@@ -33,7 +33,8 @@ def build(bld):
 		'helper/BootstrappingHelper.cc',
 		
         ]
-
+    #module.cxxflags = ['-std=c++11']
+    #module.linkflags = ['-lbf', '-lpthread']
     module_test = bld.create_ns3_module_test_library('ccncaching')
     module_test.source = [
         'test/ccncaching-test-suite.cc',
@@ -68,6 +69,8 @@ def build(bld):
 		'helper/BootstrappingHelper.h',
         ]
 
+    #headers.cxxflags = ['-std=c++11']
+    #headers.linkflags = ['-lbf', '-lpthread']
     if bld.env.ENABLE_EXAMPLES:
         bld.recurse('examples')
 

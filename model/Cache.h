@@ -13,6 +13,7 @@
 #define CACHE_H_
 
 #include <string>
+#include <bf.h>
 
 #include "ns3/core-module.h"
 #include "ns3/CcnModule.h"
@@ -51,6 +52,7 @@ public:
 	void add_object(LRU_Object* obj);
 	void remove_object(const LRU_Object* obj);
 	void update_object(LRU_Object* obj, bool new_object = false);
+        void test();
 };
 
 class CacheModule: public Object{

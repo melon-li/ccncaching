@@ -52,10 +52,12 @@ char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fas
     // char * cache_cap = CACHE_CAPACITY;
     char mode = _mode;
     if (mode == PACKET_CACHE_MODE){
-            cache = new P_Cache( _cache_cap, _cache_fast_cap);
-        }else {
-            cache = new O_Cache( _cache_cap, _cache_fast_cap);
-        }
+        cache = new P_Cache( _cache_cap, _cache_fast_cap);
+    }else if(mode == OBJECT_CACHE_MODE){
+        cache = new O_Cache( _cache_cap, _cache_fast_cap);
+    }else{
+        cache = new S_Cache( _cache_cap, _cache_fast_cap);
+    }
     return 0;
 }
 

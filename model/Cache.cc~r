@@ -1,0 +1,387 @@
+#include "Cache.h"
+
+namespace ns3 {
+
+/**
+ * Looks for cached packet in Object organised cache
+ * returns 0 if packet is not found
+ * returns 1 if packet is found cached
+ * the actual data are never stored/retrieved
+ */
+char O_Cache::get_cached_packet(const string& _filename, const string& _ID){
+	requests++;
+	//click_chatter("Searching chunk.. %d", ID);
+	unsigned ID = atoi(_ID.c_str());
+	map<string, unsigned>::iterator it = index_table.find(_filename);
+	if (it!=index_table.end() && ID<=it->second){	
+		LRU->update_object(LRU->objects[_filename]);//fere to arxeio san most recent
+		string key = _filename+"-";
+		key.append(_ID);
+		map<string, unsigned>::iterator it = log_hits.find(key);
+		if (it!=log_hits.end())
+			it->second++;
+		else
+			log_hits[key]=1;
+		hits++;
+		return 1;
+		}
+	return 0;
+	}
+	
+/**
+ * Called upon the receiption of a data packet.
+ * Decides wether packet should be stored or not.
+ * @payload is currently not used in the simulation
+ */
+char O_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+	responses++;
+	unsigned ID = atoi(_ID.c_str());
+	//printf("Adding chunk.. %s/%d\n", _filename.c_str(),ID);
+	map<string, unsigned>::iterator it = index_table.find(_filename);
+	/* always store the first packet */
+	if (stored_packets >= capacity){
+			if (remove_last_packet(_filename)==-1)
+				return -1;
+			stored_packets--;
+		}if (ID == CACHING_START_INDEX){	//if inai to prwto paketo
+		/* chunk is already stored, do nothing */
+		if (it!=index_table.end())
+			return 0;
+		zero_pcks++;
+		/* remove the least recently used file*/
+		if (index_table.size() >= capacity_fast_table){
+			int removed_packets=0;
+			removed_packets=remove_last_file(_filename);
+			if (removed_packets==-1)
+				return -1;			
+			//stored_files--;
+			stored_packets-=removed_packets;
+		}else if (stored_packets >= capacity){
+			if (remove_last_packet(_filename)==-1)
+				return -1;
+			stored_packets--;
+		}
+		add_packet(_filename, _ID, _payload, true);
+		stored_packets++;
+
+	}	
+	/* if previous packet is stored */		
+	else if (it!=index_table.end() && ID == (it->second+1)){
+		added_pcks++;
+		if (stored_packets >= capacity){
+			if (remove_last_packet(_filename)==-1)
+				return -1;
+			stored_packets--;
+		}
+		add_packet(_filename, _ID, _payload, false);
+		stored_packets++;
+	}
+	//else if (it!=index_table.end())
+		//click_chatter("Did not add %d cause i have until %d", ID,it->second );	
+	return 0;	
+	}
+	
+/**
+ * data packet is stored to memory
+ * This operation is currently avoided in the simulation
+ */
+char O_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
+	
+	uint32_t ID = atoi(_ID.c_str());
+	/* if its packet 0 then have to add it to caching tables */
+//	char* data;
+	if (is_first_packet){
+		index_table.insert(std::pair<string, uint32_t>(_filename, CACHING_START_INDEX));
+		LRU_Object * _obj  = new LRU_Object(_filename);
+		LRU->add_object(_obj);		
+		}
+	/* have to store payload and update counters */
+	else {
+		index_table[_filename] = ID;
+		}
+	printf("Added packet %s/%s\n",_filename.c_str(), _ID.c_str() );
+	return 0;
+	}
+
+/***
+ * Removes the last chunk of the least recently used file
+ * Reduces chunk counter and resizes allocated memory space when needed
+ * */
+char O_Cache::remove_last_packet(const string& _filename){
+	string filename = LRU->tail->filename;
+	
+	if (filename.compare(_filename)==0) {
+		//	NS_ASSERT_MSG("CacheModule::Did not remove_last_packet.");
+			return -1;
+		}
+	
+	unsigned last_packet_id = index_table[filename];
+	/* if its the LAST chunk remove all table items*/
+	if (last_packet_id==CACHING_START_INDEX){
+		index_table.erase(filename);
+		LRU->remove_object(LRU->tail);	
+		return 0;
+		}
+	/* if its NOT the LAST chunk */
+	last_packet_id--;
+	index_table[filename]=last_packet_id;
+	//unsigned allocated_memory = mem_table[filename];
+	/* reduce allocated memory if needed*/
+	//if (allocated_memory>(last_packet_id+MEMORY_ALLOCATION)){
+		//char* tmp_array = data_table[filename];
+		//if (realloc(tmp_array, (last_packet_id+MEMORY_ALLOCATION/2)*PAYLOAD_SIZE)==0){
+			//click_chatter("Warning: could not reallocate memory..");
+			//}
+		//mem_table[filename] = last_packet_id+MEMORY_ALLOCATION/2;
+	//	}
+
+
+	return 0;
+}
+
+/***
+ * Removes the least recently used filename
+ **/
+unsigned O_Cache::remove_last_file(const string& _filename){
+	string tail = LRU->tail->filename;
+	
+	/*if (filename.compare(_filename)==0) {
+		//	NS_ASSERT_MSG("CacheModule::Did not remove_last_packet.");
+			return -1;
+		}*/
+		unsigned removed_packets=stored_packets_of_file(tail);
+		index_table.erase(tail);
+		LRU->remove_object(LRU->tail);
+	printf("Remove file \n");
+	return removed_packets;
+}
+
+/***
+ * Returns the number of the stored packets in the file _filename or 0 if filename not found
+ **/
+unsigned O_Cache::stored_packets_of_file(const string& _filename){
+	map<string, unsigned>::iterator it = index_table.find(_filename);
+	if (it!=index_table.end()){
+		return it->second;
+	}
+	else return 0;
+}
+
+string O_Cache::get_state(){
+	std::stringstream ss;
+	string s="";
+	s+= "O_cache| ";
+
+
+	ss << index_table.size();
+	s+=" indexSize:"+ ss.str() +"\t";
+	for (map<string , uint32_t>::iterator it=index_table.begin();it!=index_table.end();++it){
+		ss.str(std::string());
+		ss<<it->second;
+		s+=it->first+"-"+ss.str()+",";
+	}
+	s+="\n\n\n";
+	
+	return s;
+	}
+	
+string CacheModule::get_hits(){
+	std::stringstream ss;
+	string s="";
+	ss << log_hits.size();
+	s+= "_cache| hit_files:"+ ss.str() +"\t";
+	for (map<string , uint32_t>::iterator it=log_hits.begin();it!=log_hits.end();++it){
+		ss.str(std::string());
+		ss<<it->second;
+		s+=it->first+":"+ss.str()+",";
+	}
+	s+="\n\n\n";
+	log_hits.clear();
+
+	return s;
+	}
+
+
+string O_Cache::get_packet_stats(){
+	std::stringstream ss;
+	string s="";
+	ss << requests ;
+	s+= "_cache | requests: "+ ss.str() +" ";
+	ss.str("");
+	ss << responses ;
+	s+= "responses: "+ ss.str() +" ";
+	ss.str("");
+	ss << zero_pcks ;
+	s+= "zero_pcks: "+ ss.str() +" ";
+	ss.str("");
+	ss << added_pcks ;
+	s+= "added_pcks: "+ ss.str() +" ";
+	ss.str("");
+	
+	s+="\n\n\n";
+	log_hits.clear();
+
+	return s;
+	
+	
+	}
+	
+string P_Cache::get_state(){
+	std::stringstream ss;
+	string s="";
+	ss << data_table.size();
+	s+= "P_cache| indexSize:"+ ss.str() +"\t";
+	for (map<string , char*>::iterator it=data_table.begin();it!=data_table.end();++it){
+		s+=it->first+",";
+	}
+	s+="\n\n\n";
+	return s;
+	}
+
+/**
+ * Looks for cached packet in Object organised cache
+ * returns 0 if packet is not found
+ * returns 1 if packet is found cached
+ */
+char P_Cache::get_cached_packet(const string& _filename, const string& _ID){
+	requests++;
+	string key = _filename+"-";
+	key.append(_ID);
+	map<string, char*>::iterator it = data_table.find(key);
+	if (it!=data_table.end()){	
+		map<string, unsigned>::iterator it = log_hits.find(key);
+		if (it!=log_hits.end())
+			it->second++;
+		else
+			log_hits[key]=1;	
+		hits++;
+		return 1;
+		}
+	return 0;
+
+	}
+	
+char P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+	//printf("Adding chunk.. %s\n", _ID.c_str());
+	string key = _filename+"-";
+	key.append(_ID);
+	map<string, char*>::iterator it = data_table.find(key);
+	/* chunk is already stored, do nothing */
+	if (it!=data_table.end())
+		return 0;
+	/* remove the last chunk from the least recently used file*/
+	if (stored_packets >= capacity){
+		remove_last_packet(key);
+		stored_packets--;
+		}
+	add_packet(_filename, _ID, _payload, true);
+	it = data_table.find(key);
+	stored_packets++;
+	//std::cout<<"Added packet "<<_filename<<"/"<<_ID<<" stored_pcks:"<<stored_packets<<"/"<<capacity<<std::endl;
+	return 0;	
+}
+	
+/**
+ *  is_first_packet is not used in packet level caching
+ * @payload is not used in the simulation
+ * */	
+char P_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
+	string key = _filename+"-";
+	key.append(_ID);
+	//stats_table.set (_filename, 0);
+	char* data = new char[PAYLOAD_SIZE];
+	//memcpy(data, _payload->data(), PAYLOAD_SIZE);
+	data_table.insert (std::pair<string,char*>(key, data));
+	//click_chatter("Added key %s data 1st byte %d", key.c_str(), *(data));
+	LRU_Object * _obj  = new LRU_Object(key);
+	LRU->add_object(_obj);		
+	return 0;
+}
+
+/***
+ * _filename is actually the key filename+ID
+ * */
+char P_Cache::remove_last_packet(const string& _filename){
+	string key = LRU->tail->filename;
+	//stats_table.erase(key);
+	//click_chatter("Removing item to insert %s", _filename.c_str());
+	delete [] data_table[key];
+	data_table.erase(key);
+	LRU->remove_object(LRU->tail);	
+	//std::cout<<"Removed packet "<<_filename<<std::endl;
+
+	return 0;
+}
+	
+void LRU_Table::add_object(LRU_Object* obj){
+	/* first item in cache */
+	if (stored_files == 0){
+		obj->next = obj;
+		obj->prev = obj;
+		head = obj;
+		tail = obj;
+		stored_files=1;
+		}
+	else{
+		stored_files++;
+		update_object(obj, true);	
+		}
+		
+		objects.insert (std::pair<string,LRU_Object*>(obj->filename, obj));
+	}
+	
+void LRU_Table::remove_object(const LRU_Object* obj){
+	/* first cache is empty  (maybe this check is redundant) */
+	if (stored_files == 0){
+		return;
+		}
+	else if (stored_files == 1){
+		/* head and tail is the same obj*/
+		head = NULL;
+		tail = NULL;
+		stored_files = 0;
+		}
+	else{
+		/* always removing tail*/
+		obj->next->prev = NULL;
+		tail = obj->next;
+		stored_files--;
+		}
+	//click_chatter("Removed LRU object %s", obj->filename.c_str());
+	objects.erase(obj->filename);
+	delete obj;
+	
+	
+	}
+	
+/**
+ *  sets object as head
+ */
+void LRU_Table::update_object(LRU_Object* obj, bool new_object){
+	
+	if (new_object){
+		head->next = obj;
+		obj->prev = head;
+		head = obj;
+		}
+	else if (stored_files > 1 && head!=obj){
+		
+		if (tail == obj){
+			tail = obj->next;
+			obj->next->prev = NULL;
+			}
+		else{
+			obj->next->prev = obj->prev;
+			obj->prev->next = obj->next;
+			}
+		obj->next = NULL;
+		obj->prev = head;
+		head->next = obj;
+		head = obj;
+		
+		//click_chatter("LRU state changed: head: %s tail: %s ", head->filename.c_str(), tail->filename.c_str());
+		}
+	}
+	
+
+}

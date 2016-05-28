@@ -8,12 +8,12 @@ namespace ns3 {
 int PIT::COUNT_PITS = 0;
 
 PIT::PIT() {
-	COUNT_PITS++;
-	table = map<Ptr<CCN_Name>, Ptr<PTuple> >();
+    COUNT_PITS++;
+    table = map<Ptr<CCN_Name>, Ptr<PTuple> >();
 }
 
 PIT::~PIT() {
-	table.clear();
+    table.clear();
 }
 
 /*
@@ -21,38 +21,38 @@ PIT::~PIT() {
  */
 Ptr<PTuple> PIT::check(Ptr<CCN_Name> key)
 {
-	map<Ptr<CCN_Name>, Ptr<PTuple> >::iterator find = table.find(key);
+    map<Ptr<CCN_Name>, Ptr<PTuple> >::iterator find = table.find(key);
 
-	if (find != table.end())
-	{
-		return find->second;
-	}
-	else
-	{
-		return 0;
-	}
+    if (find != table.end())
+    {
+        return find->second;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void PIT::DoDispose(void) {
-	table.clear();
+    table.clear();
 
-	COUNT_PITS--;
+    COUNT_PITS--;
 
-	//if(COUNT_PITS==0)
-	//{
-		//std::cout<<"PITS over."<<std::endl;
-	//}
+    //if(COUNT_PITS==0)
+    //{
+        //std::cout<<"PITS over."<<std::endl;
+    //}
 }
 
 void PIT::update(Ptr<CCN_Name> key, Ptr<PTuple> re) {
-	table[key] = re;
+    table[key] = re;
 }
 
 void PIT::erase(Ptr<CCN_Name> key) {
-	table.erase(key);
+    table.erase(key);
 }
 
 uint32_t PIT::getSize() {
-	return table.size();
+    return table.size();
 }
 }

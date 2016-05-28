@@ -32,41 +32,41 @@ class CCN_Name;
 
 class BootstrappingHelper : public Object
 {
-	bool finished;
-	public:
+    bool finished;
+    public:
 
-	Ptr<Parser> parser;
-	map <uint32_t , Ptr < CcnModule > > nsNodeIdToModule;
+    Ptr<Parser> parser;
+    map <uint32_t , Ptr < CcnModule > > nsNodeIdToModule;
 
-	Ptr<CCN_Name> name2;
-	Ptr<Initializer> initializer;
-	Ptr<NetDevice> ndfinder(Ptr<Node> n1,Ptr<Node> n2);
-	vector< Ptr < Object > > vec3;
-	
-	void PITCheck(int ,int , vector<uint32_t>,Graph,uint32_t);
-	unsigned group_size;
-	uint32_t seed;
-	string seedString;
-	string output;
-	void specificData();
-	std::string filename;
+    Ptr<CCN_Name> name2;
+    Ptr<Initializer> initializer;
+    Ptr<NetDevice> ndfinder(Ptr<Node> n1,Ptr<Node> n2);
+    vector< Ptr < Object > > vec3;
+    
+    void PITCheck(int ,int , vector<uint32_t>,Graph,uint32_t);
+    unsigned group_size;
+    uint32_t seed;
+    string seedString;
+    string output;
+    void specificData();
+    std::string filename;
 
-	int length;
+    int length;
 
-	BootstrappingHelper(string filename,string output,uint8_t gsize, uint32_t seed, char _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap);
-	
-	char cache_mode;
-	uint32_t cache_cap;
-	uint32_t fast_cap;
-	
-	~BootstrappingHelper();
-	void parseTopology( uint8_t group_size);
+    BootstrappingHelper(string filename,string output,uint8_t gsize, uint32_t seed, char _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap);
+    
+    char cache_mode;
+    uint32_t cache_cap;
+    uint32_t fast_cap;
+    
+    ~BootstrappingHelper();
+    void parseTopology( uint8_t group_size);
 
-	void startExperiment();
-	
-	void cache_check(vector < Ptr< Node > > cache_nodes);
+    void startExperiment();
+    
+    void cache_check(vector < Ptr< Node > > cache_nodes);
 
-	
+    
 };
 }
 

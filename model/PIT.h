@@ -15,21 +15,21 @@ class Bloomfilter;
 
 class PIT: public Object {
 public:
-	static int COUNT_PITS;
-	PIT();
-	~PIT();
-	virtual void DoDispose(void);
+    static int COUNT_PITS;
+    PIT();
+    ~PIT();
+    virtual void DoDispose(void);
 
-	void update(Ptr<CCN_Name> key, Ptr<PTuple> re);
+    void update(Ptr<CCN_Name> key, Ptr<PTuple> re);
 
-	Ptr<PTuple> check(Ptr<CCN_Name> key);
+    Ptr<PTuple> check(Ptr<CCN_Name> key);
 
-	void erase(Ptr<CCN_Name> key);
+    void erase(Ptr<CCN_Name> key);
 
-	uint32_t getSize();
+    uint32_t getSize();
 
 //private:
-	map<Ptr<CCN_Name>, Ptr<PTuple> > table;
+    map<Ptr<CCN_Name>, Ptr<PTuple> > table;
 };
 }
 

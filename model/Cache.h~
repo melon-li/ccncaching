@@ -21,56 +21,56 @@ namespace ns3 {
 
 class LRU_Object{
 public:
-	LRU_Object(){}
-	LRU_Object(const string & _filename){
-		filename = _filename;
-		stored_packets = 0;
-		prev = NULL;
-		next = NULL;
-		//click_chatter("Created new LRU_Object %s", _filename.c_str());
-		}
+    LRU_Object(){}
+    LRU_Object(const string & _filename){
+        filename = _filename;
+        stored_packets = 0;
+        prev = NULL;
+        next = NULL;
+        //click_chatter("Created new LRU_Object %s", _filename.c_str());
+        }
 
-	string filename;
-	LRU_Object * prev;
-	LRU_Object * next;
-	uint32_t stored_packets;
+    string filename;
+    LRU_Object * prev;
+    LRU_Object * next;
+    uint32_t stored_packets;
 
 };
 
 class LRU_Table{
 public:
-	LRU_Table(){
-		stored_files = 0;
-		}
-		
-	uint32_t stored_files;
-	LRU_Object* head, *tail;
-	map<string, LRU_Object*> objects; 
-	
-	void add_object(LRU_Object* obj);
-	void remove_object(const LRU_Object* obj);
-	void update_object(LRU_Object* obj, bool new_object = false);
-	
-	
+    LRU_Table(){
+        stored_files = 0;
+        }
+        
+    uint32_t stored_files;
+    LRU_Object* head, *tail;
+    map<string, LRU_Object*> objects; 
+    
+    void add_object(LRU_Object* obj);
+    void remove_object(const LRU_Object* obj);
+    void update_object(LRU_Object* obj, bool new_object = false);
+    
+    
 };
 
 class CacheModule: public Object{
 public:
-	CacheModule(uint32_t _capacity,uint32_t _capacity_fast_table){
-		capacity = _capacity;
-		capacity_fast_table = _capacity_fast_table;
-		stored_packets=0;
-		stored_files=0;
-		LRU = new LRU_Table();
-		requests=0;
-		hits=0;		
-		responses=0;  
-	}
+    CacheModule(uint32_t _capacity,uint32_t _capacity_fast_table){
+        capacity = _capacity;
+        capacity_fast_table = _capacity_fast_table;
+        stored_packets=0;
+        stored_files=0;
+        LRU = new LRU_Table();
+        requests=0;
+        hits=0;        
+        responses=0;  
+    }
 
-	~CacheModule(){
-		//delete LRU;
-	}
-	
+    ~CacheModule(){
+        //delete LRU;
+    }
+    
     map<string , char* > data_table; 
   
     uint32_t capacity; // in packets
@@ -84,7 +84,7 @@ public:
     virtual char add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
     virtual char remove_last_packet(const string& _filename){return 0;}
     virtual string get_state(){return 0;}
-	virtual string get_packet_stats(){return 0;}
+    virtual string get_packet_stats(){return 0;}
     
     LRU_Table *LRU;
     
@@ -102,14 +102,14 @@ public:
 
 class O_Cache: public CacheModule{
 public:
-	O_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity,_capacity_fast_table){
-		stored_packets = 0;
-		stored_files = 0;
-		zero_pcks=0;   
-		added_pcks=0;   
-		}
+    O_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity,_capacity_fast_table){
+        stored_packets = 0;
+        stored_files = 0;
+        zero_pcks=0;   
+        added_pcks=0;   
+        }
 
-	// <filename, max chunk id>
+    // <filename, max chunk id>
     map<string , uint32_t> index_table;  
     // <filename, allocated memory (IN PACKETS!)
     map<string , uint32_t> mem_table; 
@@ -124,15 +124,15 @@ public:
     unsigned stored_packets_of_file(const string& _filename);//new by argi
     string get_state();
     string get_packet_stats();
-	        
+            
     uint64_t zero_pcks;   
     uint64_t added_pcks; 
 };
 
 class P_Cache: public CacheModule{
 public:
-	P_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){
-		}
+    P_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){
+        }
     
     char get_cached_packet(const string& _filename, const string& _ID);
     char cache_packet(const string& _filename, const string& _ID, const char* _payload);

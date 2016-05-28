@@ -25,33 +25,33 @@ class LocalApp;
 
 class TrieNode: public Object {
 public:
-	static int COUNT_TRIENODES;
-	TrieNode(Ptr<PtrString> incoming_word);
-	~TrieNode();
-	virtual void DoDispose(void);
+    static int COUNT_TRIENODES;
+    TrieNode(Ptr<PtrString> incoming_word);
+    ~TrieNode();
+    virtual void DoDispose(void);
 
-	map<Ptr<PtrString>, Ptr<TrieNode> > getChildren(){ return children; }
+    map<Ptr<PtrString>, Ptr<TrieNode> > getChildren(){ return children; }
 
-	Ptr<TrieNode> setAndGetChildren(Ptr<PtrString>);
-	Ptr<TrieNode> getChild(Ptr<PtrString>);
-	bool hasDevices(){return (devices.size()!=0&&(devices.size()>0)&&devices.at(0)!=0);}
-	bool hasLocalApps(){ return (localApps.size()!=0&&(localApps.size()>0)&&localApps.at(0)!=0);}
-	bool hasData();
+    Ptr<TrieNode> setAndGetChildren(Ptr<PtrString>);
+    Ptr<TrieNode> getChild(Ptr<PtrString>);
+    bool hasDevices(){return (devices.size()!=0&&(devices.size()>0)&&devices.at(0)!=0);}
+    bool hasLocalApps(){ return (localApps.size()!=0&&(localApps.size()>0)&&localApps.at(0)!=0);}
+    bool hasData();
 
-	vector<Ptr<LocalApp> > getLocalApps(){return localApps;}
-	vector<Ptr<NetDevice> > getDevices(){return devices;}
+    vector<Ptr<LocalApp> > getLocalApps(){return localApps;}
+    vector<Ptr<NetDevice> > getDevices(){return devices;}
 
-	bool isLeaf() { return children.size() == 0; }
-	bool addDevice(Ptr<NetDevice>);
-	bool addLocalApp(Ptr<LocalApp>);
+    bool isLeaf() { return children.size() == 0; }
+    bool addDevice(Ptr<NetDevice>);
+    bool addLocalApp(Ptr<LocalApp>);
 
 private:
 
-	Ptr<PtrString> word;
+    Ptr<PtrString> word;
 
-	vector<Ptr<NetDevice> > devices;
-	vector<Ptr<LocalApp> > localApps;
-	map<Ptr<PtrString>, Ptr<TrieNode> > children;
+    vector<Ptr<NetDevice> > devices;
+    vector<Ptr<LocalApp> > localApps;
+    map<Ptr<PtrString>, Ptr<TrieNode> > children;
 
 };
 }

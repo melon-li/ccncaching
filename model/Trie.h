@@ -15,20 +15,20 @@ namespace ns3 {
 
 class Trie: public Object {
 public:
-	static int COUNT_TRIES;
-	Trie();
-	~Trie();
-	virtual void DoDispose(void);
+    static int COUNT_TRIES;
+    Trie();
+    ~Trie();
+    virtual void DoDispose(void);
 
-	Ptr<TrieNode> longestPrefixMatch(Ptr<CCN_Name> name);
-	bool put(Ptr<CCN_Name> name, Ptr<NetDevice> device);
-	bool put(Ptr<CCN_Name> name, Ptr<LocalApp> localApp);
+    Ptr<TrieNode> longestPrefixMatch(Ptr<CCN_Name> name);
+    bool put(Ptr<CCN_Name> name, Ptr<NetDevice> device);
+    bool put(Ptr<CCN_Name> name, Ptr<LocalApp> localApp);
 
-	bool hasData();
+    bool hasData();
 
 private:
-	Ptr<TrieNode> root;
-	Ptr<TrieNode> findNode(Ptr<CCN_Name>);
+    Ptr<TrieNode> root;
+    Ptr<TrieNode> findNode(Ptr<CCN_Name>);
 
 };
 

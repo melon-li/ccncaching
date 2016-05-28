@@ -44,8 +44,8 @@ namespace ns3 {
 
 class ExperimentGlobals{
 public:
-	static Ptr<UniformRandomVariable> RANDOM_VAR;
-	static uint8_t CACHE_PLACEMENT;
+    static Ptr<UniformRandomVariable> RANDOM_VAR;
+    static uint8_t CACHE_PLACEMENT;
 
 };
 

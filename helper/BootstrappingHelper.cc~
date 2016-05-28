@@ -18,386 +18,386 @@ using namespace ns3;
 
 BootstrappingHelper::BootstrappingHelper(string filename,string output,uint8_t gsize, uint32_t seed, char _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap)
 {
-	std::cout<<"Constructing BootstrappingHelper"<<std::endl;
-	this->seed=seed;
-	this->filename=filename;
-	this->output=output;
-	this->gs=gsize;
-	nodeToModule=map<uint32_t, uint32_t >();//to find module index in the vector that is connected to specific node (by its id)
-	cache_mode = _cache_mode;
-	cache_cap = _caching_cap;
-	fast_cap = _fast_cap;
-	ExperimentGlobals::RANDOM_VAR =CreateObject<UniformRandomVariable>();
-	RngSeedManager::SetSeed (seed);
+    std::cout<<"Constructing BootstrappingHelper"<<std::endl;
+    this->seed=seed;
+    this->filename=filename;
+    this->output=output;
+    this->gs=gsize;
+    nodeToModule=map<uint32_t, uint32_t >();//to find module index in the vector that is connected to specific node (by its id)
+    cache_mode = _cache_mode;
+    cache_cap = _caching_cap;
+    fast_cap = _fast_cap;
+    ExperimentGlobals::RANDOM_VAR =CreateObject<UniformRandomVariable>();
+    RngSeedManager::SetSeed (seed);
 }
 
 BootstrappingHelper::~BootstrappingHelper()
 {
-	std::cout<<"Destructing BootstrappingHelper"<<std::endl;
-	p=0;
-	vector<Ptr<CcnModule> >::iterator iter;
-	for (iter=module.begin(); iter!=module.end(); iter++)
-		(*(iter))->reset();
-	module.clear();
-	i=0;
+    std::cout<<"Destructing BootstrappingHelper"<<std::endl;
+    p=0;
+    vector<Ptr<CcnModule> >::iterator iter;
+    for (iter=module.begin(); iter!=module.end(); iter++)
+        (*(iter))->reset();
+    module.clear();
+    i=0;
 }
 /*
  * @gs is the number of host nodes that will be inserted in each access node
  */
 void BootstrappingHelper::parseTopology(uint8_t nodes_size)
 {
-	p=CreateObject<Parser>();
-	p->parse(filename, nodes_size);
-	module = vector < Ptr < CcnModule > >();
+    p=CreateObject<Parser>();
+    p->parse(filename, nodes_size);
+    module = vector < Ptr < CcnModule > >();
 
-	map<uint32_t, Ptr<Node> >::iterator iter;
-	// add a ccnmodule for every vertex and assign a unique ID
-	for (iter=p->idToNode.begin(); iter!=p->idToNode.end(); iter++ ){
-		//std::cout<<"Created ccnmodule for node_id: "<<iter->first<<std::endl;
-		Ptr<CcnModule> m = CreateObject<CcnModule>(iter->second);
-		//if there are x already inside ,then the next will be the (x+1)th ,with index x
-		nodeToModule[iter->first]=module.size(); //returns the index of vector module!!!
-		module.push_back(m);
-	}
+    map<uint32_t, Ptr<Node> >::iterator iter;
+    // add a ccnmodule for every vertex and assign a unique ID
+    for (iter=p->idToNode.begin(); iter!=p->idToNode.end(); iter++ ){
+        //std::cout<<"Created ccnmodule for node_id: "<<iter->first<<std::endl;
+        Ptr<CcnModule> m = CreateObject<CcnModule>(iter->second);
+        //if there are x already inside ,then the next will be the (x+1)th ,with index x
+        nodeToModule[iter->first]=module.size(); //returns the index of vector module!!!
+        module.push_back(m);
+    }
 
-	map<uint32_t, Ptr<Node> >::iterator iter2;
+    map<uint32_t, Ptr<Node> >::iterator iter2;
 
-	//here we set the neighbors of every CcnModule
-	for (iter2=p->idToNode.begin(); iter2!=p->idToNode.end(); iter2++ )
-	{//here we want an iterator again ,because we must not try to refer to nodes that do not exist
-		if(iter2->first!=0)
-		{//for every neighbor
-			for(unsigned j=0;j<p->getNeighbors(iter2->first).size();j++)
-				{
-					Ptr<Node> n1=p->getNeighbors(iter2->first).at(j);//this is the neighbor
-					uint32_t u1=p->nodeToId[n1->GetId()];//neighbors id (the id we use ,not the system's)
-					Ptr<CcnModule> ccn_module=module.at(nodeToModule.find(u1)->second);//neighbor's module
-					Ptr<Node> n2=iter2->second;//this node
-					uint32_t u2=iter2->first;//this node's id
-					Ptr<NetDevice> net_device = ndfinder(n1,n2);
+    //here we set the neighbors of every CcnModule
+    for (iter2=p->idToNode.begin(); iter2!=p->idToNode.end(); iter2++ )
+    {//here we want an iterator again ,because we must not try to refer to nodes that do not exist
+        if(iter2->first!=0)
+        {//for every neighbor
+            for(unsigned j=0;j<p->getNeighbors(iter2->first).size();j++)
+                {
+                    Ptr<Node> n1=p->getNeighbors(iter2->first).at(j);//this is the neighbor
+                    uint32_t u1=p->nodeToId[n1->GetId()];//neighbors id (the id we use ,not the system's)
+                    Ptr<CcnModule> ccn_module=module.at(nodeToModule.find(u1)->second);//neighbor's module
+                    Ptr<Node> n2=iter2->second;//this node
+                    uint32_t u2=iter2->first;//this node's id
+                    Ptr<NetDevice> net_device = ndfinder(n1,n2);
 
-					if(net_device==0)
-					{
-						std::cout<<"net_device about to be inserted in the map is null"<<std::endl;
-					}
+                    if(net_device==0)
+                    {
+                        std::cout<<"net_device about to be inserted in the map is null"<<std::endl;
+                    }
 
-					if(ccn_module==0)
-					{
-						std::cout<<"ccn_module about to be inserted in the map is null"<<std::endl;
-					}
+                    if(ccn_module==0)
+                    {
+                        std::cout<<"ccn_module about to be inserted in the map is null"<<std::endl;
+                    }
 
-					//std::cout<<"Setting neighbor of module "<<nodeToModule.find(u2)->second<<" to be "<<nodeToModule.find(u1)->second<<std::endl;
-					module.at(nodeToModule.find(u2)->second)->setNeighbor(net_device, ccn_module);
-				}
-		}
-	}
+                    //std::cout<<"Setting neighbor of module "<<nodeToModule.find(u2)->second<<" to be "<<nodeToModule.find(u1)->second<<std::endl;
+                    module.at(nodeToModule.find(u2)->second)->setNeighbor(net_device, ccn_module);
+                }
+        }
+    }
 
-	std::cout<<"Module vector has size: "<<module.size()<<std::endl;
-	//std::cout<<"According to the maps:"<<std::endl;
-	
-	for(uint32_t i=0;i<module.size();i++)
-	{
-		Ptr<CcnModule> from = module.at(i);
-		map<Ptr<NetDevice>, Ptr<CcnModule> > neighbors = from->getNeighborModules();
-		for(uint32_t j=0;j<from->getNode()->GetNDevices();j++)//yparxoune netdevices poy den einai syndedemenes poyhtena ,etsi fainetai apo edo ,opote prepei na prosexoume na min asxoloumaste mazi tous
-		{	
-			Ptr<NetDevice> dev = from->getNode()->GetDevice(j);
-			if(neighbors.find(dev) != neighbors.end())
-			{
-			//std::cout<<"Node "<<from->getNode()->GetId()<<" is connected through device "<<dev->GetAddress()<<" to node "<<from->getNeighborModules().find(dev)->second->getNode()->GetId()<<std::endl;
-			}
-		}
-	}
-	
+    std::cout<<"Module vector has size: "<<module.size()<<std::endl;
+    //std::cout<<"According to the maps:"<<std::endl;
+    
+    for(uint32_t i=0;i<module.size();i++)
+    {
+        Ptr<CcnModule> from = module.at(i);
+        map<Ptr<NetDevice>, Ptr<CcnModule> > neighbors = from->getNeighborModules();
+        for(uint32_t j=0;j<from->getNode()->GetNDevices();j++)//yparxoune netdevices poy den einai syndedemenes poyhtena ,etsi fainetai apo edo ,opote prepei na prosexoume na min asxoloumaste mazi tous
+        {    
+            Ptr<NetDevice> dev = from->getNode()->GetDevice(j);
+            if(neighbors.find(dev) != neighbors.end())
+            {
+            //std::cout<<"Node "<<from->getNode()->GetId()<<" is connected through device "<<dev->GetAddress()<<" to node "<<from->getNeighborModules().find(dev)->second->getNode()->GetId()<<std::endl;
+            }
+        }
+    }
+    
 }
 /*
  * epistrefei to net device tou deksiou me to opoio o deksis syndeetai ston aristero
  */
 Ptr<NetDevice> BootstrappingHelper::ndfinder(Ptr<Node> n1,Ptr<Node> n2)
 {
-	//std::cout<<"Bootstrapping ndfinder"<<std::endl;
-	if(n1==0) {std::cout<<"In ndfinder in initializer n1 is null"<<std::endl;}
+    //std::cout<<"Bootstrapping ndfinder"<<std::endl;
+    if(n1==0) {std::cout<<"In ndfinder in initializer n1 is null"<<std::endl;}
 
-	if(n2==0) {std::cout<<"In ndfinder in initializer n2 is null"<<std::endl;}
+    if(n2==0) {std::cout<<"In ndfinder in initializer n2 is null"<<std::endl;}
 
-	for(unsigned i=0;i<n2->GetNDevices();i++)
-	{
-			if(n2->GetDevice(i)->GetChannel()->GetDevice(0)->GetNode()==n1)
-			{
-					return n2->GetDevice(i);
-			}
+    for(unsigned i=0;i<n2->GetNDevices();i++)
+    {
+            if(n2->GetDevice(i)->GetChannel()->GetDevice(0)->GetNode()==n1)
+            {
+                    return n2->GetDevice(i);
+            }
 
-			if(n2->GetDevice(i)->GetChannel()->GetDevice(1)->GetNode()==n1)
-			{
-					return n2->GetDevice(i);
-			}
-	}
+            if(n2->GetDevice(i)->GetChannel()->GetDevice(1)->GetNode()==n1)
+            {
+                    return n2->GetDevice(i);
+            }
+    }
 
-	std::cout<<"Bootstrapping helper ndfinder returning 0"<<std::endl;
-	return 0;
+    std::cout<<"Bootstrapping helper ndfinder returning 0"<<std::endl;
+    return 0;
 }
 //diavazei to arxeio kai kanei shuffle ta kommatia
 vector<string> parseWorkload(uint32_t sseed){
-	vector <string> vec;
-	std::ifstream myfile (WORKLOAD_FILE);
-	std::cout<<"Workload path "<<WORKLOAD_FILE<<std::endl;
-	string line; 
-	if (myfile.is_open()){
-		while ( getline (myfile,line) )	{
-//		 std::cout << line << '\n';
-		  vec.push_back (line.substr(0, line.find(" ")).c_str());
-		}
-		myfile.close();
-	  }
-	vector<string> old_vec = vec;
+    vector <string> vec;
+    std::ifstream myfile (WORKLOAD_FILE);
+    std::cout<<"Workload path "<<WORKLOAD_FILE<<std::endl;
+    string line; 
+    if (myfile.is_open()){
+        while ( getline (myfile,line) )    {
+//         std::cout << line << '\n';
+          vec.push_back (line.substr(0, line.find(" ")).c_str());
+        }
+        myfile.close();
+      }
+    vector<string> old_vec = vec;
     std::srand(sseed);
-	std::random_shuffle(vec.begin(), vec.end()); // shuffle
-	std::cout<<vec.size()<<" is the size of the workload first: "<< vec[0]<<" middle: "<< vec[vec.size()/2]<<" last: "<< vec[vec.size()-1]<<"\n";
+    std::random_shuffle(vec.begin(), vec.end()); // shuffle
+    std::cout<<vec.size()<<" is the size of the workload first: "<< vec[0]<<" middle: "<< vec[vec.size()/2]<<" last: "<< vec[vec.size()-1]<<"\n";
 
-	return vec;	
-	}
+    return vec;    
+    }
 
 // updates the map of files <filename, filesize> 
 map<string, uint32_t> parseFileMap(){
-	map <string, uint32_t> map;
-	std::ifstream myfile (WORKLOAD_FILE);
-	   string file,line;
-	   uint32_t packets=0;
-	   uint64_t cum_packets=0;
-	if (myfile.is_open()){
-		while ( getline (myfile,line) )	{
-		 // cout << line << '\n';
-		 file=(line.substr(0, line.find(" ")).c_str());
-		 if (map.find(file)==map.end()){
-			packets = atoi(line.substr(line.find(" ")+1).c_str());
-			map[file] = packets;
-			cum_packets+=packets;
-		}
-		 
-		}
-		myfile.close();
-	  }
-	  else std::cout << "Unable to open file_map file\n"; 
-	
+    map <string, uint32_t> map;
+    std::ifstream myfile (WORKLOAD_FILE);
+       string file,line;
+       uint32_t packets=0;
+       uint64_t cum_packets=0;
+    if (myfile.is_open()){
+        while ( getline (myfile,line) )    {
+         // cout << line << '\n';
+         file=(line.substr(0, line.find(" ")).c_str());
+         if (map.find(file)==map.end()){
+            packets = atoi(line.substr(line.find(" ")+1).c_str());
+            map[file] = packets;
+            cum_packets+=packets;
+        }
+         
+        }
+        myfile.close();
+      }
+      else std::cout << "Unable to open file_map file\n"; 
+    
 
-	std::cout<<"Num_of_files: "<<map.size()<<" data: "<<cum_packets <<"\n";
+    std::cout<<"Num_of_files: "<<map.size()<<" data: "<<cum_packets <<"\n";
 
-	return map;
-	
-	
-	}
+    return map;
+    
+    
+    }
 
 void BootstrappingHelper::startExperiment(){
-		uint8_t c=0;
-	
-		std::cout<<"startExperiment"<<std::endl;
-		Graph topology=p->getGraph(); //load the topology. P is object of type Parser. Returns a Topology object
-		set<uint32_t> nodes_set;
-		//set<uint32_t> nodes_set = topology.getNodesWithDegree(1); //set of access nodes viz the nodes with degree=1.
-		string type_of_node;
-		if (NODES_TYPE == 1){
-			nodes_set = topology.getNodesWithDegree(1);
-			type_of_node = "access nodes";
-		}
-		else {
-			nodes_set = topology.getNodesWithDegree(2);
-			type_of_node = "core nodes";
-		}
-		std::cout<<"Number of" << type_of_node << ": "<<nodes_set.size()<<std::endl;
+        uint8_t c=0;
+    
+        std::cout<<"startExperiment"<<std::endl;
+        Graph topology=p->getGraph(); //load the topology. P is object of type Parser. Returns a Topology object
+        set<uint32_t> nodes_set;
+        //set<uint32_t> nodes_set = topology.getNodesWithDegree(1); //set of access nodes viz the nodes with degree=1.
+        string type_of_node;
+        if (NODES_TYPE == 1){
+            nodes_set = topology.getNodesWithDegree(1);
+            type_of_node = "access nodes";
+        }
+        else {
+            nodes_set = topology.getNodesWithDegree(2);
+            type_of_node = "core nodes";
+        }
+        std::cout<<"Number of" << type_of_node << ": "<<nodes_set.size()<<std::endl;
 
-		if(nodes_set.size()<0 || gs<1){
-			std::cout<<"ERROR: topology has no access nodes or nodes size is less than 1. Exiting."<<std::endl;
-			exit(EXIT_FAILURE);
-		}
+        if(nodes_set.size()<0 || gs<1){
+            std::cout<<"ERROR: topology has no access nodes or nodes size is less than 1. Exiting."<<std::endl;
+            exit(EXIT_FAILURE);
+        }
 
-		std::cout<<type_of_node <<" size: "<<gs<<std::endl;
-	
-			stringstream st;
-			st << seed+c;
-			this->seedString=st.str();
+        std::cout<<type_of_node <<" size: "<<gs<<std::endl;
+    
+            stringstream st;
+            st << seed+c;
+            this->seedString=st.str();
 
-			vector <uint32_t> nodes;
-			//nodes(nodes_set.begin(), nodes_set.end()); //copy set to vector
-			nodes = p->getActiveNodes(); //access nodes..Actually the nodes of the users because in each access node there is a group of users
-			uint8_t owner_pos =  p->sender_id; // owner/source of the information, dld publisher
-			uint32_t dataOwner= p->sender_id;//nodes[owner_pos];
-			//nodes.erase(nodes.begin() + owner_pos);
-			std::cout<<"Data owner is "<<dataOwner<<" ("<<(unsigned)owner_pos<<")--- ns3 id of node: "<<module.at( nodeToModule.find( dataOwner )->second)->getNodeId()<<std::endl;
+            vector <uint32_t> nodes;
+            //nodes(nodes_set.begin(), nodes_set.end()); //copy set to vector
+            nodes = p->getActiveNodes(); //access nodes..Actually the nodes of the users because in each access node there is a group of users
+            uint8_t owner_pos =  p->sender_id; // owner/source of the information, dld publisher
+            uint32_t dataOwner= p->sender_id;//nodes[owner_pos];
+            //nodes.erase(nodes.begin() + owner_pos);
+            std::cout<<"Data owner is "<<dataOwner<<" ("<<(unsigned)owner_pos<<")--- ns3 id of node: "<<module.at( nodeToModule.find( dataOwner )->second)->getNodeId()<<std::endl;
 
-			
-			std::cout<<"Module vector size "<<module.size()<<std::endl;
-			std::cout<<"seed "<<(seed+c)<<std::endl;
-			//set owner app and data object
-			//----------------------------------------------------
-			std::cout<<"Data owner is "<<dataOwner<<" --- ns3 id of node: "<<module.at( nodeToModule.find( dataOwner )->second)->getNodeId()<<std::endl;
-			
-			//----------------------------------------------------
-			//set nodes apps and request data
-			//----------------------------------------------------
-			vector < Ptr< Receiver > > receiver_apps;//receiver apps on the users's Nodes
+            
+            std::cout<<"Module vector size "<<module.size()<<std::endl;
+            std::cout<<"seed "<<(seed+c)<<std::endl;
+            //set owner app and data object
+            //----------------------------------------------------
+            std::cout<<"Data owner is "<<dataOwner<<" --- ns3 id of node: "<<module.at( nodeToModule.find( dataOwner )->second)->getNodeId()<<std::endl;
+            
+            //----------------------------------------------------
+            //set nodes apps and request data
+            //----------------------------------------------------
+            vector < Ptr< Receiver > > receiver_apps;//receiver apps on the users's Nodes
 
-			for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-				receiver_apps.push_back(CreateObject<Receiver>(module.at(nodeToModule.find(*it)->second))); //put a Receiver object in module node
-			}
+            for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+                receiver_apps.push_back(CreateObject<Receiver>(module.at(nodeToModule.find(*it)->second))); //put a Receiver object in module node
+            }
 
-			this->i=CreateObject<Initializer>(&module,p,dataOwner,FILE_CATALOG,nodeToModule);
-			this->i->file_map = parseFileMap();//updates the map of files <filename, filesize>
-			this->i->initializeFIBs();//initialize forwarding rules!!
-			std::cout<<"Initialized FIBs\n";
-			
-			map <string, uint32_t> file_map = this->i->file_map;
-			
-			//bazoume sender sto module poy exei to kombo 106 ,oxi sto 106o module (to opoio den yparxei ypoxreotika)
-			Ptr<Sender> sa1=CreateObject<Sender>( module.at( nodeToModule.find( dataOwner )->second ) );
+            this->i=CreateObject<Initializer>(&module,p,dataOwner,FILE_CATALOG,nodeToModule);
+            this->i->file_map = parseFileMap();//updates the map of files <filename, filesize>
+            this->i->initializeFIBs();//initialize forwarding rules!!
+            std::cout<<"Initialized FIBs\n";
+            
+            map <string, uint32_t> file_map = this->i->file_map;
+            
+            //bazoume sender sto module poy exei to kombo 106 ,oxi sto 106o module (to opoio den yparxei ypoxreotika)
+            Ptr<Sender> sa1=CreateObject<Sender>( module.at( nodeToModule.find( dataOwner )->second ) );
 
-			vector<string> tokens;
-			tokens.push_back(ROOT_DOMAIN);//tokens are names/prefixes
-			for(map <string, uint32_t>::iterator it=file_map.begin();it!=file_map.end();++it)
-			{
-				
-				tokens.push_back(it->first);
-				Ptr<CCN_Name> theName = CreateObject<CCN_Name>(tokens);
-				//std::cout<<"putting: "<<nameVector->at(i)->toString()<<std::endl;
-				if (!module.at(nodeToModule.find(dataOwner)->second)->getFIB()->put(theName,sa1->getLocalApp()))
-					{std::cout<<"Could not add FIB entry :" <<theName->toString();exit(1);}
-				tokens.pop_back();
-			}
-			std::cout<<"Created CCN_names\n";
+            vector<string> tokens;
+            tokens.push_back(ROOT_DOMAIN);//tokens are names/prefixes
+            for(map <string, uint32_t>::iterator it=file_map.begin();it!=file_map.end();++it)
+            {
+                
+                tokens.push_back(it->first);
+                Ptr<CCN_Name> theName = CreateObject<CCN_Name>(tokens);
+                //std::cout<<"putting: "<<nameVector->at(i)->toString()<<std::endl;
+                if (!module.at(nodeToModule.find(dataOwner)->second)->getFIB()->put(theName,sa1->getLocalApp()))
+                    {std::cout<<"Could not add FIB entry :" <<theName->toString();exit(1);}
+                tokens.pop_back();
+            }
+            std::cout<<"Created CCN_names\n";
 
-			vector < Ptr< Node > > cache_nodes;
-			vector < Ptr< CcnModule > > cache_modules;
-			if (cache_mode!=0){//cache enable (0=no cache,1=LRU,2=OPC)
-				//start caching nodes
-				for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-					Ptr <Node> n = p->getNeighbors(*it)[0];
-					if (std::find(cache_nodes.begin(), cache_nodes.end(), n)==cache_nodes.end()){
-						cache_nodes.push_back(n); //there will be only one neighbor
-						cache_modules.push_back(module.at(nodeToModule.at(n->GetId())));
-						module.at(nodeToModule.at(n->GetId()))->enableCache(cache_mode, cache_cap, fast_cap);
-						std::cout<<"Added cache app at "<< type_of_node<<" "<<  n->GetId()<<" mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<"\n";
-					}
-				}
-			}
-			
-			//start receivers- for every user give the worklad and the file map
-			for(unsigned i=0;i<nodes.size();i++)
-			{		
-//				receiver_apps.at(i)->workload = this->i->create_workload(this->i->file_map, (seed+c+i));
-//				receiver_apps.at(i)->file_map = this->i->file_map;
-				receiver_apps.at(i)->workload = parseWorkload(seed+i);
-				receiver_apps.at(i)->file_map = this->i->file_map;//parseFileMap();
-				receiver_apps.at(i)->start();
-				break;
-			}
-			////cache state
-			//////----------------------------------------------------
-			//if (cache_mode!=0){
-				//Time t=ns3::Seconds(100);
-				//Simulator::Schedule(t,&BootstrappingHelper::cache_check,this,cache_nodes);
-			//}
-			//----------------------------------------------------
-			std::cout<<"Starting simulation\n";
+            vector < Ptr< Node > > cache_nodes;
+            vector < Ptr< CcnModule > > cache_modules;
+            if (cache_mode!=0){//cache enable (0=no cache,1=LRU,2=OPC)
+                //start caching nodes
+                for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+                    Ptr <Node> n = p->getNeighbors(*it)[0];
+                    if (std::find(cache_nodes.begin(), cache_nodes.end(), n)==cache_nodes.end()){
+                        cache_nodes.push_back(n); //there will be only one neighbor
+                        cache_modules.push_back(module.at(nodeToModule.at(n->GetId())));
+                        module.at(nodeToModule.at(n->GetId()))->enableCache(cache_mode, cache_cap, fast_cap);
+                        std::cout<<"Added cache app at "<< type_of_node<<" "<<  n->GetId()<<" mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<"\n";
+                    }
+                }
+            }
+            
+            //start receivers- for every user give the worklad and the file map
+            for(unsigned i=0;i<nodes.size();i++)
+            {        
+//                receiver_apps.at(i)->workload = this->i->create_workload(this->i->file_map, (seed+c+i));
+//                receiver_apps.at(i)->file_map = this->i->file_map;
+                receiver_apps.at(i)->workload = parseWorkload(seed+i);
+                receiver_apps.at(i)->file_map = this->i->file_map;//parseFileMap();
+                receiver_apps.at(i)->start();
+                break;
+            }
+            ////cache state
+            //////----------------------------------------------------
+            //if (cache_mode!=0){
+                //Time t=ns3::Seconds(100);
+                //Simulator::Schedule(t,&BootstrappingHelper::cache_check,this,cache_nodes);
+            //}
+            //----------------------------------------------------
+            std::cout<<"Starting simulation\n";
 
-			Simulator::Run();//start the simulator ekteleitai h start toy rei
-			
-			uint32_t dtime = Now().ToInteger(Time::MS);
-			std::cout<<"Overall service time: "<<Now().ToInteger(Time::MS)<<std::endl; 
-		
-			/**
-			 * print caching results
-			 */
+            Simulator::Run();//start the simulator ekteleitai h start toy rei
+            
+            uint32_t dtime = Now().ToInteger(Time::MS);
+            std::cout<<"Overall service time: "<<Now().ToInteger(Time::MS)<<std::endl; 
+        
+            /**
+             * print caching results
+             */
 
-			 if (cache_mode!=0){
-				uint32_t reqs=0;
-				uint32_t hits=0;
-				for (uint8_t n = 0; n< cache_nodes.size(); n++){
-					Ptr<Node> nd = cache_nodes[n];
-						reqs+=module.at(nodeToModule.at(nd->GetId()))->cache->requests;
-						hits+=module.at(nodeToModule.at(nd->GetId()))->cache->hits;
-				 }
-				 printf("Cache requests: %d hits: %d \n",reqs,hits);
-			 }
-		
-			
-	
-			//print results and initialize structures again
-			//----------------------------------------------------
-			Ptr<ResultPrinter> rp=CreateObject<ResultPrinter>(module,gs,c,sa1,receiver_apps,output);
+             if (cache_mode!=0){
+                uint32_t reqs=0;
+                uint32_t hits=0;
+                for (uint8_t n = 0; n< cache_nodes.size(); n++){
+                    Ptr<Node> nd = cache_nodes[n];
+                        reqs+=module.at(nodeToModule.at(nd->GetId()))->cache->requests;
+                        hits+=module.at(nodeToModule.at(nd->GetId()))->cache->hits;
+                 }
+                 printf("Cache requests: %d hits: %d \n",reqs,hits);
+             }
+        
+            
+    
+            //print results and initialize structures again
+            //----------------------------------------------------
+            Ptr<ResultPrinter> rp=CreateObject<ResultPrinter>(module,gs,c,sa1,receiver_apps,output);
 
-			//print to file
-			//----------------------------------------------------
-			ofstream file;
-			string tempPath=output+"/results.txt";
-			file.open (tempPath.c_str(),std::ios::app);
+            //print to file
+            //----------------------------------------------------
+            ofstream file;
+            string tempPath=output+"/results.txt";
+            file.open (tempPath.c_str(),std::ios::app);
 
-			file << "experiment "<<c<<" nodessize "<<gs<<" participants ["<<module.at(nodeToModule.find(dataOwner)->second)->getNodeId()<<",";  
+            file << "experiment "<<c<<" nodessize "<<gs<<" participants ["<<module.at(nodeToModule.find(dataOwner)->second)->getNodeId()<<",";  
 
-			for(unsigned i=0;i<receiver_apps.size();i++)	{
-				file<<receiver_apps.at(i)->getModule()->getNodeId();
-				if(i!=gs-1)
-					file<<",";
-			}
+            for(unsigned i=0;i<receiver_apps.size();i++)    {
+                file<<receiver_apps.at(i)->getModule()->getNodeId();
+                if(i!=gs-1)
+                    file<<",";
+            }
 
-			file<<"] interests "<<CcnModule::RX_INTERESTS<<" data "<<CcnModule::RX_DATA<<" server_interests "<<sa1->getInterests()<<" time: "<<dtime<<"\n";
-			file.close();
-			//----------------------------------------------------
-			CcnModule::RX_INTERESTS=0;
-			CcnModule::RX_DATA=0;
+            file<<"] interests "<<CcnModule::RX_INTERESTS<<" data "<<CcnModule::RX_DATA<<" server_interests "<<sa1->getInterests()<<" time: "<<dtime<<"\n";
+            file.close();
+            //----------------------------------------------------
+            CcnModule::RX_INTERESTS=0;
+            CcnModule::RX_DATA=0;
 
-			for(unsigned i=0;i<module.size();i++)
-			{
-				module.at(i)->reInit();
-			}
-			//----------------------------------------------------
-			Simulator::Stop();
-	
+            for(unsigned i=0;i<module.size();i++)
+            {
+                module.at(i)->reInit();
+            }
+            //----------------------------------------------------
+            Simulator::Stop();
+    
 }
 
 // CAREFULL this runs for ever!!
 void BootstrappingHelper::cache_check(vector < Ptr< Node > > cache_nodes){
-	for (uint8_t n = 0; n< cache_nodes.size(); n++){
-		Ptr<Node> nd = cache_nodes[n];
-		std::cout<<module.at(nodeToModule.at(nd->GetId()))->cache->get_state();
-	 }
-	Time t=ns3::Seconds(100);
-	Simulator::Schedule(Now()+t,&BootstrappingHelper::cache_check,this,cache_nodes);
+    for (uint8_t n = 0; n< cache_nodes.size(); n++){
+        Ptr<Node> nd = cache_nodes[n];
+        std::cout<<module.at(nodeToModule.at(nd->GetId()))->cache->get_state();
+     }
+    Time t=ns3::Seconds(100);
+    Simulator::Schedule(Now()+t,&BootstrappingHelper::cache_check,this,cache_nodes);
 }
 
 
 void BootstrappingHelper::PITCheck(int gs,int exp,vector<uint32_t> nodes,Graph topology,uint32_t owner)
 {//sto router tis pigis tha mou bgalei allo ena entry
 
-	string nodes_nodes="";
-	for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
-		std::stringstream s;
-		s << *it;
-		nodes_nodes=nodes_nodes+","+s.str();
-	}
+    string nodes_nodes="";
+    for (vector<uint32_t>::iterator it=nodes.begin(); it!=nodes.end(); ++it){
+        std::stringstream s;
+        s << *it;
+        nodes_nodes=nodes_nodes+","+s.str();
+    }
 
-	for(unsigned i=0;i<module.size();i++)
-	{
-		if(module.at(i)->getNodeId() != module.at(nodeToModule.find( owner )->second)->getNodeId() )
-		{
-			stringstream st;
-			st << gs;
-			stringstream st2;
-			st2 << exp;
-			ofstream file;
-			string secondPartPath="CCN/pit_stats/gs-"+st.str()+"-experiment-"+st2.str()+"-nodes_nodes-"+nodes_nodes+"-seed-"+seedString+".txt";
-			string tempPath=output+secondPartPath;
-			const char* tempPath2=tempPath.c_str();
-			file.open (tempPath2,std::ios::app);
-			file<<"router "<<module.at(i)->getNodeId()<<" pit_entries "<<module.at(i)->getPIT()->getSize();
-			if(topology.isItCoreNode(module.at(i)->getNodeId()+1))//+1 because the implementation of our graph used to calculate the degree here ,counts from 1
-			{
-				file<<" core";
-			}
-			else
-			{
-				file<<" access";
-			}
-			file<<endl;
-			file.close();
-		}
-	}
+    for(unsigned i=0;i<module.size();i++)
+    {
+        if(module.at(i)->getNodeId() != module.at(nodeToModule.find( owner )->second)->getNodeId() )
+        {
+            stringstream st;
+            st << gs;
+            stringstream st2;
+            st2 << exp;
+            ofstream file;
+            string secondPartPath="CCN/pit_stats/gs-"+st.str()+"-experiment-"+st2.str()+"-nodes_nodes-"+nodes_nodes+"-seed-"+seedString+".txt";
+            string tempPath=output+secondPartPath;
+            const char* tempPath2=tempPath.c_str();
+            file.open (tempPath2,std::ios::app);
+            file<<"router "<<module.at(i)->getNodeId()<<" pit_entries "<<module.at(i)->getPIT()->getSize();
+            if(topology.isItCoreNode(module.at(i)->getNodeId()+1))//+1 because the implementation of our graph used to calculate the degree here ,counts from 1
+            {
+                file<<" core";
+            }
+            else
+            {
+                file<<" access";
+            }
+            file<<endl;
+            file.close();
+        }
+    }
 }

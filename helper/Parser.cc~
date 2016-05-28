@@ -8,38 +8,38 @@ using std::getline;
 namespace ns3 {
 
 Parser::Parser() {
-	matrix_map = map<uint32_t, set<uint32_t> >(); // Node id, set of nodes which is connected
-	idToNode = map<uint32_t, Ptr<Node> >();
-	nodeToId = map<uint32_t, uint32_t>();
+    matrix_map = map<uint32_t, set<uint32_t> >(); // Node id, set of nodes which is connected
+    idToNode = map<uint32_t, Ptr<Node> >();
+    nodeToId = map<uint32_t, uint32_t>();
 }
 
 Parser::~Parser() {
-	//TODO implement correctly
+    //TODO implement correctly
 }
 
 void Parser::DoDispose(void) {
-	idToNode.clear();
+    idToNode.clear();
 }
 
 Ptr<Node> Parser::getNodeById(uint32_t nodeid) {
-	return idToNode[nodeid];
+    return idToNode[nodeid];
 }
 
 uint32_t Parser::findId(Ptr<Node> node) {
-	return nodeToId[node->GetId()];
+    return nodeToId[node->GetId()];
 }
 
 vector<Ptr<Node> > Parser::getNeighbors(uint32_t graphNodeId) {
 
-	set < uint32_t > neighbors = matrix_map[graphNodeId];
-	vector < Ptr<Node> > v;
-	set<uint32_t>::iterator iter;
-	for (iter = neighbors.begin(); iter != neighbors.end(); iter++) {
-		uint32_t n_id = *iter;
-		Ptr < Node > nodePtr = idToNode[n_id];
-		v.push_back(nodePtr);
-	}
-	return v;
+    set < uint32_t > neighbors = matrix_map[graphNodeId];
+    vector < Ptr<Node> > v;
+    set<uint32_t>::iterator iter;
+    for (iter = neighbors.begin(); iter != neighbors.end(); iter++) {
+        uint32_t n_id = *iter;
+        Ptr < Node > nodePtr = idToNode[n_id];
+        v.push_back(nodePtr);
+    }
+    return v;
 }
 
 /*
@@ -47,163 +47,163 @@ vector<Ptr<Node> > Parser::getNeighbors(uint32_t graphNodeId) {
  * and updates some maps that contain vertexes and their associates
  */
 void Parser::parse(string& filepath, uint8_t group_size) {
-	matrix_map.clear();
+    matrix_map.clear();
 
-	ifstream f;
-	string line;
-	f.open(filepath.c_str());
+    ifstream f;
+    string line;
+    f.open(filepath.c_str());
 
-	uint16_t num_of_access_nodes=0;
+    uint16_t num_of_access_nodes=0;
 
-	if (f.is_open()) {
-		// for all vertex connections
-		while (getline(f, line)) {
-			vector < string > tokens = Utils::split(line, '\t');
-			if (tokens.size()<2)
-				tokens = Utils::split(line, ' ');
-			string t = "";
-			for (uint32_t i = 0; i < tokens.size(); i++) {
-				string orgnl = tokens[i];
-				Utils::replaceAll(orgnl, "<", "");
-				tokens[i] = orgnl;
-			}
-			uint32_t sourceNode = atoi(tokens[0].c_str());
-			set < uint32_t > neighbors;
-			for (uint32_t i = 1; i < tokens.size(); i++) {
-				uint32_t neighbor = atoi(tokens[i].c_str());
-				matrix_map[sourceNode].insert(neighbor);
-				matrix_map[neighbor].insert(sourceNode);
-			}
-			//calculate access nodes
-			if (tokens.size()==2)
-				num_of_access_nodes++;
-		}
-	}
-	else{
-		std::cout<<"Could not open file "<<filepath<<std::endl;
-		}
+    if (f.is_open()) {
+        // for all vertex connections
+        while (getline(f, line)) {
+            vector < string > tokens = Utils::split(line, '\t');
+            if (tokens.size()<2)
+                tokens = Utils::split(line, ' ');
+            string t = "";
+            for (uint32_t i = 0; i < tokens.size(); i++) {
+                string orgnl = tokens[i];
+                Utils::replaceAll(orgnl, "<", "");
+                tokens[i] = orgnl;
+            }
+            uint32_t sourceNode = atoi(tokens[0].c_str());
+            set < uint32_t > neighbors;
+            for (uint32_t i = 1; i < tokens.size(); i++) {
+                uint32_t neighbor = atoi(tokens[i].c_str());
+                matrix_map[sourceNode].insert(neighbor);
+                matrix_map[neighbor].insert(sourceNode);
+            }
+            //calculate access nodes
+            if (tokens.size()==2)
+                num_of_access_nodes++;
+        }
+    }
+    else{
+        std::cout<<"Could not open file "<<filepath<<std::endl;
+        }
 
-	NodeContainer n;
-	// create a node object for each vertex
-	for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
-			iter != matrix_map.end(); iter++) {
-		uint32_t node = iter->first;
-		Ptr < Node > nodePtr = CreateObject<Node>();
-		n.Add(nodePtr);
-		idToNode[node] = nodePtr;
-		nodeToId[nodePtr->GetId()] = node;
-	}
+    NodeContainer n;
+    // create a node object for each vertex
+    for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
+            iter != matrix_map.end(); iter++) {
+        uint32_t node = iter->first;
+        Ptr < Node > nodePtr = CreateObject<Node>();
+        n.Add(nodePtr);
+        idToNode[node] = nodePtr;
+        nodeToId[nodePtr->GetId()] = node;
+    }
 
-	set < uint32_t > nodes;
+    set < uint32_t > nodes;
 
-	map<uint32_t, map<uint32_t, uint32_t> > alreadyConnected;
-	//create links between the Nodes
-	for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
-			iter != matrix_map.end(); iter++) {
-		Ptr < Node > sourceNode = getNodeById(iter->first);
-		vector < Ptr<Node> > neighbors = getNeighbors(iter->first);
-		for (vector<Ptr<Node> >::iterator neighborsIter = neighbors.begin();
-				neighborsIter != neighbors.end(); neighborsIter++) {
-			uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
-			uint32_t neighborNodeGraphId = nodeToId[(*neighborsIter)->GetId()];
+    map<uint32_t, map<uint32_t, uint32_t> > alreadyConnected;
+    //create links between the Nodes
+    for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
+            iter != matrix_map.end(); iter++) {
+        Ptr < Node > sourceNode = getNodeById(iter->first);
+        vector < Ptr<Node> > neighbors = getNeighbors(iter->first);
+        for (vector<Ptr<Node> >::iterator neighborsIter = neighbors.begin();
+                neighborsIter != neighbors.end(); neighborsIter++) {
+            uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
+            uint32_t neighborNodeGraphId = nodeToId[(*neighborsIter)->GetId()];
 
-			if (alreadyConnected[sourceNodeGraphId][neighborNodeGraphId] == 1)
-				continue;
+            if (alreadyConnected[sourceNodeGraphId][neighborNodeGraphId] == 1)
+                continue;
 
-			NodeContainer n;
-			n.Add(sourceNode);
-			n.Add(*neighborsIter);
+            NodeContainer n;
+            n.Add(sourceNode);
+            n.Add(*neighborsIter);
 
-			PointToPointHelper pph;
-			pph.SetQueue(string("ns3::DropTailQueue"), string("MaxPackets"),
-					ns3::UintegerValue(10000), string("MaxBytes"),
-					ns3::UintegerValue(10000));
-			pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
-			pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
-			NetDeviceContainer ndc = pph.Install(n);
+            PointToPointHelper pph;
+            pph.SetQueue(string("ns3::DropTailQueue"), string("MaxPackets"),
+                    ns3::UintegerValue(10000), string("MaxBytes"),
+                    ns3::UintegerValue(10000));
+            pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
+            pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
+            NetDeviceContainer ndc = pph.Install(n);
 
-			nodes.insert(sourceNodeGraphId);
-			nodes.insert(neighborNodeGraphId);
+            nodes.insert(sourceNodeGraphId);
+            nodes.insert(neighborNodeGraphId);
 
-			alreadyConnected[sourceNodeGraphId][neighborNodeGraphId] = 1;
-			alreadyConnected[neighborNodeGraphId][sourceNodeGraphId] = 1;
-		}
-	}
+            alreadyConnected[sourceNodeGraphId][neighborNodeGraphId] = 1;
+            alreadyConnected[neighborNodeGraphId][sourceNodeGraphId] = 1;
+        }
+    }
 
-	/* we create group of users connecting to the access_nodes (those with degree=1)
-	 * this should become a method "create_link" but its too complicated to understand and select the correct commands !! 
-	 */
-	// create a new matric map to add the host nodes - place sender alone!
-	//random sender_position
-	
-	uint8_t limit=4;
-	uint16_t sender_position = ExperimentGlobals::RANDOM_VAR->GetInteger(0,num_of_access_nodes-1)%limit;
-	map<uint32_t, set<uint32_t> > matrix_map_tmp = matrix_map;
-	uint32_t host_node_name = matrix_map.size()-1;
-	
-	uint8_t added_groups = 0;
-	if (NODES_TYPE == 1){
-			type_of_node = "access node ";
-		}
-		else {
-			type_of_node = "core node ";
-		}
-	for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
-			iter != matrix_map.end(); iter++) {
-		vector < Ptr<Node> > neighbors = getNeighbors(iter->first);
-		if (neighbors.size() == 1) {//if they are access nodes
-			if (added_groups==sender_position) {
-				std::cout<<"added sender at position "<<sender_position<<" ("<<iter->first <<")\n";
-				sender_id = iter->first;
-				added_groups++;
-				continue;
-			}
-			
-			if (added_groups++==limit)
-				break;
-			std::cout << "Added group(seed) is: " << (unsigned)added_groups<<"--> Found "<< type_of_node << iter->first;
-			Ptr < Node > sourceNode = getNodeById(iter->first);
-			uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
+    /* we create group of users connecting to the access_nodes (those with degree=1)
+     * this should become a method "create_link" but its too complicated to understand and select the correct commands !! 
+     */
+    // create a new matric map to add the host nodes - place sender alone!
+    //random sender_position
+    
+    uint8_t limit=4;
+    uint16_t sender_position = ExperimentGlobals::RANDOM_VAR->GetInteger(0,num_of_access_nodes-1)%limit;
+    map<uint32_t, set<uint32_t> > matrix_map_tmp = matrix_map;
+    uint32_t host_node_name = matrix_map.size()-1;
+    
+    uint8_t added_groups = 0;
+    if (NODES_TYPE == 1){
+            type_of_node = "access node ";
+        }
+        else {
+            type_of_node = "core node ";
+        }
+    for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
+            iter != matrix_map.end(); iter++) {
+        vector < Ptr<Node> > neighbors = getNeighbors(iter->first);
+        if (neighbors.size() == 1) {//if they are access nodes
+            if (added_groups==sender_position) {
+                std::cout<<"added sender at position "<<sender_position<<" ("<<iter->first <<")\n";
+                sender_id = iter->first;
+                added_groups++;
+                continue;
+            }
+            
+            if (added_groups++==limit)
+                break;
+            std::cout << "Added group(seed) is: " << (unsigned)added_groups<<"--> Found "<< type_of_node << iter->first;
+            Ptr < Node > sourceNode = getNodeById(iter->first);
+            uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
 
-			for (unsigned gs = 0; gs < group_size; gs++) {
-				// add the new host node
-				Ptr < Node > newNode = CreateObject<Node>();
-				n.Add(newNode);
+            for (unsigned gs = 0; gs < group_size; gs++) {
+                // add the new host node
+                Ptr < Node > newNode = CreateObject<Node>();
+                n.Add(newNode);
 
-				idToNode[++host_node_name] = newNode;
-				nodeToId[newNode->GetId()] = host_node_name;
+                idToNode[++host_node_name] = newNode;
+                nodeToId[newNode->GetId()] = host_node_name;
 
-				NodeContainer n;
-				n.Add(sourceNode);
-				n.Add(newNode);
+                NodeContainer n;
+                n.Add(sourceNode);
+                n.Add(newNode);
 
-				// add the new link
-				PointToPointHelper pph;
-				pph.SetQueue(string("ns3::DropTailQueue"), string("MaxPackets"),
-						ns3::UintegerValue(10000), string("MaxBytes"),
-						ns3::UintegerValue(10000));
-				pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
-				pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
-				NetDeviceContainer ndc = pph.Install(n);
+                // add the new link
+                PointToPointHelper pph;
+                pph.SetQueue(string("ns3::DropTailQueue"), string("MaxPackets"),
+                        ns3::UintegerValue(10000), string("MaxBytes"),
+                        ns3::UintegerValue(10000));
+                pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
+                pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
+                NetDeviceContainer ndc = pph.Install(n);
 
-				nodes.insert(host_node_name);
+                nodes.insert(host_node_name);
 
-				alreadyConnected[sourceNodeGraphId][host_node_name] = 1;
-				alreadyConnected[host_node_name][sourceNodeGraphId] = 1;
+                alreadyConnected[sourceNodeGraphId][host_node_name] = 1;
+                alreadyConnected[host_node_name][sourceNodeGraphId] = 1;
 
-				std::cout << ", " << host_node_name;
-				// update the temporary matrix map
-				matrix_map_tmp[iter->first].insert(host_node_name);
-				matrix_map_tmp[host_node_name].insert(iter->first);
-				
-				active_nodes.push_back(newNode->GetId());
-			}
-			std::cout << "\n";
+                std::cout << ", " << host_node_name;
+                // update the temporary matrix map
+                matrix_map_tmp[iter->first].insert(host_node_name);
+                matrix_map_tmp[host_node_name].insert(iter->first);
+                
+                active_nodes.push_back(newNode->GetId());
+            }
+            std::cout << "\n";
 
-		}
-	}
-	matrix_map = matrix_map_tmp;
-	topology.setGraph(matrix_map);
+        }
+    }
+    matrix_map = matrix_map_tmp;
+    topology.setGraph(matrix_map);
 }
 
 //Graph Parser::create_link(const uint32_t sourceNodeGraphId, const uint32_t neighborNodeGraphId){
@@ -229,7 +229,7 @@ void Parser::parse(string& filepath, uint8_t group_size) {
 //}
 
 Graph Parser::getGraph() {
-	return topology;
+    return topology;
 }
 
 }

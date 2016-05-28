@@ -39,7 +39,7 @@ namespace ns3 {
 
 class ExperimentGlobals{
 public:
-	static Ptr<UniformRandomVariable> RANDOM_VAR;
+    static Ptr<UniformRandomVariable> RANDOM_VAR;
 
 };
 

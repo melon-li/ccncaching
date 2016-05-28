@@ -30,48 +30,48 @@ namespace  ns3 {
 
 class Parser : public Object
 {
-		map<uint32_t, set<uint32_t> > matrix_map;
-		// used also in boostrapping for creating ccnmodules
+        map<uint32_t, set<uint32_t> > matrix_map;
+        // used also in boostrapping for creating ccnmodules
 
-		vector <uint32_t> active_nodes;
-		uint32_t sender_id;
-		
-		map<uint32_t, double> graph_node_id_to_betw;
-		
-		vector <Ptr <Node> > all_nodes;
-		
-	public:
-	
-		Parser();
-		~Parser();
-		virtual void DoDispose(void);
-		// should make these private, but they are used a lot in Bootstrapper
-		map<uint32_t, Ptr<Node> > idToNode;
-		map<uint32_t, uint32_t > nodeToId;
-		
-		double getNode_Betw(const uint32_t& node_graph_id ){
-			return graph_node_id_to_betw[node_graph_id];
-		}
+        vector <uint32_t> active_nodes;
+        uint32_t sender_id;
+        
+        map<uint32_t, double> graph_node_id_to_betw;
+        
+        vector <Ptr <Node> > all_nodes;
+        
+    public:
+    
+        Parser();
+        ~Parser();
+        virtual void DoDispose(void);
+        // should make these private, but they are used a lot in Bootstrapper
+        map<uint32_t, Ptr<Node> > idToNode;
+        map<uint32_t, uint32_t > nodeToId;
+        
+        double getNode_Betw(const uint32_t& node_graph_id ){
+            return graph_node_id_to_betw[node_graph_id];
+        }
 
 
-		Ptr<Node> getNodeById(uint32_t);
-		uint32_t findId(Ptr<Node>);
-		vector<Ptr<Node> > getNeighbors(uint32_t);
-		void parse(string &, uint8_t group_size);
-		Graph topology;
-		Graph getGraph();
-		
-		vector <uint32_t> getActiveNodes(){
-			return active_nodes;
-		}
-		
-		uint32_t getSenderId(){
-			return sender_id;
-		}
-			
-		vector <Ptr <Node> > get_all_nodes(){
-			return all_nodes;
-			}
+        Ptr<Node> getNodeById(uint32_t);
+        uint32_t findId(Ptr<Node>);
+        vector<Ptr<Node> > getNeighbors(uint32_t);
+        void parse(string &, uint8_t group_size);
+        Graph topology;
+        Graph getGraph();
+        
+        vector <uint32_t> getActiveNodes(){
+            return active_nodes;
+        }
+        
+        uint32_t getSenderId(){
+            return sender_id;
+        }
+            
+        vector <Ptr <Node> > get_all_nodes(){
+            return all_nodes;
+            }
 };
 
 }  // namespace  ns3

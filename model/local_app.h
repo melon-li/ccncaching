@@ -10,18 +10,18 @@ namespace ns3{
 
 class LocalApp : public Object{
 public:
-		static int COUNT_APPS;
-    	LocalApp(){COUNT_APPS++;};
-		virtual ~LocalApp(){ }
-		virtual void DoDispose()
-		{
-			COUNT_APPS--;
+        static int COUNT_APPS;
+        LocalApp(){COUNT_APPS++;};
+        virtual ~LocalApp(){ }
+        virtual void DoDispose()
+        {
+            COUNT_APPS--;
 
-			if(COUNT_APPS==0)
-			{
-				std::cout<<"APPS over."<<std::endl;
-			}
-		}
+            if(COUNT_APPS==0)
+            {
+                std::cout<<"APPS over."<<std::endl;
+            }
+        }
 
         //called from CCN_Module
         void deliverInterest(Ptr<CCN_Name>);
@@ -38,9 +38,9 @@ private:
         Callback<void, Ptr<CCN_Name>, uint8_t*, uint32_t> onDataCallback;
 
         void doDeliverInterest(Ptr<CCN_Name> name){ onInterestCallback(name); }
-		void doDeliverData(Ptr<CCN_Name> name, uint8_t* buffer, uint32_t buffLen){onDataCallback(name, buffer, buffLen); }
+        void doDeliverData(Ptr<CCN_Name> name, uint8_t* buffer, uint32_t buffLen){onDataCallback(name, buffer, buffLen); }
 
-		static Time ONE_NS;
+        static Time ONE_NS;
 
 };
 

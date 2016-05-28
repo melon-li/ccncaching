@@ -15,21 +15,21 @@ int LocalApp::COUNT_APPS = 0;
 Time LocalApp::ONE_NS = NanoSeconds(1);
 
 void LocalApp::deliverInterest(Ptr<CCN_Name> name){
-	Simulator::Schedule(ONE_NS, &LocalApp::doDeliverInterest, this, name);
+    Simulator::Schedule(ONE_NS, &LocalApp::doDeliverInterest, this, name);
 }
 
 void LocalApp::deliverData(Ptr<CCN_Name> name, uint8_t* buffer, uint32_t bufflen){
-	Simulator::Schedule(ONE_NS, &LocalApp::doDeliverData, this, name, buffer, bufflen);
+    Simulator::Schedule(ONE_NS, &LocalApp::doDeliverData, this, name, buffer, bufflen);
 }
 
 bool operator< (const Ptr<LocalApp>& first, const Ptr<LocalApp>& second)
 {
-	if(PeekPointer(first)<PeekPointer(second))
-	{
-		return true;
-	}
+    if(PeekPointer(first)<PeekPointer(second))
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 }
 

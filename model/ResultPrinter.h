@@ -28,12 +28,12 @@ class CcnModule;
 class ResultPrinter: public ns3::Object {
 
 public:
-	ResultPrinter(map<uint32_t, Ptr<CcnModule> > nsNodeToModule, uint32_t gs, uint32_t exp, Ptr<Sender> s,vector < Ptr < Receiver > > receiver,std::string output);
-	~ResultPrinter();
-	virtual void DoDispose(void);
+    ResultPrinter(map<uint32_t, Ptr<CcnModule> > nsNodeToModule, uint32_t gs, uint32_t exp, Ptr<Sender> s,vector < Ptr < Receiver > > receiver,std::string output);
+    ~ResultPrinter();
+    virtual void DoDispose(void);
 
 private:
-	map<uint32_t, Ptr<CcnModule> > nsNodeToModule;
+    map<uint32_t, Ptr<CcnModule> > nsNodeToModule;
 };
 
 }

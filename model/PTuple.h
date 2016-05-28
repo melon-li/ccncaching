@@ -15,29 +15,29 @@ class Bloomfilter;
 
 class PTuple : public Object {
 public:
-	static int COUNT_TUPLES;
+    static int COUNT_TUPLES;
 
-	PTuple();
-	PTuple(vector<Ptr<NetDevice> >* devices );
-	PTuple( vector<Ptr<LocalApp> >* apps);
+    PTuple();
+    PTuple(vector<Ptr<NetDevice> >* devices );
+    PTuple( vector<Ptr<LocalApp> >* apps);
 
-	virtual ~PTuple();
-	virtual void DoDispose(void);
+    virtual ~PTuple();
+    virtual void DoDispose(void);
 
-	bool addLocalApp(Ptr<LocalApp> app);
-	bool addDevice(Ptr<NetDevice> device);
+    bool addLocalApp(Ptr<LocalApp> app);
+    bool addDevice(Ptr<NetDevice> device);
 
-	bool removeLocalApp(Ptr<LocalApp>);
-	bool removeDevice(Ptr<NetDevice>);
+    bool removeLocalApp(Ptr<LocalApp>);
+    bool removeDevice(Ptr<NetDevice>);
 
-	vector<Ptr<LocalApp> >& getLocalApps() {return r;}//apps that asked for data
-	vector<Ptr<NetDevice> >& getDevices() {return d;}//devices that asked for data
+    vector<Ptr<LocalApp> >& getLocalApps() {return r;}//apps that asked for data
+    vector<Ptr<NetDevice> >& getDevices() {return d;}//devices that asked for data
 
 private:
-	vector<Ptr<LocalApp> > r;
-	vector<Ptr<NetDevice> > d;
-	vector<Ptr<LocalApp> >::iterator find(Ptr<LocalApp>);
-	vector<Ptr<NetDevice> >::iterator find(Ptr<NetDevice>);
+    vector<Ptr<LocalApp> > r;
+    vector<Ptr<NetDevice> > d;
+    vector<Ptr<LocalApp> >::iterator find(Ptr<LocalApp>);
+    vector<Ptr<NetDevice> >::iterator find(Ptr<NetDevice>);
 };
 
 }

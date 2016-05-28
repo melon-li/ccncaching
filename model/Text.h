@@ -14,18 +14,18 @@ namespace ns3{
 
 class Text  : public Object
 {
-	private:
+    private:
 
-	Text();
-	static Ptr<Text> text;
-	map<string, string*>* textContainer;
+    Text();
+    static Ptr<Text> text;
+    map<string, string*>* textContainer;
 
-	public:
-	~Text();
-	virtual void DoDispose(void);
-	Ptr<CCN_Name> giveText(string* text);
-	void removeText(string* text);
-	static Ptr<Text> getPtr();
+    public:
+    ~Text();
+    virtual void DoDispose(void);
+    Ptr<CCN_Name> giveText(string* text);
+    void removeText(string* text);
+    static Ptr<Text> getPtr();
 };
 }
 #endif

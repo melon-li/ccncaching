@@ -33,6 +33,7 @@ public:
         //click_chatter("Created new LRU_Object %s", _filename.c_str());
         }
 
+    //filename = filename + "-" + ID
     string filename;
     LRU_Object * prev;
     LRU_Object * next;
@@ -149,17 +150,53 @@ public:
      
 };
 
+class File_Object{
+public:
+    Data_Object(){
+        for(int i=0; i<pkts.size(); i++) pkts[i] = 0;
+    }
+    typedef map <string, char *> Pkt_Obj;
+    Pkt_Obj pkts[PKT_NUM];
+     
+};
+
+class Slot_Object{
+    Slot_Object(){}
+    File_Object files[FILE_NUM];
+};
+
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
-    
-    uint32_t get_cached_packet(const string& _filename, const string& _ID);
-    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):
+                     CacheModule(_capacity,_capacity_fast_table){
+        stored_packets = 0;
+        stored_files = 0;
+        zero_pcks=0;
+        added_pcks=0;
+    }
+
+    // <filename, max chunk id>
+    //map<string , uint32_t> index_table;
+    bf::a2_bloom_filter bf_index(3, 100, 40);
+
+    // data_table
+    map <uint32_t, Slot_Object> data_table;
+    // <filename, allocated memory (IN PACKETS!)
+    map<string , uint32_t> mem_table;
+    // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
+    map<string , uint32_t> stats_table;
+
     uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
-
+    int32_t remove_last_file();//new by argi
+    int32_t get_stored_packets(const string& _filename);//new by argi
+    uint32_t get_cached_packet(const string& _filename, const string& _ID);
+    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
-    string get_packet_stats(){return "";}
+    string get_packet_stats();
+
+    uint64_t zero_pcks;
+    uint64_t added_pcks;
 };
 
 }

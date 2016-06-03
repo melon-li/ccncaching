@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/Trie.h"

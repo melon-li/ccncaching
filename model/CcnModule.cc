@@ -55,8 +55,9 @@ char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fas
         cache = new P_Cache( _cache_cap, _cache_fast_cap);
     }else if(mode == OBJECT_CACHE_MODE){
         cache = new O_Cache( _cache_cap, _cache_fast_cap);
-    }else{
+/**    }else{
         cache = new S_Cache( _cache_cap, _cache_fast_cap);
+*/
     }
     return 0;
 }
@@ -111,7 +112,8 @@ void CcnModule::sendThroughDevice(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     Ptr<Packet> p2 = Create<Packet>(b, p->GetSize());
     delete [] b;
     
-    bool sent = nd->Send(p2, addresses[nd], 0x88DD);
+    //bool sent = nd->Send(p2, addresses[nd], 0x88DD);
+    bool sent = nd->Send(p2, addresses[nd], CCN_PROTO);
 
     if (!sent) {
         std::cout << "bytes dropped" << std::endl;
@@ -141,6 +143,8 @@ uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {
 }
 
 void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
+    NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
+    sleep(2);
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
     //std::cout<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
     //cache is enabled, look for stored response
@@ -169,6 +173,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME), &CcnModule::dohandleIncomingInterest, this, p, nd);
     }// cache is not enabled
     else dohandleIncomingInterest(p, nd);
+    NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t>>>>>>>>");
     
 }
 void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {

@@ -8,6 +8,7 @@
 #ifndef EXPERIMENT_GLOBALS_H
 #define EXPERIMENT_GLOBALS_H
 
+#define CCN_PROTO 0x88DD
 #define NUMBER_OF_RUNS 1
 
 #define ROOT_DOMAIN "domain1"
@@ -22,8 +23,13 @@
 
 #define CACHE_CAPACITY 100 
 #define CACHE_MODE "packet" // "packet" or "object"
-#define PACKET_CACHE_MODE 1
-#define OBJECT_CACHE_MODE 2
+#define PACKET_CACHE_MODE 1  //LRU
+#define OBJECT_CACHE_MODE 2  //OPC
+#define SRAM_CACHE_MODE 3  //sram cache for dram, certainly file index is also stored in sram 
+
+//sram cache parameters
+#define PKT_NUM 8
+#define FILE_NUM 4
 
 //#define CACHE_PLACEMENT 0 // 0 for edges, 1 for betweenness and 2 for all nodes
 

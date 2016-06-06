@@ -400,78 +400,78 @@ void LRU_Table::update_object(LRU_Object* obj, bool new_object){
         }
     }
 
-Slot_Object::insert_packet(pair<string, char *> pkt){
+bool Slot_Object::insert_packet(pair<string, char *> pkt){
     Name2index::iterator it;
     uint32_t pos = 0, _ID = 0;
     string _filename;
 
     pos = pkt.first.find("-");
     if(!pos) return false;
-    _ID = pkt.first.substr(pos+1);
+    _ID = atoi(pkt.first.substr(pos+1).c_str());
     _filename = pkt.first.substr(0, pos);
-    it = name2index.find(_filename)
+    it = name2index.find(_filename);
 
     if(it == name2index.end()){
-        if(files.size() >= files_num){
-            files[0].clear();
-            files[0].insert(Pkts::value_type(_ID, pkt.second)); 
+        if(files.size() >= file_num){
+            files[cur_file].clear();
+            files[cur_file].insert(Pkts::value_type(_ID, pkt.second)); 
             for(Name2index::iterator it_t=name2index.begin(); it_t!=name2index.end(); it_t++){
-                if(it_t->second == 0) {
+                if(it_t->second == cur_file) {
                     name2index.erase(it_t);
                     break;
                 }
             }
-            name2index[_filename] = 0;
+            name2index[_filename] = cur_file;
+            cur_file++;
+            if(cur_file > file_num) cur_file = 0;
         }else{
-            Pkts pkt;
+            Pkts p;
             pos = files.size();
-            pkt.insert(Pkts::value_type(_ID, pkt.second));
-            files.push_back(pkt);
-            name2index.insert(Name2index::value_type(_filename, pos))
+            p.insert(Pkts::value_type(_ID, pkt.second));
+            files.push_back(p);
+            name2index.insert(Name2index::value_type(_filename, pos));
         }
     }else{
-        Pkts::value_type vt = files[pos].begin();
+        pos = it->second;
+        if(pos >= files.size()) return false;
+
+        Pkts::iterator vt = files[pos].begin();
         if((_ID - vt->first) >= pkt_num) return false;
 
-        pos = it->second;
         if(files[pos].size() > pkt_num) return false;
-
 
         files[pos].insert(Pkts::value_type(_ID, pkt.second));
     }
     return true;
 }
 
-Slot_Object:: insert_packets(string filename, uint8_t last_id){
-    uint32_t pos = 0, _ID = 0;
+bool Slot_Object::insert_packets(string filename, uint8_t last_id, vector<char *> payloads){
+    uint32_t pos = 0, _ID = 0, len=0;
     string _filename;
 
-    pos = pkt.first.find("-");
+    pos = filename.find("-");
     if(!pos) return false;
-    _ID = pkt.first.substr(pos+1);
-    _filename = pkt.first.substr(0, pos);
+    _ID = atoi(filename.substr(pos+1).c_str());
+    _filename = filename.substr(0, pos);
+    len = last_id - _ID + 1;
+    if( len > pkt_num ) return false;
+    if( len != payloads.size() )return false;
+
+    for(uint8_t i =0; i< len; i++){
+        _filename = _filename + "-";
+        _filename.append(std::to_string(i));
+        if(! Slot_Object::insert_packet(make_pair(_filename, payloads[i]))) return false;
+    }
  
+    return true;
 }
 
-void LRU_Table::test(){
-  bf::basic_bloom_filter b(0.8, 100);
+pair<bool, Pkts> Slot_Object::find(string filename){
+    Pkts p;
+    Name2index::iterator it = name2index.find(filename);
+    if(it == name2index.end()) return make_pair(false, p);
+    return make_pair(true, files[it->second]);
+}
 
-  // Add two elements.
-  b.add("foo");
-  b.add(42);
-
-  // Test set membership
-  std::cout << b.lookup("foo") << std::endl;  // 1
-  std::cout << b.lookup("bar") << std::endl;  // 0
-  std::cout << b.lookup(42) << std::endl;     // 1
-
-  // Remove all elements.
-  b.clear();
-  std::cout << b.lookup("foo") << std::endl;  // 0
-  std::cout << b.lookup(42) << std::endl;     // 0
-
-//  return 0;
-
-       }
     
 }//ns3 namespace

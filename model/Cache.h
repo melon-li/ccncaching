@@ -150,7 +150,18 @@ public:
      
 };
 
+typedef map<uint8_t, char *> Pkts;
 class Slot_Object{
+private:
+    typedef map<string, uint8_t> Name2index;
+    typedef vector<Pkts> Files;
+
+    Name2index name2index;
+    Files files;
+    uint32_t pkt_num = PKT_NUM;
+    uint32_t file_num = FILE_NUM;
+    uint32_t cur_file = 0;
+
 public:
     Slot_Object(){}
 
@@ -162,7 +173,7 @@ public:
      *         True, succeeded to insert it or it has already been stored in DRAM
      *         if slot is full, instead the most front filename.
      */
-    bool insert_packet(pair<string, char *> pkt){}
+    bool insert_packet(pair<string, char *> pkt);
 
     /*
      *@func: insert PKT_NUM or total(if it is less than PKT_NUM) packets of filename
@@ -172,24 +183,16 @@ public:
      *         True, succeeded to insert it or it has already been stored in DRAM
      *         if slot is full, instead the most front filename.
      */
-    bool insert_packets(string filename, uint8_t last_id){}
+    bool insert_packets(string filename, uint8_t last_id, vector<char *> payloads);
 
     /*
      *@param: filename without file ID(begin-id)
-     *@return: the number of packets stored in DRAM, the value is equal to or less than PKT_NUM 
+     *@return: bool,true or false
+     *         Pkts
      */
-    uint8_t find(string filename){}
+    pair<bool, Pkts> find(string filename);
 
     //File_Obj files[FILE_NUM];
-private:
-    typedef map<uint8_t, char *> Pkts;
-    typedef map<string, uint8_t> Name2index;
-    typedef vector<Pkts> Files;
-
-    Name2index name2index;
-    Files files;
-    uint32_t pkt_num = PKT_NUM;
-    uint32_t file_num = FILE_NUM;
      
 };
 
@@ -205,7 +208,8 @@ public:
 
     // <filename, max chunk id>
     //map<string , uint32_t> index_table;
-    bf::a2_bloom_filter bf_index(3, 100, 40);
+    //bf::a2_bloom_filter index_bf(3, 100, 40);
+    bf::a2_bloom_filter b(3, 100, 40);
 
     // data_table
     map <uint32_t, Slot_Object> data_table;
@@ -214,7 +218,7 @@ public:
     // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
     map<string , uint32_t> stats_table;
 
-    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+/*    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
@@ -222,7 +226,7 @@ public:
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
-
+*/
     uint64_t zero_pcks;
     uint64_t added_pcks;
 };

@@ -153,11 +153,14 @@ public:
 class Slot_Object{
 public:
     Slot_Object(){}
+
+    
     /*
      *@func: insert a packet of filename
      *@param: make_pair(filename-ID, data_pointer)
-     *@return: False,failed to insert, if the Slot is full; 
-               True, succeeded to insert it or it has already been stored in DRAM
+     *@return: False,failed to insert. 
+     *         True, succeeded to insert it or it has already been stored in DRAM
+     *         if slot is full, instead the most front filename.
      */
     bool insert_packet(pair<string, char *> pkt){}
 
@@ -165,21 +168,28 @@ public:
      *@func: insert PKT_NUM or total(if it is less than PKT_NUM) packets of filename
      *@param: filename with begin-ID
      *@param: last_id, last_id subtracted  begin_id is less than PKT_NUM
-     *@return: False,failed to insert, if the Slot is full; 
-               True, succeeded to insert it or it has already been stored in DRAM
+     *@return: False,failed to insert; 
+     *         True, succeeded to insert it or it has already been stored in DRAM
+     *         if slot is full, instead the most front filename.
      */
     bool insert_packets(string filename, uint8_t last_id){}
 
     /*
      *@param: filename without file ID(begin-id)
-     *@return: the number of packets stored in DRAM
+     *@return: the number of packets stored in DRAM, the value is equal to or less than PKT_NUM 
      */
     uint8_t find(string filename){}
 
     //File_Obj files[FILE_NUM];
 private:
     typedef map<uint8_t, char *> Pkts;
-    map<string, Pkts> files;
+    typedef map<string, uint8_t> Name2index;
+    typedef vector<Pkts> Files;
+
+    Name2index name2index;
+    Files files;
+    uint32_t pkt_num = PKT_NUM;
+    uint32_t file_num = FILE_NUM;
      
 };
 

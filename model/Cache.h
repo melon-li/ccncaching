@@ -207,9 +207,8 @@ public:
     }
 
     // <filename, max chunk id>
-    //map<string , uint32_t> index_table;
-    //bf::a2_bloom_filter index_bf(3, 100, 40);
-    bf::a2_bloom_filter b(3, 100, 40);
+//    map<string , uint32_t> index_table;
+    bf::a2_bloom_filter index_bf{3, 100, 40};
 
     // data_table
     map <uint32_t, Slot_Object> data_table;

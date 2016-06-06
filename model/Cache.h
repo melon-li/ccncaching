@@ -150,19 +150,37 @@ public:
      
 };
 
-class File_Object{
-public:
-    Data_Object(){
-        for(int i=0; i<pkts.size(); i++) pkts[i] = 0;
-    }
-    typedef map <string, char *> Pkt_Obj;
-    Pkt_Obj pkts[PKT_NUM];
-     
-};
-
 class Slot_Object{
+public:
     Slot_Object(){}
-    File_Object files[FILE_NUM];
+    /*
+     *@func: insert a packet of filename
+     *@param: make_pair(filename-ID, data_pointer)
+     *@return: False,failed to insert, if the Slot is full; 
+               True, succeeded to insert it or it has already been stored in DRAM
+     */
+    bool insert_packet(pair<string, char *> pkt){}
+
+    /*
+     *@func: insert PKT_NUM or total(if it is less than PKT_NUM) packets of filename
+     *@param: filename with begin-ID
+     *@param: last_id, last_id subtracted  begin_id is less than PKT_NUM
+     *@return: False,failed to insert, if the Slot is full; 
+               True, succeeded to insert it or it has already been stored in DRAM
+     */
+    bool insert_packets(string filename, uint8_t last_id){}
+
+    /*
+     *@param: filename without file ID(begin-id)
+     *@return: the number of packets stored in DRAM
+     */
+    uint8_t find(string filename){}
+
+    //File_Obj files[FILE_NUM];
+private:
+    typedef map<uint8_t, char *> Pkts;
+    map<string, Pkts> files;
+     
 };
 
 class S_Cache:public CacheModule{

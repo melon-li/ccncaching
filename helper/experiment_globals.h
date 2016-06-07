@@ -28,8 +28,12 @@
 #define SRAM_CACHE_MODE 3  //sram cache for dram, certainly file index is also stored in sram 
 
 //sram cache parameters
+#define WIDTH 8 //bytes
+#define PKT_SIZE 1500
 #define PKT_NUM 8
 #define FILE_NUM 4
+// GB
+#define DRAM_SIZE 100 
 
 //#define CACHE_PLACEMENT 0 // 0 for edges, 1 for betweenness and 2 for all nodes
 
@@ -42,7 +46,9 @@
 
 
 #define SRAM_ACCESS_TIME 450 // in pico seconds
-#define DRAM_ACCESS_TIME 55000 // in pico seconds
+#define DRAM_ACCESS_TIME 30000 // in pico seconds
+#define DRAM_OLD_ACCESS_TIME 62.5
+
 
 #include "ns3/core-module.h"
 

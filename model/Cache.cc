@@ -473,5 +473,81 @@ pair<bool, Pkts> Slot_Object::find(string filename){
     return make_pair(true, files[it->second]);
 }
 
+
+uint32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
+	requests++;
+	//click_chatter("Searching chunk.. %d", ID);
+	unsigned ID = atoi(_ID.c_str());
+	map<string, unsigned>::iterator it = index_table.find(_filename);
+	// chunk is cached
+	if (it!=index_table.end() && ID<=it->second){	
+		LRU->update_object(LRU->objects[_filename]);//fere to arxeio san most recent
+		
+		string key = _filename+"-";
+		key.append(_ID);
+		map<string, unsigned>::iterator lit = log_file_hits.find(key);
+		if (lit!=log_file_hits.end())
+			lit->second++;
+		else{
+			log_file_hits[key]=1;
+		}
+		
+		log_chunk_id_hits[std::min((unsigned) MAX_LOG_CHUNK_ID-1,ID)]++;
+		hits++;
+		//std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(unsigned)it->second<<std::endl;
+		uint16_t tmp = (it->second - ID + 1);
+		reads_for_fetchings += tmp;
+		return tmp * DRAM_ACCESS_TIME;
+	}
+	return 0;
+}
+
+uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+	unsigned lookup_time = 0;
+	unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
+        unsigned block_id = ID/pkt_num;
+        uint32_t addr = 0;
+        bool islast = false;
+
+        _filename = _filename + "-";
+        _filename.append(std::to_string(block_id*pkt_num)); 
+
+	responses++;
+        uint8_t iscache = index_bf(_filename.c_str()); 
+        if(iscache) return 0;
+
+        //cache in SRAM for writing(cache_table_w)
+        Cachetable::iterator it = cache_table_w.find(_filename);
+        if(it != cache_table_w.end()){
+            it->second.push_back(_payload);
+            //up to  pkt_num or islast is true
+            //if cache PKT_NUM packets or all packets(less than PKT_NUM) of a file, transfer these to DRAM
+            if(it->second.size() >= pkt_num || islast){
+               addr = CityHash32(_filename.c_str(), _filename.size());
+               addr = addr%block_num; 
+               data_table[addr].insert(_filename, ID, it->second); 
+               cache_table_w.erase(it);
+               lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->second.size() + \
+                             DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
+             }
+        }else{
+            vector<char *> payloads;
+            payloads.push_back(_payload);
+            NS_ASSERT_MSG(ID == block_id*pkt_num,
+            "S_Cache::cache_packet:Internal error.Filename stored in SRAM cache for writing is wrong");            
+            cache_table_w.insert(Cachetable::value_type(_filename, payloads));
+            if(islast){
+               addr = CityHash32(_filename.c_str(), _filename.size());
+               addr = addr%block_num; 
+               data_table[addr].insert(_filename, ID, payloads); 
+               cache_table_w.erase(it);
+               lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->second.size() + \
+                             DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
+            }
+        }  
+
+	NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID<<" capacity "<<index_table.size()<<" - "<<stored_packets);
+	return lookup_time;	
+}
     
 }//ns3 namespace

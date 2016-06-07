@@ -15,6 +15,8 @@
 #include <string>
 #include <bf.h>
 
+#include "ns3/city.h"
+#include "ns3/citycrc.h"
 #include "ns3/core-module.h"
 #include "ns3/CcnModule.h"
 #include "ns3/experiment_globals.h"
@@ -198,26 +200,41 @@ public:
 
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):
+    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, uint64_t _dram_size = 0):
                      CacheModule(_capacity,_capacity_fast_table){
         stored_packets = 0;
         stored_files = 0;
         zero_pcks=0;
         added_pcks=0;
+        if(_dram_size == 0){
+            slot_num = DRAM_SIZE*1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM;
+        }else{
+            slot_num = _dram_size*1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM;
+        }
     }
 
     // <filename, max chunk id>
 //    map<string , uint32_t> index_table;
     bf::a2_bloom_filter index_bf{3, 100, 40};
 
-    // data_table
+    // DRAM table
     map <uint32_t, Slot_Object> data_table;
+
+    //SRAM table for reading
+    //filename-begin_id, packets
+    typedef map<string, vector<char*> > Cachetable;
+    Cachetable cache_table_r;
+
+    //SRAM table for writing
+    //filename-beigin_id, packets
+    Cachetable cache_table_w;
+
     // <filename, allocated memory (IN PACKETS!)
     map<string , uint32_t> mem_table;
     // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
     map<string , uint32_t> stats_table;
 
-/*    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
@@ -225,9 +242,11 @@ public:
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
-*/
+
     uint64_t zero_pcks;
     uint64_t added_pcks;
+    // the number of slot, one slot has FILE_NUM files, one file has equal to or less than PKT_NUM packets
+    uint64_t slot_num;
 };
 
 }

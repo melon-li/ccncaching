@@ -14,6 +14,7 @@
 
 #include <string>
 #include <bf.h>
+#include <deque>
 
 #include "ns3/city.h"
 #include "ns3/citycrc.h"
@@ -174,8 +175,9 @@ public:
      *@return: False,failed to insert. 
      *         True, succeeded to insert it or it has already been stored in DRAM
      *         if slot is full, instead the most front filename.
+     *         int, stored_packet number at this time
      */
-    bool insert_packet(pair<string, char *> pkt);
+    pair<bool, int> insert_packet(pair<string, char *> pkt);
 
     /*
      *@func: insert PKT_NUM or total(if it is less than PKT_NUM) packets of filename
@@ -184,8 +186,9 @@ public:
      *@return: False,failed to insert; 
      *         True, succeeded to insert it or it has already been stored in DRAM
      *         if slot is full, instead the most front filename.
+     *         int, stored_packet number at this time
      */
-    bool insert_packets(string filename, uint8_t last_id, vector<char *> payloads);
+    pair<bool,int> insert_packets(string filename, uint8_t last_id, vector<char *> payloads);
 
     /*
      *@param: filename without file ID(begin-id)
@@ -200,16 +203,17 @@ public:
 
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, uint64_t _dram_size = 0):
+    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):
                      CacheModule(_capacity,_capacity_fast_table){
         stored_packets = 0;
         stored_files = 0;
         zero_pcks=0;
-        added_pcks=0;
-        if(_dram_size == 0){
+        readcache_pcks=0;
+        writecache_pcks=0;
+        if(_capacity == 0){
             slot_num = DRAM_SIZE*1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM;
         }else{
-            slot_num = _dram_size*1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM;
+            slot_num = _capacity/PKT_NUM/FILE_NUM;
         }
     }
 
@@ -222,7 +226,7 @@ public:
 
     //SRAM table for reading
     //filename-begin_id, packets
-    typedef map<string, vector<char*> > Cachetable;
+    typedef map<string, deque<char*> > Cachetable;
     Cachetable cache_table_r;
 
     //SRAM table for writing
@@ -235,8 +239,10 @@ public:
     map<string , uint32_t> stats_table;
 
     uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
-    uint32_t remove_last_packet(const string& _filename);
-    int32_t remove_last_file();//new by argi
+    uint32_t remove_last_packet_r(const string& _filename);
+    int32_t remove_last_file_r();//new by argi
+    uint32_t remove_last_packet_w(const string& _filename);
+    int32_t remove_last_file_w();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
     uint32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
@@ -244,7 +250,8 @@ public:
     string get_packet_stats();
 
     uint64_t zero_pcks;
-    uint64_t added_pcks;
+    uint64_t readcache_pcks;
+    uint64_t writecache_pcks;
     // the number of slot, one slot has FILE_NUM files, one file has equal to or less than PKT_NUM packets
     uint64_t slot_num;
 };

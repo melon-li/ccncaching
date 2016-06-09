@@ -412,7 +412,7 @@ pair<bool, int> Slot_Object::insert_packet(pair<string, char *> pkt){
     int stored_packets = 0;
 
     pos = pkt.first.find("-");
-    if(!pos) return make_pair(false, 0);
+    if(!pos) return std::make_pair(false, 0);
     _ID = atoi(pkt.first.substr(pos+1).c_str());
     _filename = pkt.first.substr(0, pos);
     it = name2index.find(_filename);
@@ -442,48 +442,48 @@ pair<bool, int> Slot_Object::insert_packet(pair<string, char *> pkt){
         }
     }else{
         pos = it->second;
-        if(pos >= files.size()) return make_pair(false, 0);
+        if(pos >= files.size()) return std::make_pair(false, 0);
 
         Pkts::iterator vt = files[pos].begin();
-        if((_ID - vt->first) >= pkt_num) return make_pair(false, 0);
+        if((_ID - vt->first) >= PKT_NUM) return std::make_pair(false, 0);
 
-        if(files[pos].size() > pkt_num) return make_pair(false, 0);
+        if(files[pos].size() > PKT_NUM) return std::make_pair(false, 0);
 
         files[pos].insert(Pkts::value_type(_ID, pkt.second));
         stored_packets++;
     }
-    return make_pair(true, stored_packets);
+    return std::make_pair(true, stored_packets);
 }
 
-pair<bool, int> Slot_Object::insert_packets(string filename, uint8_t last_id, vector<char *> payloads){
+pair<bool, int> Slot_Object::insert_packets(string filename, uint8_t last_id, std::deque<char *> payloads){
     uint32_t pos = 0, _ID = 0, len=0;
     string _filename;
     int stored_packets = 0;
 
     pos = filename.find("-");
-    if(!pos) return make_pair(false, 0);
+    if(!pos) return std::make_pair(false, 0);
     _ID = atoi(filename.substr(pos+1).c_str());
     _filename = filename.substr(0, pos);
     len = last_id - _ID + 1;
-    if( len > pkt_num ) return make_pair(false, 0);
-    if( len != payloads.size() )return make_pair(false, 0);
+    if( len > PKT_NUM ) return std::make_pair(false, 0);
+    if( len != payloads.size() )return std::make_pair(false, 0);
 
     for(uint8_t i =0; i< len; i++){
         _filename = _filename + "-";
         _filename.append(std::to_string(i));
-        pair<bool, int> pr = insert_packet(make_pair(_filename, payloads[i]));
+        pair<bool, int> pr = insert_packet(std::make_pair(_filename, payloads[i]));
         stored_packets += pr.second;
-        if(!pr.first)return make_pair(false, 0);
+        if(!pr.first)return std::make_pair(false, 0);
     }
  
-    return make_pair(true, stored_packets);
+    return std::make_pair(true, stored_packets);
 }
 
 pair<bool, Pkts> Slot_Object::find(string filename){
     Pkts p;
     Name2index::iterator it = name2index.find(filename);
-    if(it == name2index.end()) return make_pair(false, p);
-    return make_pair(true, files[it->second]);
+    if(it == name2index.end()) return std::make_pair(false, p);
+    return std::make_pair(true, files[it->second]);
 }
 
 
@@ -494,7 +494,7 @@ int32_t S_Cache::remove_last_file_r(){
         return -1;
     cache_table_r.erase(tail);
     LRU->remove_object(LRU->tail);
-    NS_LOG_INFO("S_Cache removed last file "<<tail<<" capacity "<<index_table.size()<<" - "<<stored_packets-removed_packets);
+    NS_LOG_INFO("S_Cache removed last file "<<tail);
     return removed_packets;
 }
 
@@ -511,7 +511,7 @@ int32_t S_Cache::get_stored_packets_r(const string& _filename){
 uint32_t S_Cache::tranfer_packets(const string& filename){
     uint32_t lookup_time = 0;
     uint32_t addr = 0;
-    addr = CityHash32(filename);
+    addr = CityHash32(filename.c_str(), filename.size());
     addr = addr%slot_num;
     map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
     if(it == data_table.end()) return 0;
@@ -519,9 +519,9 @@ uint32_t S_Cache::tranfer_packets(const string& filename){
     if(!pr.first) return 0;
      
 
-    deque<char *> payloads;
+    std::deque<char *> payloads;
     for(Pkts::iterator i=pr.second.begin(); i!=pr.second.end(); i++)
-        payloads.push_back(i);    
+        payloads.push_back(i->second);    
    
     while(readcache_pcks + payloads.size() >= capacity_fast_table){
             int32_t removed_packets = remove_last_file_r();
@@ -530,7 +530,7 @@ uint32_t S_Cache::tranfer_packets(const string& filename){
             readcache_pcks -= removed_packets;
     }
               
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->payloads.size() + \
+    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*payloads.size() + \
                                       DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
    
     payloads.pop_front(); 
@@ -556,34 +556,34 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
 uint32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     uint32_t lookup_time = 0;
     unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
-    uint32_t block_id = ID/pkt_num;
+    uint32_t block_id = ID/PKT_NUM;
     string filename(_filename);
     
     requests++;
     filename += "-";
-    filename.append(std::to_string((block_id*pkt_num)));
+    filename.append(std::to_string((block_id*PKT_NUM)));
 
     Cachetable::iterator cit = cache_table_r.find(filename);
     // if packets is cached in sram for reading,response them to requester,return 0
     if(cit != cache_table_r.end()){
-        //uint32_t offset = ID - (block_id*pkt_num);
+        //uint32_t offset = ID - (block_id*PKT_NUM);
         //only support request cache by order at this moment
         //if(!offset){
-        cit.pop_front();
-        if(cit.size() == 0) {
+        cit->second.pop_front();
+        if(cit->second.size() == 0) {
             cache_table_r.erase(cit);
-            LRU->remove_object(LRU->object[filename]);
+            LRU->remove_object(LRU->objects[filename]);
         }else{
-            LRU->update_object(LRU->object[filename]);
+            LRU->update_object(LRU->objects[filename]);
         }
-        readcache_pkts--;
+        readcache_pcks--;
         //}
         log_file_hit(_filename, _ID);
         return 0;
     }
 
     //if not cached in "sram for reading", and check if stored in dram
-    uint8_t iscache = index_bf(filename.c_str()); 
+    uint8_t iscache = index_bf.lookup(filename.c_str()); 
     if(!iscache) return 0;
 
     // stored in dram, tranfer them from dram to sram
@@ -599,7 +599,7 @@ int32_t S_Cache::remove_last_file_w(){
         return -1;
     cache_table_w.erase(tail);
     LRU->remove_object(LRU->tail);
-    NS_LOG_INFO("S_Cache removed last file "<<tail<<" capacity "<<index_table.size()<<" - "<<stored_packets-removed_packets);
+    NS_LOG_INFO("S_Cache removed last file "<<tail);
     return removed_packets;
 }
 
@@ -616,21 +616,21 @@ int32_t S_Cache::get_stored_packets_w(const string& _filename){
 }
 
 
-int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,
-                            const uint32_t block_id,  const char *_payload){
+int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload){
     unsigned lookup_time = 0;
     bool islast = false;
     uint32_t addr = 0;
+    char* data = new char[PAYLOAD_SIZE];
     Cachetable::iterator it = cache_table_w.find(_filename);
     if(it != cache_table_w.end()){
-        it->second.push_back(_payload);
+        it->second.push_back(data);
         writecache_pcks++;
-        //up to  pkt_num or islast is true
+        //up to  PKT_NUM or islast is true
         //if cache PKT_NUM packets or all packets(less than PKT_NUM) of a file, transfer these to DRAM
-        if(it->second.size() >= pkt_num || islast){
+        if(it->second.size() >= PKT_NUM || islast){
            addr = CityHash32(_filename.c_str(), _filename.size());
-           addr = addr%block_num; 
-           pair<bool, int> pr = data_table[addr].insert(_filename, ID, it->second); 
+           addr = addr%slot_num; 
+           pair<bool, int> pr = data_table[addr].insert_packets(_filename, ID, it->second); 
            stored_packets += pr.second;
            cache_table_w.erase(it);
            lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->second.size() + \
@@ -638,16 +638,16 @@ int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,
          }
     //is first packet
     }else{
-        vector<char *> payloads;
-        payloads.push_back(_payload);
+        std::deque<char *> payloads;
+        payloads.push_back(data);
         writecache_pcks++;
-        NS_ASSERT_MSG(ID == block_id*pkt_num,
+        NS_ASSERT_MSG(ID == block_id*PKT_NUM,
         "S_Cache::cache_packet:Internal error.Filename stored in SRAM cache for writing is wrong");            
         cache_table_w.insert(Cachetable::value_type(_filename, payloads));
         if(islast){
            addr = CityHash32(_filename.c_str(), _filename.size());
            addr = addr%slot_num; 
-           data_table[addr].insert(_filename, ID, payloads); 
+           pair<bool, int> pr = data_table[addr].insert_packets(_filename, ID, payloads); 
            cache_table_w.erase(it);
            stored_packets += pr.second;
            lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
@@ -659,18 +659,18 @@ int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,
     }  
 }
 
-int32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     string filename(_filename);
     unsigned lookup_time = 0;
     unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
-    unsigned block_id = ID/pkt_num;
+    unsigned block_id = ID/PKT_NUM;
 
     filename = filename + "-";
-    filename.append(std::to_string(block_id*pkt_num)); 
+    filename.append(std::to_string(block_id*PKT_NUM)); 
 
     responses++;
     // if packet has existed in dram, return 0
-    uint8_t iscache = index_bf(filename.c_str()); 
+    uint8_t iscache = index_bf.lookup(filename.c_str()); 
     if(iscache) return 0;
 
     //if sram is full, delete the least recent file
@@ -684,9 +684,9 @@ int32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const 
     }
 
     //cache them in "SRAM for writing(cache_table_w)"
-    //if up to pkt_num or islast, then transfer them from sram to dram
+    //if up to PKT_NUM or islast, then transfer them from sram to dram
     lookup_time = add_packet(filename, ID, block_id, _payload);
-    NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID<<" capacity "<<index_table.size()<<" - "<<stored_packets);
+    NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID<<" capacity ");
     return lookup_time;	
 }
     

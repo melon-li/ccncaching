@@ -246,6 +246,7 @@ public:
     int32_t get_stored_packets(const string& _filename);//new by argi
     uint32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    void log_file_hit(const string& _filename, const string& _ID);
     string get_state();
     string get_packet_stats();
 

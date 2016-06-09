@@ -507,6 +507,7 @@ int32_t S_Cache::get_stored_packets_r(const string& _filename){
     }
 }
 
+//tranfer packets from dram to sram
 uint32_t S_Cache::tranfer_packets(const string& filename){
     uint32_t lookup_time = 0;
     uint32_t addr = 0;
@@ -518,7 +519,7 @@ uint32_t S_Cache::tranfer_packets(const string& filename){
     if(!pr.first) return 0;
      
 
-    vector<char *> payloads;
+    deque<char *> payloads;
     for(Pkts::iterator i=pr.second.begin(); i!=pr.second.end(); i++)
         payloads.push_back(i);    
    
@@ -529,14 +530,27 @@ uint32_t S_Cache::tranfer_packets(const string& filename){
             readcache_pcks -= removed_packets;
     }
               
+    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->payloads.size() + \
+                                      DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
+   
+    payloads.pop_front(); 
     cache_table_r.insert(Cachetable::value_type(filename, payloads));
     LRU_Object * _obj  = new LRU_Object(filename);
     LRU->add_object(_obj);	 
     readcache_pcks += payloads.size();  
     
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*it->payloads.size() + \
-                                      DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
     return lookup_time;
+}
+
+void S_Cache::log_file_hit(const string& _filename, const string& _ID){
+    string key = _filename+"-";
+    key.append(_ID);
+    map<string, unsigned>::iterator lit = log_file_hits.find(key);
+    if (lit!=log_file_hits.end())
+        lit->second++;
+    else{
+        log_file_hits[key]=1;
+    }
 }
 
 uint32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
@@ -550,27 +564,30 @@ uint32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     filename.append(std::to_string((block_id*pkt_num)));
 
     Cachetable::iterator cit = cache_table_r.find(filename);
-    // if packets is cached in sram for reading
+    // if packets is cached in sram for reading,response them to requester,return 0
     if(cit != cache_table_r.end()){
-        uint32_t offset = ID - (block_id*pkt_num);
+        //uint32_t offset = ID - (block_id*pkt_num);
         //only support request cache by order at this moment
-        if(!offset){
-            cit.pop_front();
-            if(cit.size() == 0) {
-                cache_table_r.erase(cit);
-                LRU->remove_object(LRU->object[filename]);
-            }else{
-                LRU->update_object(LRU->object[filename]);
-            }
-            readcache_pkts--;
+        //if(!offset){
+        cit.pop_front();
+        if(cit.size() == 0) {
+            cache_table_r.erase(cit);
+            LRU->remove_object(LRU->object[filename]);
+        }else{
+            LRU->update_object(LRU->object[filename]);
         }
+        readcache_pkts--;
+        //}
+        log_file_hit(_filename, _ID);
         return 0;
     }
 
+    //if not cached in "sram for reading", and check if stored in dram
     uint8_t iscache = index_bf(filename.c_str()); 
     if(!iscache) return 0;
 
-    //file is stored in dram, tranfer them from dram to sram
+    // stored in dram, tranfer them from dram to sram
+    log_file_hit(_filename, _ID);
     lookup_time = tranfer_packets(filename); 
     return lookup_time;
 }
@@ -652,10 +669,11 @@ int32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const 
     filename.append(std::to_string(block_id*pkt_num)); 
 
     responses++;
+    // if packet has existed in dram, return 0
     uint8_t iscache = index_bf(filename.c_str()); 
     if(iscache) return 0;
 
-    //cache in SRAM for writing(cache_table_w)
+    //if sram is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
 	    int32_t removed_packets = remove_last_file_w();
 	    if (removed_packets == -1)
@@ -664,8 +682,10 @@ int32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const 
 	   // lookup_time += removed_packets;
 	   // reads_for_evictions += removed_packets;
     }
-    lookup_time = add_packet(filename, ID, block_id, _payload);
 
+    //cache them in "SRAM for writing(cache_table_w)"
+    //if up to pkt_num or islast, then transfer them from sram to dram
+    lookup_time = add_packet(filename, ID, block_id, _payload);
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID<<" capacity "<<index_table.size()<<" - "<<stored_packets);
     return lookup_time;	
 }

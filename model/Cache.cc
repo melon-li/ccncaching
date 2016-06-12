@@ -642,7 +642,6 @@ int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,const uin
         it->second.push_back(data);
         writecache_pcks++;
         //up to  PKT_NUM or islast is true
-        //if cache PKT_NUM packets or all packets(less than PKT_NUM) of a file, transfer these to DRAM
         if(it->second.size() >= PKT_NUM || islast){
            addr = CityHash32(_filename.c_str(), _filename.size());
            addr = addr%slot_num; 

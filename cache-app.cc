@@ -15,66 +15,75 @@ int main(int argc ,char *argv[])
         uint16_t gs;
         uint16_t cpl;
         uint16_t cpo;
-    uint32_t cache_cap = 0;
-    uint32_t fast_cap = 0;
+	uint32_t cache_cap = 0;
+	uint32_t fast_cap = 0;
         
-    CommandLine cmd;
+	uint32_t cache_size = 0;
+	uint32_t fast_size = 0;
+	CommandLine cmd;
 
-    //Topology path
+	//Topology path
         cmd.AddValue("tp", "Topology path", tp);
 
-    //Seed
+	//Seed
         cmd.AddValue("seed", "Seed", seed);
 
-    //Group size
+	//Group size
         cmd.AddValue("gs", "Group size", gs);
 
-    //Cache placement 0/1/2 access-nodes/betweenness/all-nodes
+	//Cache placement 0/1/2 access-nodes/betweenness/all-nodes
         cmd.AddValue("cpl", "Cache placement", cpl);
 
-    //caching policy: 0 for no cache, 1 for packet_level, 2 for object level
+	//caching policy: 0 for no cache, 1 for packet_level, 2 for object level
         cmd.AddValue("cpo", "Cache policy", cpo);
 
         //DRAM capacity
         cmd.AddValue("dc", "DRAM capacity", cache_cap);
         cmd.AddValue("sc", "SRAM capacity", fast_cap);
 
-    cmd.Parse (argc, argv);
+ 
+        cmd.AddValue("ds", "DRAM size(GB)", cache_size);
+        cmd.AddValue("ss", "SRAM size(MB)", fast_size);
 
-    ExperimentGlobals::RANDOM_VAR =CreateObject<UniformRandomVariable>();
+	cmd.Parse (argc, argv);
 
-    uint8_t arg =1;
-    //--------------------------------------------------
-    //--------------------------------------------------
-    //--------------------------------------------------
-    //seed = std::atoi(argv[arg++]);
-    RngSeedManager::SetSeed (seed);
-    //--------------------------------------------------
-    //--------------------------------------------------
-    //gs=std::atoi(argv[arg++]);
-    //--------------------------------------------------
-    //--------------------------------------------------
-    ExperimentGlobals::CACHE_PLACEMENT = cpl;
-    char caching = cpo;
-    if (caching!=0) {
+	ExperimentGlobals::RANDOM_VAR =CreateObject<UniformRandomVariable>();
+
+	uint8_t arg =1;
+	//--------------------------------------------------
+	//--------------------------------------------------
+	//--------------------------------------------------
+	//seed = std::atoi(argv[arg++]);
+	RngSeedManager::SetSeed (seed);
+	//--------------------------------------------------
+	//--------------------------------------------------
+	//gs=std::atoi(argv[arg++]);
+	//--------------------------------------------------
+	//--------------------------------------------------
+	ExperimentGlobals::CACHE_PLACEMENT = cpl;
+	char caching = cpo;
+/*	if (caching!=0) {
             cache_cap=std::atoi(argv[arg++]);
         if (argc>arg)
             fast_cap=std::atoi(argv[arg++]);
-    }
-    
-    //print experiment info
-    std::cout<<"Topology: "<<tp<<std::endl;
-    std::cout<<"Seed: "<<seed<<std::endl;
-    std::cout<<"Group size: "<<(uint16_t)gs<<std::endl;
-    std::cout<<"Cache placement: "<<(uint16_t)ExperimentGlobals::CACHE_PLACEMENT<<std::endl;
-    std::cout<<"Caching policy: "<<(unsigned)caching<<" \nCache capacity (DRAM(packets num)-SRAM(table entries num)): "<<cache_cap<<"-"<<fast_cap<<std::endl;    
+	}
+*/	
+        if(cache_size) cache_cap = cache_size*(1024*1024*1024/PKT_SIZE);
+        if(fast_size) fast_cap = fast_size*(1024*1024/PKT_SIZE);
 
-    Ptr<BootstrappingHelper> bh=CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed,
+	//print experiment info
+	std::cout<<"Topology: "<<tp<<std::endl;
+	std::cout<<"Seed: "<<seed<<std::endl;
+	std::cout<<"Group size: "<<(uint16_t)gs<<std::endl;
+	std::cout<<"Cache placement: "<<(uint16_t)ExperimentGlobals::CACHE_PLACEMENT<<std::endl;
+	std::cout<<"Caching policy: "<<(unsigned)caching<<" \nCache capacity (DRAM(packets num)-SRAM(table entries num)): "<<cache_cap<<"-"<<fast_cap<<std::endl;	
+
+	Ptr<BootstrappingHelper> bh=CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed,
                                                                       caching, cache_cap, fast_cap);
-    bh->parseTopology(gs);//ftiaxnei ccnModules kai nodes
-    bh->startExperiment();
+	bh->parseTopology(gs);//ftiaxnei ccnModules kai nodes
+	bh->startExperiment();
 
-    std::cout<<"Application ending."<<std::endl;
-    Simulator::Destroy();
-    return 0;
+	std::cout<<"Application ending."<<std::endl;
+	Simulator::Destroy();
+	return 0;
 }

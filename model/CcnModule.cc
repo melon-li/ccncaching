@@ -48,16 +48,15 @@ CcnModule::CcnModule(Ptr<Node> node) {
 /**
  * enables and initializes the cache module of the CcnModule
  */
-char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap){
+char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap, map<string, uint32_t> *_file_map_p){
     // char * cache_cap = CACHE_CAPACITY;
     char mode = _mode;
     if (mode == PACKET_CACHE_MODE){
         cache = new P_Cache( _cache_cap, _cache_fast_cap);
     }else if(mode == OBJECT_CACHE_MODE){
         cache = new O_Cache( _cache_cap, _cache_fast_cap);
-/**    }else{
-        cache = new S_Cache( _cache_cap, _cache_fast_cap);
-*/
+    }else{
+        cache = new S_Cache( _cache_cap, _cache_fast_cap, _file_map_p);
     }
     return 0;
 }
@@ -143,7 +142,7 @@ uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {
 }
 
 void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
-    NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
+    //NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
     sleep(2);
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
     //std::cout<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
@@ -173,7 +172,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME), &CcnModule::dohandleIncomingInterest, this, p, nd);
     }// cache is not enabled
     else dohandleIncomingInterest(p, nd);
-    NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t>>>>>>>>");
+   // NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t>>>>>>>>");
     
 }
 void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {

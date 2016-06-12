@@ -14,6 +14,7 @@ namespace ns3 {
 uint32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     //click_chatter("Searching chunk.. %d", ID);
+    uint32_t lookup_time = 0;
     unsigned ID = atoi(_ID.c_str());
     map<string, unsigned>::iterator it = index_table.find(_filename);
     // chunk is cached
@@ -32,7 +33,9 @@ uint32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(unsigned)it->second<<std::endl;
         uint16_t tmp = (it->second - ID + 1);
         reads_for_fetchings += tmp;
-        return tmp * DRAM_ACCESS_TIME;
+        lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
+        return lookup_time;
+       // return tmp * DRAM_ACCESS_TIME;
     }
     return 0;
 }
@@ -92,7 +95,9 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
 
     }
     NS_LOG_INFO("O_Cache stored "<<_filename<<"/"<<_ID<<" capacity "<<index_table.size()<<" - "<<stored_packets);
-    return lookup_time * DRAM_ACCESS_TIME;    
+    uint32_t tt = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (lookup_time-1)*DRAM_ACCESS_TIME;
+    return tt;
+  //  return lookup_time * DRAM_ACCESS_TIME;    
     }
     
 /**
@@ -261,6 +266,7 @@ string P_Cache::get_state(){
  */
 uint32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
+    uint32_t lookup_time; 
     string key = _filename+"-";
     key.append(_ID);
     map<string, char*>::iterator it = data_table.find(key);
@@ -275,7 +281,8 @@ uint32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
         log_chunk_id_hits[std::min(MAX_LOG_CHUNK_ID-1,atoi(_ID.c_str()))]++;
         NS_LOG_DEBUG("Found key: "<<key<<" cached");
         reads_for_fetchings++;
-        return 1 * DRAM_ACCESS_TIME;
+        lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
+        return lookup_time;
         }
     return 0;
 
@@ -285,7 +292,8 @@ uint32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
 uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     string key = _filename+"-";
     key.append(_ID);
-    unsigned access_time = 0;
+    uint32_t access_time = 0;
+    uint32_t lookup_time = 0;
     map<string, char*>::iterator it = data_table.find(key);
     /* chunk is already stored, do nothing */
     if (it!=data_table.end())
@@ -301,7 +309,8 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     stored_packets++;
     //NS_LOG_DEBUG("Added packet "<<_filename<<"/"<<_ID<<" stored_pcks:"<<stored_packets<<"/"<<capacity);
     reads_for_insertions++;
-    return access_time* DRAM_ACCESS_TIME;    
+    lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
+    return lookup_time;
 }
     
 /**
@@ -616,12 +625,19 @@ int32_t S_Cache::get_stored_packets_w(const string& _filename){
 }
 
 
+bool S_Cache::is_last(const string &_filename, const uint32_t ID){
+   map<string, uint32_t>::iterator it = (*file_map_p).find(_filename); 
+   if(it == (*file_map_p).end()) return false;
+   if(ID < it->second) return true;
+   return true;
+}
 int32_t S_Cache::add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload){
     unsigned lookup_time = 0;
     bool islast = false;
     uint32_t addr = 0;
     char* data = new char[PAYLOAD_SIZE];
     Cachetable::iterator it = cache_table_w.find(_filename);
+    islast = is_last(_filename, ID);
     if(it != cache_table_w.end()){
         it->second.push_back(data);
         writecache_pcks++;

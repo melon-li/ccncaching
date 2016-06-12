@@ -32,8 +32,7 @@
 #define PKT_SIZE 1500
 #define PKT_NUM 8
 #define FILE_NUM 4
-// GB
-#define DRAM_SIZE 100 
+#define DRAM_SIZE 100 //GB
 
 //#define CACHE_PLACEMENT 0 // 0 for edges, 1 for betweenness and 2 for all nodes
 

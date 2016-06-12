@@ -148,7 +148,7 @@ void BootstrappingHelper::startExperiment(){
                         cache_nodes.push_back(access_node_i); //there will be only one neighbor
                     
                         cache_modules.push_back(nsNodeIdToModule[access_node_i->GetId()]);
-                        nsNodeIdToModule[access_node_i->GetId()]->enableCache(cache_mode, cache_cap, fast_cap);
+                        nsNodeIdToModule[access_node_i->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, &file_map);
                         NS_LOG_INFO("Added cache app at "<< type_of_node<<" "<<  access_node_i->GetId()<<" mode:"<<(unsigned)cache_mode<<
                                 " capacity:"<<cache_cap<<" betw "<<nsNodeIdToModule[access_node_i->GetId()]->getBetweenness());
                     }
@@ -159,7 +159,7 @@ void BootstrappingHelper::startExperiment(){
                 for (unsigned l=0;l<all_nodes.size(); l++){
                     cache_nodes.push_back(all_nodes[l]); //there will be only one neighbor                
                     cache_modules.push_back(nsNodeIdToModule[all_nodes[l]->GetId()]);
-                    nsNodeIdToModule[all_nodes[l]->GetId()]->enableCache(cache_mode, cache_cap, fast_cap);
+                    nsNodeIdToModule[all_nodes[l]->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, &file_map);
                     NS_LOG_INFO("Added cache app at "<<  all_nodes[l]->GetId()<<" mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<
                                 " betw "<<nsNodeIdToModule[all_nodes[l]->GetId()]->getBetweenness());                
                 }

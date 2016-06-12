@@ -203,8 +203,9 @@ public:
 
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):
+    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, map<string, uint32_t> *_file_map_p):
                      CacheModule(_capacity,_capacity_fast_table){
+        file_map_p = _file_map_p;
         stored_packets = 0;
         stored_files = 0;
         zero_pcks=0;
@@ -220,6 +221,8 @@ public:
     // <filename, max chunk id>
 //    map<string , uint32_t> index_table;
     bf::a2_bloom_filter index_bf{3, 100, 40};
+
+    map<string, uint32_t> *file_map_p;
 
     // DRAM table
     map <uint32_t, Slot_Object> data_table;
@@ -239,6 +242,7 @@ public:
     map<string , uint32_t> stats_table;
 
 //    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    bool is_last(const string &_filename, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
     uint32_t tranfer_packets(const string& filename);
     uint32_t remove_last_packets_r(const string& _filename);

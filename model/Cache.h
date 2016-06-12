@@ -158,12 +158,13 @@ class Slot_Object{
 private:
     typedef map<string, uint8_t> Name2index;
     typedef vector<Pkts> Files;
-
+    
+    //map filename  to index in files variable,because file is vector
     Name2index name2index;
     Files files;
     uint32_t pkt_num = PKT_NUM;
     uint32_t file_num = FILE_NUM;
-    uint32_t cur_file = 0;
+    uint32_t cur_index = 0;
 
 public:
     Slot_Object(){}

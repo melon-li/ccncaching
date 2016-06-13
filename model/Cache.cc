@@ -431,20 +431,22 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
             files[cur_index].clear();
             files[cur_index].insert(Pkts::value_type(_ID, payload)); 
             cnt++;
-            //Find corresponding element in name2index, and erase it
+            //Find old corresponding element in name2index, and erase it
             for(Name2index::iterator it_t=name2index.begin(); it_t!=name2index.end(); it_t++){
                 if(it_t->second == cur_index) {
                     name2index.erase(it_t);
                     break;
                 }
             }
-            //insert new element
+            //insert new element into name2index
             name2index.insert(Name2index::value_type(key, cur_index));
+
             // increment cur_index to can delete  the oldest file
             cur_index++;
             if(cur_index > file_num) cur_index = 0;
         }else{
             Pkts p;
+
             // get the pos after insert one element into files
             pos = files.size();
             p.insert(Pkts::value_type(_ID, payload));
@@ -457,7 +459,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
         //NS_ASSERT_MSG(pos < files.size, "Slot_Object::insert_packet, Internal error,pos can not be more than files.size");
         Pkts::iterator vt = files[pos].begin();
         NS_ASSERT_MSG((_ID - vt->first) < PKT_NUM, "Slot_Object::insert_packet, Internal error, out-of-order");
-        NS_ASSERT_MSG(files[pos].size() <= PKT_NUM,"Slot_Object::insert_packet, Internal error, files can not be more than PKT_NUM");
+        NS_ASSERT_MSG(files[pos].size() <= PKT_NUM, "Slot_Object::insert_packet, Internal error, files can not be more than PKT_NUM");
 
         files[pos].insert(Pkts::value_type(_ID, payload));
         cnt++;
@@ -475,15 +477,18 @@ pair<bool, int> Slot_Object::insert_packets(string key, uint8_t last_id, Pkts pa
     _ID = atoi(key.substr(pos+1).c_str());
     _filename = key.substr(0, pos);
     _filename = _filename + "-";
+
     len = last_id - _ID + 1;
     NS_ASSERT_MSG(len <= PKT_NUM, "Slot_Object::insert_packets, Internal error,len can not be more than  PKT_NUM");
     //if( len > PKT_NUM ) return std::make_pair(false, 0);
-
+    
+    //insert packets to dram
     for(Pkts::iterator it =payloads.begin(); it != payloads.end(); it++){
         //filename = _filename;
         //filename.append(std::to_string(it->first));
         pair<bool, int> pr = insert_packet(key, it->first, it->second);
-        if(!pr.first)return std::make_pair(false, 0);
+        NS_ASSERT_MSG(pr.first, "Slot_Object::insert_packets, Internal error,insert_packet is failed");
+        //if(!pr.first)return std::make_pair(false, 0);
         cnt += pr.second;
     }
  
@@ -636,25 +641,45 @@ int32_t S_Cache::get_stored_packets_w(const string& _filename){
 
 
 bool S_Cache::is_last(const string &_filename, const uint32_t ID){
+   uint32_t filesize = ID + CACHING_START_INDEX; 
    map<string, uint32_t>::iterator it = (*file_map_p).find(_filename); 
-   if(it == (*file_map_p).end()) return false;
-   if(ID < it->second) return true;
-   return true;
+   if(it == (*file_map_p).end()){
+        NS_LOG_DEBUG("S_Cache::is_last.Error. Do not find file("<<_filename<<")");
+        return false;
+   }
+   if(filesize == it->second) return true;
+   if(filesize > it-second) NS_LOG_DEBUG("S_Cache::is_last.Error.filesize can not be more than "<<it->second);
+   return false;
 }
 
-int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t block_id,  const char *_payload){
+//cache packets and transfer them to dram when the number is more than PKT_NUM or is last one in file
+int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t block_id, const char *_payload){
     unsigned write_time = 0;
     bool islast = false;
     uint32_t addr = 0;
     char* data = new char[PAYLOAD_SIZE];
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
-    string filename = key.substr(0, key.find("-"));
-    Cachetable::iterator it = cache_table_w.find(key);
 
-    islast = is_last(filename, ID+1);
+    //if sram is full, delete the least recent file
+    if(writecache_pcks >= capacity_fast_table){
+	    int32_t removed_packets = remove_last_file_w();
+	    if (removed_packets == -1){
+                NS_LOG_DEBUG("S_Cache::add_packet.Internal error. Fail to remove packets in writecache!"); 
+		return 0;	
+            }		
+	    writecache_pcks -= removed_packets;
+	   // write_time += removed_packets;
+	   // reads_for_evictions += removed_packets;
+    }
+
+    string filename = key.substr(0, key.find("-"));
+    islast = is_last(filename, ID);
+
+    Cachetable::iterator it = cache_table_w.find(key);
     if(it != cache_table_w.end()){
-        //if the packet has exited!, or is out-of-order
+        //if the packet has exited or is out-of-order, ignore it and return 0
         if(ID != it->second.size()) return 0;
+
         it->second.insert(Pkts::value_type(ID, data));
         writecache_pcks++;
 
@@ -663,6 +688,8 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t 
            addr = CityHash32(key.c_str(), key.size());
            addr = addr%slot_num; 
            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, it->second); 
+           NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
+           index_bf.add(key.c_str());
            stored_packets += pr.second;
            writecache_pcks -= pr.second;
            cache_table_w.erase(it);
@@ -683,9 +710,11 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t 
            addr = CityHash32(key.c_str(), key.size());
            addr = addr%slot_num; 
            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, payloads); 
+           NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
+           index_bf.add(key.c_str());
+           stored_packets = pr.second;
            cache_table_w.erase(it);
            writecache_pcks--;
-           stored_packets++;
            write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
         }else{
@@ -696,6 +725,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t 
     return write_time;
 }
 
+//cache a packet
 uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     string key(_filename);
     unsigned write_time = 0;
@@ -706,24 +736,14 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     key.append(std::to_string(block_id*PKT_NUM)); 
 
     responses++;
-    // if packet has existed in dram, return 0
+    // if packet has existed in dram, ignore and return 0
     uint8_t iscache = index_bf.lookup(key.c_str()); 
     if(iscache) return 0;
 
-    //if sram is full, delete the least recent file
-    if(writecache_pcks >= capacity_fast_table){
-	    int32_t removed_packets = remove_last_file_w();
-	    if (removed_packets == -1)
-		return 0;			
-	    writecache_pcks -= removed_packets;
-	   // write_time += removed_packets;
-	   // reads_for_evictions += removed_packets;
-    }
-
-    //cache them in "SRAM for writing(cache_table_w)"
-    //if up to PKT_NUM or islast, then transfer them from sram to dram
+    /*cache them in "SRAM for writing(cache_table_w)"
+    if up to PKT_NUM or islast, then transfer them from sram to dram*/
     write_time = add_packet(key, ID, block_id, _payload);
-    NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID<<" capacity ");
+    NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
     return write_time;	
 }
     

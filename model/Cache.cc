@@ -11,7 +11,7 @@ namespace ns3 {
  * returns >0  if packet is found cached
  * the actual data are never stored/retrieved
  */
-uint32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
+int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     //click_chatter("Searching chunk.. %d", ID);
     uint32_t lookup_time = 0;
@@ -264,7 +264,7 @@ string P_Cache::get_state(){
  * Looks for cached packet in Packet-organised cache
  * returns the amount of time spend in DRAM
  */
-uint32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
+int32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     uint32_t lookup_time; 
     string key = _filename+"-";
@@ -416,7 +416,7 @@ void LRU_Table::update_object(LRU_Object* obj, bool new_object){
 
 pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char *payload){
     Name2index::iterator it;
-    uint32_t pos = 0, _ID = 0;
+    uint32_t pos = 0;
     string _filename;
     int cnt = 0;
 
@@ -454,13 +454,10 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
         }
     }else{
         pos = it->second;
-        NS_ASSERT_MSG(pos < files.size,
-         "Slot_Object::insert_packet, Internal error,pos can not be more than files.size");
+        //NS_ASSERT_MSG(pos < files.size, "Slot_Object::insert_packet, Internal error,pos can not be more than files.size");
         Pkts::iterator vt = files[pos].begin();
-        NS_ASSERT_MSG((_ID - vt->first) < PKT_NUM, 
-          "Slot_Object::insert_packet, Internal error, out-of-order");
-        NS_ASSERT_MSG(files[pos].size() <= PKT_NUM, 
-          "Slot_Object::insert_packet, Internal error, files can not be more than PKT_NUM");
+        NS_ASSERT_MSG((_ID - vt->first) < PKT_NUM, "Slot_Object::insert_packet, Internal error, out-of-order");
+        NS_ASSERT_MSG(files[pos].size() <= PKT_NUM,"Slot_Object::insert_packet, Internal error, files can not be more than PKT_NUM");
 
         files[pos].insert(Pkts::value_type(_ID, payload));
         cnt++;
@@ -482,10 +479,9 @@ pair<bool, int> Slot_Object::insert_packets(string key, uint8_t last_id, Pkts pa
     NS_ASSERT_MSG(len <= PKT_NUM, "Slot_Object::insert_packets, Internal error,len can not be more than  PKT_NUM");
     //if( len > PKT_NUM ) return std::make_pair(false, 0);
 
-    for(Pkts::iterator it =payloads.begin(); it != payloads.end(); i++){
-        filename = _filename;
-        filename.append(std::to_string(i));
-        //pair<bool, int> pr = insert_packet(std::make_pair(filename, payloads[i]));
+    for(Pkts::iterator it =payloads.begin(); it != payloads.end(); it++){
+        //filename = _filename;
+        //filename.append(std::to_string(it->first));
         pair<bool, int> pr = insert_packet(key, it->first, it->second);
         if(!pr.first)return std::make_pair(false, 0);
         cnt += pr.second;
@@ -540,7 +536,7 @@ int32_t S_Cache::tranfer_packets(const string& key){
     //    payloads.push_back(i->second);    
    
    //if readcache is full , delete LRU files
-    while(readcache_pcks + pr->second.size() >= capacity_fast_table){
+    while(readcache_pcks + pr.second.size() >= capacity_fast_table){
             int32_t removed_packets = remove_last_file_r();
             if (removed_packets == -1)
                 return -1;
@@ -548,7 +544,7 @@ int32_t S_Cache::tranfer_packets(const string& key){
     }
               
     // cal lookup_time
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*payloads.size() + \
+    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size()) + \
                                       DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
    
     // delete the packet requested at this time.
@@ -658,7 +654,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t 
     islast = is_last(filename, ID+1);
     if(it != cache_table_w.end()){
         //if the packet has exited!, or is out-of-order
-        if((ID != it->second.size()) return 0;
+        if(ID != it->second.size()) return 0;
         it->second.insert(Pkts::value_type(ID, data));
         writecache_pcks++;
 
@@ -679,9 +675,8 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID,const uint32_t 
     }else{
         Pkts payloads;
         payloads.insert(Pkts::value_type(ID, data));
-        NS_ASSERT_MSG(ID == block_id*PKT_NUM,
-        "S_Cache::add_packet:Internal error.packet is not the first.\n
-                    Filename stored in SRAM cache for writing is wrong");            
+        NS_ASSERT_MSG(ID == block_id*PKT_NUM,"S_Cache::add_packet:Internal error.packet is not the first.\n\
+                                              Filename stored in SRAM cache for writing is wrong");            
         cache_table_w.insert(Cachetable::value_type(key, payloads));
         writecache_pcks++;
         if(islast){

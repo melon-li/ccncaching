@@ -130,7 +130,7 @@ public:
     uint32_t remove_last_packet(const string& _filename);  
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
-    uint32_t get_cached_packet(const string& _filename, const string& _ID);
+    int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
@@ -143,7 +143,7 @@ class P_Cache: public CacheModule{
 public:
     P_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
         
-    uint32_t get_cached_packet(const string& _filename, const string& _ID);
+    int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
@@ -178,7 +178,7 @@ public:
      *         if slot is full, instead the most front filename.
      *         int, stored_packet number at this time
      */
-    pair<bool, int> insert_packet(pair<string, char *> pkt);
+     pair<bool, int> insert_packet(const string& key, uint32_t _ID, char *payload);
 
     /*
      *@func: insert PKT_NUM or total(if it is less than PKT_NUM) packets of filename
@@ -189,14 +189,14 @@ public:
      *         if slot is full, instead the most front filename.
      *         int, stored_packet number at this time
      */
-    pair<bool,int> insert_packets(string filename, uint8_t last_id, std::deque<char *> payloads);
+    pair<bool, int> insert_packets(string key, uint8_t last_id, Pkts payloads);
 
     /*
      *@param: filename without file ID(begin-id)
      *@return: bool,true or false
      *         Pkts
      */
-    pair<bool, Pkts> find(string filename);
+    pair<bool, Pkts> find(const string & key);
 
     //File_Obj files[FILE_NUM];
      
@@ -245,7 +245,7 @@ public:
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     bool is_last(const string &_filename, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
-    uint32_t tranfer_packets(const string& filename);
+    int32_t tranfer_packets(const string& filename);
     uint32_t remove_last_packets_r(const string& _filename);
     int32_t remove_last_file_r();//new by argi
     uint32_t remove_last_packets_w(const string& _filename);

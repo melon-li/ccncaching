@@ -82,9 +82,9 @@ public:
     }
     
     //these used to be pure virtual but ns3 could not handle it
-    virtual uint32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
+    virtual int32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
     virtual uint32_t remove_last_packet(const string& _filename){return 0;}
-    virtual uint32_t get_cached_packet(const string& _filename, const string& ID){return 0;}
+    virtual int32_t get_cached_packet(const string& _filename, const string& ID){return 0;}
     virtual uint32_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}
     virtual string get_state(){return 0;}
     virtual string get_packet_stats(){return 0;}
@@ -126,7 +126,7 @@ public:
     // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
     map<string , uint32_t> stats_table; 
    
-    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);  
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
@@ -145,7 +145,7 @@ public:
         
     uint32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
-    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
     
     string get_state();
@@ -153,7 +153,7 @@ public:
      
 };
 
-typedef map<uint8_t, char *> Pkts;
+typedef map<uint32_t, char *> Pkts;
 class Slot_Object{
 private:
     typedef map<string, uint8_t> Name2index;
@@ -230,7 +230,7 @@ public:
 
     //SRAM table for reading
     //filename-begin_id, packets
-    typedef map<string, std::deque<char*> > Cachetable;
+    typedef map<string, Pkts > Cachetable;
     Cachetable cache_table_r;
 
     //SRAM table for writing
@@ -242,7 +242,7 @@ public:
     // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
     map<string , uint32_t> stats_table;
 
-//    uint32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+//    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     bool is_last(const string &_filename, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
     uint32_t tranfer_packets(const string& filename);
@@ -252,7 +252,7 @@ public:
     int32_t remove_last_file_w();//new by argi
     int32_t get_stored_packets_r(const string& _filename);//new by argi
     int32_t get_stored_packets_w(const string& _filename);//new by argi
-    uint32_t get_cached_packet(const string& _filename, const string& _ID);
+    int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
 //    string get_state();

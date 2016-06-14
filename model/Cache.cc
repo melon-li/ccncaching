@@ -617,12 +617,12 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
 }
 
 int32_t S_Cache::remove_last_file_w(){
-    string tail = LRU->tail->filename;
+    string tail = LRU_W->tail->filename;
     int32_t removed_packets = get_stored_packets_w(tail);
     if (removed_packets == -1)
         return -1;
     cache_table_w.erase(tail);
-    LRU->remove_object(LRU->tail);
+    LRU_W->remove_object(LRU_W->tail);
     NS_LOG_INFO("S_Cache removed last file "<<tail);
     return removed_packets;
 }
@@ -660,7 +660,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     char* data = new char[PAYLOAD_SIZE];
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
 
-    //if sram is full, delete the least recent file
+    //if writecache is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
 	    int32_t removed_packets = remove_last_file_w();
 	    if (removed_packets == -1){
@@ -685,18 +685,19 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
 
         //up to  PKT_NUM or islast is true
         if(it->second.size() >= PKT_NUM || islast){
-           addr = CityHash32(key.c_str(), key.size());
-           addr = addr%slot_num; 
-           pair<bool, int> pr = data_table[addr].insert_packets(key, ID, it->second); 
-           NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
-           index_bf.add(key.c_str());
-           stored_packets += pr.second;
-           writecache_pcks -= pr.second;
-           cache_table_w.erase(it);
-           write_time = (pr.second)*(PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME + \
+            addr = CityHash32(key.c_str(), key.size());
+            addr = addr%slot_num; 
+            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, it->second); 
+            NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
+            index_bf.add(key.c_str());
+            stored_packets += pr.second;
+            writecache_pcks -= it->second.size();
+            LRU_W->remove_object(LRU_W->objects[key]);
+            cache_table_w.erase(it);
+            write_time = (pr.second)*(PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
          }else{
-             LRU->update_object(LRU->objects[key]);
+            LRU_W->update_object(LRU_W->objects[key]);
          }
     //is first packet
     }else{
@@ -712,14 +713,14 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, payloads); 
            NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
            index_bf.add(key.c_str());
-           stored_packets = pr.second;
+           stored_packets += pr.second;
            cache_table_w.erase(it);
            writecache_pcks--;
            write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
         }else{
             LRU_Object * _obj  = new LRU_Object(key);
-            LRU->add_object(_obj);		
+            LRU_W->add_object(_obj);		
         } 
     }  
     return write_time;

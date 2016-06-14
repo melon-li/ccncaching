@@ -236,6 +236,7 @@ public:
     //SRAM table for writing
     //filename-beigin_id, packets
     Cachetable cache_table_w;
+    LRU_Table *LRU_W;
 
     // <filename, allocated memory (IN PACKETS!)
     map<string , uint32_t> mem_table;

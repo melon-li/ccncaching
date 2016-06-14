@@ -426,7 +426,9 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
     if(it == name2index.end()){
         //this slot is full
         if(files.size() >= file_num){
-            // delete the oldest file, or in options, we can use LRU algorithm to delete file
+            /* Delete the oldest file, or in options, we can use LRU algorithm to delete file
+               Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
+            */
             cnt -= files[cur_index].size();
             files[cur_index].clear();
             files[cur_index].insert(Pkts::value_type(_ID, payload)); 
@@ -546,11 +548,9 @@ int32_t S_Cache::tranfer_packets(const string& key){
             if (removed_packets == -1)
                 return -1;
             readcache_pcks -= removed_packets;
+            readcache_rmlru++;
     }
               
-    // cal lookup_time
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size()) + \
-                                      DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
    
     // delete the packet requested at this time.
    // payloads.pop_front(); 
@@ -561,6 +561,9 @@ int32_t S_Cache::tranfer_packets(const string& key){
     LRU->add_object(_obj);	 
     readcache_pcks += pr.second.size();  
     
+    // cal lookup_time
+    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size()) + \
+                                      DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
     return lookup_time;
 }
 
@@ -610,9 +613,15 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     uint8_t iscache = index_bf.lookup(key.c_str()); 
     if(!iscache) return -1;
 
+    read_dram_cnt++;
     // stored in dram, tranfer them from dram to sram
     log_file_hit(_filename, _ID);
     lookup_time = tranfer_packets(key); 
+    if(lookup_time == -1){
+        false_positive_cnt++;
+        NS_LOG_DEBUG("S_Cache::get_cached_packet.S_Cache::add_packet.bloom filter.False positive");
+        return 0;
+    }
     return lookup_time;
 }
 
@@ -648,7 +657,7 @@ bool S_Cache::is_last(const string &_filename, const uint32_t ID){
         return false;
    }
    if(filesize == it->second) return true;
-   if(filesize > it-second) NS_LOG_DEBUG("S_Cache::is_last.Error.filesize can not be more than "<<it->second);
+   if(filesize > it->second) NS_LOG_DEBUG("S_Cache::is_last.Error.filesize can not be more than "<<it->second);
    return false;
 }
 
@@ -668,6 +677,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
 		return 0;	
             }		
 	    writecache_pcks -= removed_packets;
+            writecache_rmlru++;
 	   // write_time += removed_packets;
 	   // reads_for_evictions += removed_packets;
     }

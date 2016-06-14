@@ -20,6 +20,8 @@ int main(int argc ,char *argv[])
         
 	uint32_t cache_size = 0;
 	uint32_t fast_size = 0;
+        
+        double fp;
 	CommandLine cmd;
 
 	//Topology path
@@ -44,6 +46,8 @@ int main(int argc ,char *argv[])
  
         cmd.AddValue("ds", "DRAM size(GB)", cache_size);
         cmd.AddValue("ss", "SRAM size(MB)", fast_size);
+
+        cmd.AddValue("fp", "The desired false-positive rate", fp);
 
 	cmd.Parse (argc, argv);
 
@@ -78,8 +82,8 @@ int main(int argc ,char *argv[])
 	std::cout<<"Cache placement: "<<(uint16_t)ExperimentGlobals::CACHE_PLACEMENT<<std::endl;
 	std::cout<<"Caching policy: "<<(unsigned)caching<<" \nCache capacity (DRAM(packets num)-SRAM(table entries num)): "<<cache_cap<<"-"<<fast_cap<<std::endl;	
 
-	Ptr<BootstrappingHelper> bh=CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed,
-                                                                      caching, cache_cap, fast_cap);
+	Ptr<BootstrappingHelper> bh = CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed,
+                                                  std::make_pair(caching, fp), cache_cap, fast_cap);
 	bh->parseTopology(gs);//ftiaxnei ccnModules kai nodes
 	bh->startExperiment();
 

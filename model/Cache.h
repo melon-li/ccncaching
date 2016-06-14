@@ -204,7 +204,7 @@ public:
 
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, map<string, uint32_t> *_file_map_p):
+    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, map<string, uint32_t> *_file_map_p, double _fp):
                      CacheModule(_capacity,_capacity_fast_table){
         file_map_p = _file_map_p;
         stored_packets = 0;
@@ -221,11 +221,23 @@ public:
         }else{
             slot_num = _capacity/PKT_NUM/FILE_NUM;
         }
+       
+        if(_fp){
+            index_bf_ptr = init_bf(_fp);
+        }else{
+            index_bf_ptr = init_bf(0.001);
+        }
+    }
+    
+    ~S_Cache(){
+       delete index_bf_ptr;
     }
 
     // <filename, max chunk id>
 //    map<string , uint32_t> index_table;
     bf::a2_bloom_filter index_bf{3, 100, 40};
+    bf::a2_bloom_filter  *index_bf_ptr;
+    bf::a2_bloom_filter  *init_bf(double fp);
 
     map<string, uint32_t> *file_map_p;
 

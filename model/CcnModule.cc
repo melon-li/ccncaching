@@ -48,7 +48,8 @@ CcnModule::CcnModule(Ptr<Node> node) {
 /**
  * enables and initializes the cache module of the CcnModule
  */
-char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap, map<string, uint32_t> *_file_map_p){
+char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap,
+                                      map<string, uint32_t> *_file_map_p, double _fp){
     // char * cache_cap = CACHE_CAPACITY;
     char mode = _mode;
     if (mode == PACKET_CACHE_MODE){
@@ -56,7 +57,7 @@ char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fas
     }else if(mode == OBJECT_CACHE_MODE){
         cache = new O_Cache( _cache_cap, _cache_fast_cap);
     }else{
-        cache = new S_Cache( _cache_cap, _cache_fast_cap, _file_map_p);
+        cache = new S_Cache( _cache_cap, _cache_fast_cap, _file_map_p, _fp);
     }
     return 0;
 }

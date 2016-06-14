@@ -592,7 +592,6 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     // if packets is cached in sram for reading,response them to requester,return 0
     if(cit != cache_table_r.end()){
         uint32_t offset = ID%PKT_NUM;
-        //if(offset >= cit->second.size())return 0;
         Pkts::iterator pit = cit->second.find(offset);
         //if request one packet repeatedly, do not response
         if(pit ==  cit->second.end())return -1;
@@ -758,4 +757,14 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     return write_time;	
 }
     
+
+bf::a2_bloom_filter *S_Cache::init_bf(double fp){
+    NS_ASSERT_MSG(capacity, "S_Cache::init_bf.Error. capacity can not be zero");
+    NS_ASSERT_MSG(fp, "S_Cache::init_bf.Error. fp can not be zero");
+    size_t ka; //The number of hash function for fp
+    size_t cells; //bits, the number of cells to use
+    ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
+    cells = 2*ka*capacity*std::log(2);
+    return new bf::a2_bloom_filter{ka, cells, capacity, 110, 199};
+}
 }//ns3 namespace

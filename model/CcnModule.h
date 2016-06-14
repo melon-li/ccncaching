@@ -70,7 +70,8 @@ public:
     void dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd);
 
     friend bool operator< (const Ptr<NetDevice>&, const Ptr<NetDevice>&);
-    char enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap, map<string, uint32_t> * file_map_p);
+    char enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap, 
+                                map<string, uint32_t> * file_map_p, double _fp);
     
     Ptr<CacheModule> cache;
 

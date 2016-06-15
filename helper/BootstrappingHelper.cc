@@ -207,6 +207,11 @@ void BootstrappingHelper::startExperiment(){
             uint32_t r_fetchings=0;
             uint32_t r_insertions=0;
             
+            uint64_t false_positive_cnt;
+            uint64_t read_dram_cnt;
+            uint64_t readcache_rmlru;
+            uint64_t writecache_rmlru;
+
             for (uint8_t n = 0; n< cache_nodes.size(); n++){
                 Ptr<Node> nd = cache_nodes[n];
                 reqs+=nsNodeIdToModule[nd->GetId()]->cache->requests;
@@ -215,8 +220,14 @@ void BootstrappingHelper::startExperiment(){
                 r_fetchings+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_fetchings;
                 r_insertions+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_insertions;
                 std::cout<<nsNodeIdToModule[nd->GetId()]->cache->get_chunk_id_hits();
-               }
+
+                false_positive_cnt += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt;
+                read_dram_cnt += nsNodeIdToModule[nd->GetId()]->cache->read_dram_cnt;
+                readcache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->readcache_rmlru;
+                writecache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->writecache_rmlru;
+             }
             std::cout<<"Cache requests: "<<reqs<<" hits: "<<hits<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<r_fetchings<<" r_insertions: "<<r_insertions<<endl;
+            std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<" readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
         }
         
         //print results and initialize structures again

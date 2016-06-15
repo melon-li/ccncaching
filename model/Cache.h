@@ -75,6 +75,11 @@ public:
         reads_for_insertions =0 ;
         reads_for_fetchings =0 ;
         reads_for_evictions =0 ;
+
+        false_positive_cnt=0;
+        read_dram_cnt = 0;
+        readcache_rmlru = 0;
+        writecache_rmlru = 0;
     }
 
     ~CacheModule(){
@@ -104,6 +109,12 @@ public:
     uint64_t hits;
     uint64_t responses;   
     
+
+    uint64_t false_positive_cnt;
+    uint64_t read_dram_cnt;
+    uint64_t readcache_rmlru;
+    uint64_t writecache_rmlru;
+
     uint32_t *log_chunk_id_hits ;
     map<string, uint32_t>log_file_hits; // this gets erazed when its written
     string get_file_hits();
@@ -212,10 +223,6 @@ public:
         zero_pcks=0;
         readcache_pcks=0;
         writecache_pcks=0;
-        false_positive_cnt=0;
-        read_dram_cnt = 0;
-        readcache_rmlru = 0;
-        writecache_rmlru = 0;
         if(_capacity == 0){
             slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
         }else{
@@ -278,10 +285,6 @@ public:
     uint64_t zero_pcks;
     uint64_t readcache_pcks;
     uint64_t writecache_pcks;
-    uint64_t false_positive_cnt;
-    uint64_t read_dram_cnt;
-    uint64_t readcache_rmlru;
-    uint64_t writecache_rmlru;
     // the number of slot, one slot has FILE_NUM files, one file has equal to or less than PKT_NUM packets
     uint64_t slot_num;
 };

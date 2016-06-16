@@ -15,6 +15,7 @@
 #include <string>
 #include <bf.h>
 #include <deque>
+#include <time.h>
 
 #include "ns3/city.h"
 #include "ns3/citycrc.h"
@@ -25,6 +26,7 @@
 
 namespace ns3 {
 
+//  head next-prev tail
 class LRU_Object{
 public:
     LRU_Object(){}
@@ -223,6 +225,8 @@ public:
         zero_pcks=0;
         readcache_pcks=0;
         writecache_pcks=0;
+        LRU_W = new LRU_Table();
+
         if(_capacity == 0){
             slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
         }else{

@@ -33,7 +33,8 @@ int main(int argc ,char *argv[])
 	//Group size
         cmd.AddValue("gs", "Group size", gs);
 
-	//Cache placement 0/1/2 access-nodes/betweenness/all-nodes
+	/*Cache placement 0 access-nodes
+          >0 all: 1 betweenness. !=1 all-nodes*/
         cmd.AddValue("cpl", "Cache placement", cpl);
 
 	//caching policy: 0 for no cache, 1 for packet_level, 2 for object level

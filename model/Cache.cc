@@ -91,7 +91,6 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
         lookup_time += tmp;
         stored_packets++;
         reads_for_insertions+= tmp;
-    //    std::cout<<"Added packet in cache "<<_filename<<" "<<ID<<std::cout ;
 
     }
     NS_LOG_INFO("O_Cache stored "<<_filename<<"/"<<_ID<<" capacity "<<index_table.size()<<" - "<<stored_packets);
@@ -362,7 +361,6 @@ void LRU_Table::add_object(LRU_Object* obj){
     }
     
 void LRU_Table::remove_object(const LRU_Object* obj){
-    std::cout<<"LRU_Table::remove_object end0.0, filename = "<<obj->filename<<std::endl;
     /* first cache is empty  (maybe this check is redundant) */
     if (stored_files == 0){
         return;
@@ -374,27 +372,25 @@ void LRU_Table::remove_object(const LRU_Object* obj){
         stored_files = 0;
         }
     else{
-        /* removing tail*/
-    std::cout<<"LRU_Table::remove_object end1.0, filename = "<<obj->filename<<std::endl;
+        /* if obj is  tail*/
         if(obj == tail){
             obj->next->prev = NULL;
             tail = obj->next;
             stored_files--;
         }else{
-    std::cout<<"LRU_Table::remove_object end1.1, filename = "<<obj->filename<<std::endl;
             // remove head
             if(obj->next == NULL){
                 head = obj->prev;
+                obj->prev->next = NULL;
             }else{
                 obj->next->prev = obj->prev;
                 NS_ASSERT_MSG(obj->prev, "LRU_Table::remove_object.Error. The poiter is NULL");
                 obj->prev->next = obj->next;
             }
+            stored_files--;
         }
     }
-    std::cout<<"LRU_Table::remove_object end1, filename = "<<obj->filename<<std::endl;
     objects.erase(obj->filename);
-    std::cout<<"LRU_Table::remove_object end2, filename = "<<obj->filename<<std::endl;
     delete obj;    
 }
     
@@ -590,7 +586,6 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
 }
 
 int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
-    NS_LOG_UNCOND("Searching "<<_filename<<"/"<<_ID);
     uint32_t lookup_time = 0;
     unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
     uint32_t block_id = ID/PKT_NUM;
@@ -604,32 +599,24 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     // if packets is cached in sram for reading,response them to requester,return 0
     if(cit != cache_table_r.end()){
         uint32_t offset = ID%PKT_NUM;
-    std::cout<<"offset="<<offset<<std::endl;
-    std::cout<<"end1.0 get cached packet"<<time(NULL)<<std::endl;
         Pkts::iterator pit = cit->second.find(offset);
-    std::cout<<"end1.1 get cached packet"<<time(NULL)<<std::endl;
         //if request one packet repeatedly, do not response
         if(pit ==  cit->second.end())return -1;
         cit->second.erase(pit);
-    std::cout<<"end1.2 get cached packet pkts_size="<<cit->second.size()<<std::endl;
         if(cit->second.size() == 0) {
             cache_table_r.erase(cit);
-    std::cout<<"end1.22 get cached packet"<<time(NULL)<<std::endl;
             LRU->remove_object(LRU->objects[key]);
         }else{
-    std::cout<<"end1.3 get cached packet"<<time(NULL)<<std::endl;
             LRU->update_object(LRU->objects[key]);
         }
         readcache_pcks--;
         //}
         log_file_hit(_filename, _ID);
-    std::cout<<"end1 get cached packet"<<time(NULL)<<std::endl;
         return 0;
     }
 
     //if not cached in "sram for reading", and check if stored in dram
     uint8_t iscache = index_bf.lookup(key.c_str()); 
-    std::cout<<"end2 get cached packet"<<time(NULL)<<std::endl;
     if(!iscache) return -1;
 
     read_dram_cnt++;
@@ -669,7 +656,6 @@ int32_t S_Cache::get_stored_packets_w(const string& _filename){
 
 
 bool S_Cache::is_last(const string &_filename, const uint32_t ID){
-   NS_LOG_UNCOND("S_Cache::is_last _filename = "<<_filename);
    uint32_t filesize = ID + CACHING_START_INDEX; 
    string key = _filename.substr(_filename.rfind('/') + 1);
    map<string, uint32_t>::iterator it = (*file_map_p).find(key); 
@@ -677,7 +663,6 @@ bool S_Cache::is_last(const string &_filename, const uint32_t ID){
         NS_LOG_UNCOND("S_Cache::is_last.Error. Do not find file("<<key<<")");
         return false;
    }
-   NS_LOG_UNCOND("S_Cache::is_last. The filename, "<<key);
    if(filesize == it->second) return true;
    if(filesize > it->second) NS_LOG_DEBUG("S_Cache::is_last.Error.filesize can not be more than "<<it->second);
    return false;
@@ -734,16 +719,12 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     //is first packet
     }else{
         Pkts payloads;
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, start");
         payloads.insert(Pkts::value_type(ID, data));
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end1");
         NS_ASSERT_MSG(ID == block_id*PKT_NUM,"S_Cache::add_packet:Internal error.packet is not the first.\n\
                                               Filename stored in SRAM cache for writing is wrong");            
         cache_table_w.insert(Cachetable::value_type(key, payloads));
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end2");
         writecache_pcks++;
         if(islast){
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end3");
            addr = CityHash32(key.c_str(), key.size());
            addr = addr%slot_num; 
            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, payloads); 
@@ -755,20 +736,15 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
            write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
         }else{
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end4");
             LRU_Object * _obj  = new LRU_Object(key);
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end5");
             LRU_W->add_object(_obj);		
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end6");
         } 
-        NS_LOG_UNCOND("S_Cache::add_packet, is first packet, end");
     }  
     return write_time;
 }
 
 //cache a packet
 uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
-    NS_LOG_UNCOND("Cache_packet "<<_filename<<"/"<<_ID);
     string key(_filename);
     unsigned write_time = 0;
     unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
@@ -779,7 +755,7 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
 
     responses++;
     // if packet has existed in dram, ignore and return 0
-    uint8_t iscache = index_bf.lookup(key.c_str()); 
+    size_t iscache = index_bf.lookup(key.c_str()); 
     if(iscache) return 0;
 
     /*cache them in "SRAM for writing(cache_table_w)"

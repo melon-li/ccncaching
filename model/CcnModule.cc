@@ -51,16 +51,12 @@ CcnModule::CcnModule(Ptr<Node> node) {
 char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap,
                                       map<string, uint32_t> *_file_map_p, double _fp){
     // char * cache_cap = CACHE_CAPACITY;
-    NS_LOG_UNCOND("enableCache");
     char mode = _mode;
     if (mode == PACKET_CACHE_MODE){
-    NS_LOG_UNCOND("enableCache, packet_mode");
         cache = new P_Cache( _cache_cap, _cache_fast_cap);
     }else if(mode == OBJECT_CACHE_MODE){
-    NS_LOG_UNCOND("enableCache, object_mode");
         cache = new O_Cache( _cache_cap, _cache_fast_cap);
     }else{
-    NS_LOG_UNCOND("enableCache, S_Cache_mode");
         cache = new S_Cache( _cache_cap, _cache_fast_cap, _file_map_p, _fp);
     }
     return 0;
@@ -163,7 +159,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
         int32_t lookup_time = cache->get_cached_packet(pref, _id);
-        NS_LOG_UNCOND("lookup_time = "<<lookup_time);
+        //NS_LOG_UNCOND("lookup_time = "<<lookup_time);
         // if found cached response
         if (lookup_time > 0)    {//if >0 then is found
             uint8_t *tmp_p = new uint8_t[p->GetSize()] ;
@@ -187,13 +183,11 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     
 }
 void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
-    std::cout<<"CcnModule::dohandleIncomingInterest 1"<<std::endl; 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
         
     //checks if pit contains interest
     Ptr<PTuple> pt = this->thePIT->check(interest->getName()); 
     
-    std::cout<<"CcnModule::dohandleIncomingInterest 2"<<std::endl; 
     if (pt != 0){
         pt->addDevice(nd);
         return;
@@ -208,12 +202,9 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
         Ptr<PTuple> tuple=CreateObject<PTuple>();
         tuple->addDevice(nd);
         this->thePIT->update(interest->getName(),tuple);
-    std::cout<<"CcnModule::dohandleIncomingInterest 3"<<std::endl; 
         publisher->deliverInterest(interest->getName());
         
-    std::cout<<"CcnModule::dohandleIncomingInterest 4"<<std::endl; 
         nameToBetweenness[interest->getName()] = interest->getBetweenness();
-    std::cout<<"CcnModule::dohandleIncomingInterest 5"<<std::endl; 
         return;
     }
     NS_ASSERT_MSG(tn->hasDevices(),"router " + nodePtr->GetId() << "does not know how to forward " << interest->getName()->toString());
@@ -232,20 +223,16 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
 
 void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
     
-    NS_LOG_UNCOND("handleIncomingData");
     Ptr<CCN_Data> data = CCN_Data::deserializeFromPacket(p->Copy());
-    NS_LOG_UNCOND("handleIncomingData1");
     //std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString() <<"\n";
     //cache is enabled, cache data packet
     float betw = data->getBetweenness();
-    NS_LOG_UNCOND("handleIncomingData2");
     bool cache_packet = true;
     
     // Betw implementation
     if (ExperimentGlobals::CACHE_PLACEMENT == 1 && betw > this->getBetweenness() && this->getBetweenness()!=0){
         cache_packet = false;
     }
-    NS_LOG_UNCOND("handleIncomingData3");
     
     // if caching is allowed at this node
     if (cache_packet && cache!=NULL){
@@ -255,9 +242,9 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         NS_LOG_INFO("Cached packet "<<pref<<"/"<<_id<<" at router "<<getNode()->GetId()<<" router betw "<<this->getBetweenness()<<" packet "<<betw);
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
     }    
-    else
-    NS_LOG_UNCOND("handleIncomingData4");
+    else{
         dohandleIncomingData(p, nd);
+    }
 }
 
 void CcnModule::dohandleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd)

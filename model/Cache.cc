@@ -742,8 +742,6 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
         payloads.insert(Pkts::value_type(ID, data));
         NS_ASSERT_MSG(ID == block_id*PKT_NUM,"Internal error.packet is not the first.\n\
                                               Filename stored in SRAM cache for writing is wrong");            
-        cache_table_w.insert(Cachetable::value_type(key, payloads));
-        writecache_pcks++;
         if(islast){
             addr = CityHash64(key.c_str(), key.size());
             addr = addr%slot_num; 
@@ -754,7 +752,6 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
                 Slot_Object so;
                 pr = so.insert_packets(key, ID, payloads);
                 data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
-                NS_LOG_WARN("end");
             }else{
                 NS_LOG_WARN("old data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
                 pr = dtit->second.insert_packets(key, ID, payloads);
@@ -762,11 +759,11 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
             NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
             index_bf_ptr->add(key.c_str());
             stored_packets += pr.second;
-            cache_table_w.erase(it);
-            writecache_pcks--;
             write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
          }else{
+            cache_table_w.insert(Cachetable::value_type(key, payloads));
+            writecache_pcks++;
             LRU_Object * _obj  = new LRU_Object(key);
             LRU_W->add_object(_obj);		
          } 

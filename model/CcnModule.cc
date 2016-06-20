@@ -238,9 +238,9 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
         unsigned lookup_time = cache->cache_packet(pref, _id, NULL);
-        if(lookup_time>0){
+       /* if(lookup_time>0){
     std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
-        }
+        }*/
         NS_LOG_INFO("Cached packet "<<pref<<"/"<<_id<<" at router "<<getNode()->GetId()<<" router betw "<<this->getBetweenness()<<" packet "<<betw);
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
     }    

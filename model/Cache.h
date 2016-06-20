@@ -202,7 +202,7 @@ public:
      *         if slot is full, instead the most front filename.
      *         int, stored_packet number at this time
      */
-    pair<bool, int> insert_packets(string key, uint8_t last_id, Pkts payloads);
+    pair<bool, int> insert_packets(string key, uint32_t last_id, Pkts payloads);
 
     /*
      *@param: filename without file ID(begin-id)

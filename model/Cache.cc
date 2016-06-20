@@ -15,22 +15,22 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     //click_chatter("Searching chunk.. %d", ID);
     uint32_t lookup_time = 0;
-    unsigned ID = atoi(_ID.c_str());
-    map<string, unsigned>::iterator it = index_table.find(_filename);
+    uint32_t ID = atoi(_ID.c_str());
+    map<string, uint32_t>::iterator it = index_table.find(_filename);
     // chunk is cached
     if (it!=index_table.end() && ID<=it->second){    
         LRU->update_object(LRU->objects[_filename]);//fere to arxeio san most recent
         string key = _filename+"-";
         key.append(_ID);
-        map<string, unsigned>::iterator lit = log_file_hits.find(key);
+        map<string, uint32_t>::iterator lit = log_file_hits.find(key);
         if (lit!=log_file_hits.end())
             lit->second++;
         else{
             log_file_hits[key]=1;
         }
-        log_chunk_id_hits[std::min((unsigned) MAX_LOG_CHUNK_ID-1,ID)]++;
+        log_chunk_id_hits[std::min((uint32_t) MAX_LOG_CHUNK_ID-1,ID)]++;
         hits++;
-        //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(unsigned)it->second<<std::endl;
+        //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second<<std::endl;
         uint16_t tmp = (it->second - ID + 1);
         reads_for_fetchings += tmp;
         lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
@@ -47,9 +47,9 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
  */
 uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     responses++;
-    unsigned lookup_time = 0;
-    unsigned ID = atoi(_ID.c_str());
-    map<string, unsigned>::iterator it = index_table.find(_filename);
+    uint32_t lookup_time = 0;
+    uint32_t ID = atoi(_ID.c_str());
+    map<string, uint32_t>::iterator it = index_table.find(_filename);
     /* always store the first packet */
     if (ID == CACHING_START_INDEX){    
         /* chunk is already stored, do nothing */
@@ -132,7 +132,7 @@ uint32_t O_Cache::remove_last_packet(const string& new_packet_filename){
     if (last_filename.compare(new_packet_filename)==0) 
             return 0;
             
-    unsigned last_packet_id = index_table[last_filename];
+    uint32_t last_packet_id = index_table[last_filename];
     /* if its the LAST chunk remove all table items*/
     if (last_packet_id==CACHING_START_INDEX){
         index_table.erase(last_filename);
@@ -165,7 +165,7 @@ int32_t O_Cache::remove_last_file(){
  * Returns the number of the stored packets in the file _filename or 0 if filename not found
  **/
 int32_t O_Cache::get_stored_packets(const string& _filename){
-    map<string, unsigned>::iterator it = index_table.find(_filename);
+    map<string, uint32_t>::iterator it = index_table.find(_filename);
     if (it!=index_table.end()){
         return it->second;
     }
@@ -271,7 +271,7 @@ int32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
     map<string, char*>::iterator it = data_table.find(key);
     if (it!=data_table.end()){    
         LRU->update_object(LRU->objects[key]);
-        map<string, unsigned>::iterator it = log_file_hits.find(key);
+        map<string, uint32_t>::iterator it = log_file_hits.find(key);
         if (it!=log_file_hits.end())
             it->second++;
         else
@@ -476,7 +476,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
     return std::make_pair(true, cnt);
 }
 
-pair<bool, int> Slot_Object::insert_packets(string key, uint8_t last_id, Pkts payloads){
+pair<bool, int> Slot_Object::insert_packets(string key, uint32_t last_id, Pkts payloads){
     uint32_t pos = 0, _ID = 0, len=0;
     string _filename, filename;
     int cnt = 0;
@@ -488,7 +488,8 @@ pair<bool, int> Slot_Object::insert_packets(string key, uint8_t last_id, Pkts pa
     _filename = _filename + "-";
 
     len = last_id - _ID + 1;
-    NS_ASSERT_MSG(len <= PKT_NUM, "Slot_Object::insert_packets, Internal error,len can not be more than  PKT_NUM");
+    NS_ASSERT_MSG(len <= PKT_NUM,
+         "Internal error,"<<last_id<<"-"<<_ID<<",len can not be more than  PKT_NUM");
     //if( len > PKT_NUM ) return std::make_pair(false, 0);
     
     //insert packets to dram
@@ -496,7 +497,7 @@ pair<bool, int> Slot_Object::insert_packets(string key, uint8_t last_id, Pkts pa
         //filename = _filename;
         //filename.append(std::to_string(it->first));
         pair<bool, int> pr = insert_packet(key, it->first, it->second);
-        NS_ASSERT_MSG(pr.first, "Slot_Object::insert_packets, Internal error,insert_packet is failed");
+        NS_ASSERT_MSG(pr.first, "Internal error,insert_packet is failed");
         //if(!pr.first)return std::make_pair(false, 0);
         cnt += pr.second;
     }
@@ -537,6 +538,7 @@ void print_data_table(map<uint32_t, Slot_Object> & dt){
         NS_LOG_WARN("addr="<<(it->first));
     }
 }
+
 //Tranfer packets from dram to sram
 int32_t S_Cache::transfer_packets(const string& key){
     uint32_t lookup_time = 0;
@@ -548,7 +550,6 @@ int32_t S_Cache::transfer_packets(const string& key){
     if(it == data_table.end()) return -1;
     pair<bool, Pkts> pr = it->second.find(key);
     if(!pr.first) return -1;
-    //NS_LOG_WARN("Flag2");
      
 
     //find filename, trasfer map payloads to deque payloads
@@ -584,7 +585,7 @@ int32_t S_Cache::transfer_packets(const string& key){
 void S_Cache::log_file_hit(const string& _filename, const string& _ID){
     string key = _filename+"-";
     key.append(_ID);
-    map<string, unsigned>::iterator lit = log_file_hits.find(key);
+    map<string, uint32_t>::iterator lit = log_file_hits.find(key);
     if (lit!=log_file_hits.end())
         lit->second++;
     else{
@@ -594,7 +595,7 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
 
 int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     uint32_t lookup_time = 0;
-    unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
+    uint32_t ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
     uint32_t block_id = ID/PKT_NUM;
     string key(_filename);
     
@@ -633,7 +634,7 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     lookup_time = transfer_packets(key); 
     if(lookup_time == -1){
         false_positive_cnt++;
-        //NS_LOG_WARN("Bloom Filter:False positive");
+        NS_LOG_WARN("Bloom Filter:False positive");
         return 0;
     }
     return lookup_time;
@@ -678,15 +679,15 @@ bool S_Cache::is_last(const string &_filename, const uint32_t ID){
 
 //cache packets and transfer them to dram when the number is more than PKT_NUM or is last one in file
 int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t block_id, const char *_payload){
-    unsigned write_time = 0;
+    uint32_t write_time = 0;
     bool islast = false;
     uint32_t addr = 0;
     char* data = new char[PAYLOAD_SIZE];
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
-
+    if(key.substr(0, key.find("-")) == "/domain1/1123") NS_LOG_WARN("key="<<key<<" ID="<<ID);
     //if writecache is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
-            NS_LOG_WARN("writecache_pcks >= "<<capacity_fast_table<<"----------------------------------");
+            NS_LOG_WARN("writecache_pcks >= "<<capacity_fast_table);
 	    int32_t removed_packets = remove_last_file_w();
 	    if (removed_packets == -1){
                 NS_LOG_ERROR("Internal error. Fail to remove packets in writecache!"); 
@@ -702,7 +703,6 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     islast = is_last(filename, ID);
 
     Cachetable::iterator it = cache_table_w.find(key);
-    NS_LOG_WARN("caching "<<key);
     if(it != cache_table_w.end()){
         //if the packet has exited or is out-of-order, ignore it and return 0
         if(ID != it->second.size()) return 0;
@@ -717,12 +717,10 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
             map <uint32_t, Slot_Object>::iterator dtit = data_table.find(addr);
             pair<bool, int> pr;
             if(dtit == data_table.end()){
-                NS_LOG_WARN("New data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
                 Slot_Object so;
                 pr = so.insert_packets(key, ID, it->second);
                 data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
             }else{
-                NS_LOG_WARN("old data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
                 pr = dtit->second.insert_packets(key, ID, it->second);
             }
             NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
@@ -740,20 +738,20 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     }else{
         Pkts payloads;
         payloads.insert(Pkts::value_type(ID, data));
-        NS_ASSERT_MSG(ID == block_id*PKT_NUM,"Internal error.packet is not the first.\n\
-                                              Filename stored in SRAM cache for writing is wrong");            
+       /* NS_ASSERT_MSG(ID == block_id*PKT_NUM,
+           "Internal error.packet is not the first key="<<key<<" ID="<<ID<<" block_id*PKT_NUM="<<(block_id*PKT_NUM));            
+        */
+        if(ID != block_id*PKT_NUM) NS_LOG_WARN("Packet is not the first key="<<key<<" ID="<<ID<<" block_id*PKT_NUM="<<(block_id*PKT_NUM));
         if(islast){
             addr = CityHash64(key.c_str(), key.size());
             addr = addr%slot_num; 
             map <uint32_t, Slot_Object>::iterator dtit = data_table.find(addr);
             pair<bool, int> pr;
             if(dtit == data_table.end()){
-                NS_LOG_WARN("New data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
                 Slot_Object so;
                 pr = so.insert_packets(key, ID, payloads);
                 data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
             }else{
-                NS_LOG_WARN("old data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
                 pr = dtit->second.insert_packets(key, ID, payloads);
             }
             NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
@@ -774,9 +772,9 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
 //cache a packet
 uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     string key(_filename);
-    unsigned write_time = 0;
-    unsigned ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
-    unsigned block_id = ID/PKT_NUM;
+    uint32_t write_time = 0;
+    uint32_t ID = uint32_t(atoi(_ID.c_str()) - CACHING_START_INDEX);
+    uint32_t block_id = ID/PKT_NUM;
 
     key = key + "-";
     key.append(std::to_string(block_id*PKT_NUM)); 

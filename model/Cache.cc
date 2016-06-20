@@ -532,16 +532,23 @@ int32_t S_Cache::get_stored_packets_r(const string& _filename){
     }
 }
 
-//tranfer packets from dram to sram
-int32_t S_Cache::tranfer_packets(const string& key){
+void print_data_table(map<uint32_t, Slot_Object> & dt){
+    for(map<uint32_t, Slot_Object>::iterator it= dt.begin(); it!=dt.end(); it++){
+        NS_LOG_WARN("addr="<<(it->first));
+    }
+}
+//Tranfer packets from dram to sram
+int32_t S_Cache::transfer_packets(const string& key){
     uint32_t lookup_time = 0;
     uint32_t addr = 0;
-    addr = CityHash32(key.c_str(), key.size());
+    addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num;
     map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
+    //print_data_table(data_table);
     if(it == data_table.end()) return -1;
     pair<bool, Pkts> pr = it->second.find(key);
     if(!pr.first) return -1;
+    //NS_LOG_WARN("Flag2");
      
 
     //find filename, trasfer map payloads to deque payloads
@@ -616,16 +623,17 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     }
 
     //if not cached in "sram for reading", and check if stored in dram
-    uint8_t iscache = index_bf.lookup(key.c_str()); 
+    size_t iscache = index_bf_ptr->lookup(key.c_str()); 
+    //NS_LOG_WARN("Bloom Filter:False positive ("<<key<<" iscache="<<iscache<<")");
     if(!iscache) return -1;
 
     read_dram_cnt++;
     // stored in dram, tranfer them from dram to sram
     log_file_hit(_filename, _ID);
-    lookup_time = tranfer_packets(key); 
+    lookup_time = transfer_packets(key); 
     if(lookup_time == -1){
         false_positive_cnt++;
-        NS_LOG_DEBUG("S_Cache::get_cached_packet.S_Cache::add_packet.bloom filter.False positive");
+        //NS_LOG_WARN("Bloom Filter:False positive");
         return 0;
     }
     return lookup_time;
@@ -660,11 +668,11 @@ bool S_Cache::is_last(const string &_filename, const uint32_t ID){
    string key = _filename.substr(_filename.rfind('/') + 1);
    map<string, uint32_t>::iterator it = (*file_map_p).find(key); 
    if(it == (*file_map_p).end()){
-        NS_LOG_UNCOND("S_Cache::is_last.Error. Do not find file("<<key<<")");
+        NS_LOG_ERROR("Error. Do not find file("<<key<<")");
         return false;
    }
    if(filesize == it->second) return true;
-   if(filesize > it->second) NS_LOG_DEBUG("S_Cache::is_last.Error.filesize can not be more than "<<it->second);
+   if(filesize > it->second) NS_LOG_ERROR("Error.filesize can not be more than "<<it->second);
    return false;
 }
 
@@ -678,9 +686,10 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
 
     //if writecache is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
+            NS_LOG_WARN("writecache_pcks >= "<<capacity_fast_table<<"----------------------------------");
 	    int32_t removed_packets = remove_last_file_w();
 	    if (removed_packets == -1){
-                NS_LOG_DEBUG("S_Cache::add_packet.Internal error. Fail to remove packets in writecache!"); 
+                NS_LOG_ERROR("Internal error. Fail to remove packets in writecache!"); 
 		return 0;	
             }		
 	    writecache_pcks -= removed_packets;
@@ -693,6 +702,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     islast = is_last(filename, ID);
 
     Cachetable::iterator it = cache_table_w.find(key);
+    NS_LOG_WARN("caching "<<key);
     if(it != cache_table_w.end()){
         //if the packet has exited or is out-of-order, ignore it and return 0
         if(ID != it->second.size()) return 0;
@@ -700,13 +710,23 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
         it->second.insert(Pkts::value_type(ID, data));
         writecache_pcks++;
 
-        //up to  PKT_NUM or islast is true
+        //up to PKT_NUM or islast is true
         if(it->second.size() >= PKT_NUM || islast){
-            addr = CityHash32(key.c_str(), key.size());
+            addr = CityHash64(key.c_str(), key.size());
             addr = addr%slot_num; 
-            pair<bool, int> pr = data_table[addr].insert_packets(key, ID, it->second); 
-            NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
-            index_bf.add(key.c_str());
+            map <uint32_t, Slot_Object>::iterator dtit = data_table.find(addr);
+            pair<bool, int> pr;
+            if(dtit == data_table.end()){
+                NS_LOG_WARN("New data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
+                Slot_Object so;
+                pr = so.insert_packets(key, ID, it->second);
+                data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
+            }else{
+                NS_LOG_WARN("old data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
+                pr = dtit->second.insert_packets(key, ID, it->second);
+            }
+            NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
+            index_bf_ptr->add(key.c_str());
             stored_packets += pr.second;
             writecache_pcks -= it->second.size();
             LRU_W->remove_object(LRU_W->objects[key]);
@@ -720,25 +740,36 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     }else{
         Pkts payloads;
         payloads.insert(Pkts::value_type(ID, data));
-        NS_ASSERT_MSG(ID == block_id*PKT_NUM,"S_Cache::add_packet:Internal error.packet is not the first.\n\
+        NS_ASSERT_MSG(ID == block_id*PKT_NUM,"Internal error.packet is not the first.\n\
                                               Filename stored in SRAM cache for writing is wrong");            
         cache_table_w.insert(Cachetable::value_type(key, payloads));
         writecache_pcks++;
         if(islast){
-           addr = CityHash32(key.c_str(), key.size());
-           addr = addr%slot_num; 
-           pair<bool, int> pr = data_table[addr].insert_packets(key, ID, payloads); 
-           NS_ASSERT_MSG(pr.first, "S_Cache::add_packet.Error.Fail to insert_packets");
-           index_bf.add(key.c_str());
-           stored_packets += pr.second;
-           cache_table_w.erase(it);
-           writecache_pcks--;
-           write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
+            addr = CityHash64(key.c_str(), key.size());
+            addr = addr%slot_num; 
+            map <uint32_t, Slot_Object>::iterator dtit = data_table.find(addr);
+            pair<bool, int> pr;
+            if(dtit == data_table.end()){
+                NS_LOG_WARN("New data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
+                Slot_Object so;
+                pr = so.insert_packets(key, ID, payloads);
+                data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
+                NS_LOG_WARN("end");
+            }else{
+                NS_LOG_WARN("old data_table.len="<<data_table.size()<<" "<<key<<"->"<<slot_num<<":"<<addr<<" Flag1");
+                pr = dtit->second.insert_packets(key, ID, payloads);
+            }
+            NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
+            index_bf_ptr->add(key.c_str());
+            stored_packets += pr.second;
+            cache_table_w.erase(it);
+            writecache_pcks--;
+            write_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*1 + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
-        }else{
+         }else{
             LRU_Object * _obj  = new LRU_Object(key);
             LRU_W->add_object(_obj);		
-        } 
+         } 
     }  
     return write_time;
 }
@@ -755,7 +786,7 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
 
     responses++;
     // if packet has existed in dram, ignore and return 0
-    size_t iscache = index_bf.lookup(key.c_str()); 
+    size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache) return 0;
 
     /*cache them in "SRAM for writing(cache_table_w)"
@@ -767,13 +798,14 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     
 
 bf::a2_bloom_filter *S_Cache::init_bf(double fp){
-    NS_ASSERT_MSG(capacity, "S_Cache::init_bf.Error. capacity can not be zero");
-    NS_ASSERT_MSG(fp, "S_Cache::init_bf.Error. fp can not be zero");
+    NS_ASSERT_MSG(capacity, "capacity can not be zero");
+    NS_ASSERT_MSG(fp, "fp can not be zero");
     size_t ka; //The number of hash function for fp
     size_t cells; //bits, the number of cells to use
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
-    cells = 2*ka*capacity*std::log(2);
-    NS_LOG_INFO("S_Cache::init_bf. ka = "<<ka<<" cells = "<<cells);
-    return new bf::a2_bloom_filter{ka, cells, capacity, 110, 199};
+    cells = 2*ka*(capacity/PKT_NUM)*std::log(2);
+    NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells);
+    return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM, 1, 199};
 }
+
 }//ns3 namespace

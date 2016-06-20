@@ -73,7 +73,7 @@ int main(int argc ,char *argv[])
             fast_cap=std::atoi(argv[arg++]);
 	}
 */	
-        if(cache_size) cache_cap = cache_size*(1024*1024*1024/PKT_SIZE/PKT_NUM);
+        if(cache_size) cache_cap = cache_size*(1024*1024*1024/PKT_SIZE);
         if(fast_size) fast_cap = fast_size*(1024*1024/PKT_SIZE);
 
 	//print experiment info

@@ -228,9 +228,9 @@ public:
         LRU_W = new LRU_Table();
 
         if(_capacity == 0){
-            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
+            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE);
         }else{
-            slot_num = _capacity/PKT_NUM/FILE_NUM;
+            slot_num = _capacity/PKT_NUM;
         }
        
         if(_fp){
@@ -246,7 +246,6 @@ public:
 
     // <filename, max chunk id>
 //    map<string , uint32_t> index_table;
-    bf::a2_bloom_filter index_bf{3, 100, 40};
     bf::a2_bloom_filter  *index_bf_ptr;
     bf::a2_bloom_filter  *init_bf(double fp);
 
@@ -273,7 +272,7 @@ public:
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     bool is_last(const string &_filename, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
-    int32_t tranfer_packets(const string& filename);
+    int32_t transfer_packets(const string& filename);
     uint32_t remove_last_packets_r(const string& _filename);
     int32_t remove_last_file_r();//new by argi
     uint32_t remove_last_packets_w(const string& _filename);

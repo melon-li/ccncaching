@@ -620,6 +620,8 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
         readcache_pcks--;
         //}
         log_file_hit(_filename, _ID);
+        hits++;
+         
         return 0;
     }
 
@@ -630,13 +632,14 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
 
     read_dram_cnt++;
     // stored in dram, tranfer them from dram to sram
-    log_file_hit(_filename, _ID);
     lookup_time = transfer_packets(key); 
     if(lookup_time == -1){
         false_positive_cnt++;
         NS_LOG_WARN("Bloom Filter:False positive");
         return 0;
     }
+    log_file_hit(_filename, _ID);
+    hits++;
     return lookup_time;
 }
 
@@ -685,6 +688,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     char* data = new char[PAYLOAD_SIZE];
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
     if(key.substr(0, key.find("-")) == "/domain1/1123") NS_LOG_WARN("key="<<key<<" ID="<<ID);
+    NS_LOG_WARN("writecache="<<writecache_pcks);
     //if writecache is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
             NS_LOG_WARN("writecache_pcks >= "<<capacity_fast_table);
@@ -726,9 +730,9 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
             NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
             index_bf_ptr->add(key.c_str());
             stored_packets += pr.second;
-            writecache_pcks -= it->second.size();
             LRU_W->remove_object(LRU_W->objects[key]);
             cache_table_w.erase(it);
+            writecache_pcks -= it->second.size();
             write_time = (pr.second)*(PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME + \
                          DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
          }else{
@@ -795,11 +799,14 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
 bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     NS_ASSERT_MSG(capacity, "capacity can not be zero");
     NS_ASSERT_MSG(fp, "fp can not be zero");
+
     size_t ka; //The number of hash function for fp
     size_t cells; //bits, the number of cells to use
+
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
-    cells = 2*ka*(capacity/PKT_NUM)*std::log(2);
+    cells = 2*ka*(capacity/PKT_NUM)/std::log(2);
     NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells);
+
     return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM, 1, 199};
 }
 

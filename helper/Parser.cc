@@ -170,7 +170,8 @@ void Parser::parse(string& filepath, uint8_t group_size) {
      * IMPROVE: create a method "create_link"
      */    
     uint8_t limit=255;
-    uint16_t sender_position = ExperimentGlobals::RANDOM_VAR->GetInteger(0,num_of_access_nodes-1)%limit;
+    //uint16_t sender_position = ExperimentGlobals::RANDOM_VAR->GetInteger(0,num_of_access_nodes-1)%limit;
+    uint16_t sender_position = (num_of_access_nodes/2)%limit;
     map<uint32_t, set<uint32_t> > matrix_map_tmp = matrix_map;
     uint32_t host_node_name = matrix_map.size()-1;
     uint8_t added_groups = 0;

@@ -78,7 +78,8 @@ public:
         reads_for_fetchings =0 ;
         reads_for_evictions =0 ;
 
-        false_positive_cnt=0;
+
+        false_positive_cnt = 0;
         read_dram_cnt = 0;
         readcache_rmlru = 0;
         writecache_rmlru = 0;
@@ -180,6 +181,7 @@ private:
     uint32_t cur_index = 0;
 
 public:
+    //uint64_t write_for_evictions = 0;
     Slot_Object(){}
 
     

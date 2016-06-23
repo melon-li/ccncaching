@@ -61,7 +61,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
             int32_t removed_packets=remove_last_file();
             if (removed_packets==-1)
                 return 0;            
-            stored_packets-=removed_packets;
+            stored_packets -= removed_packets;
             lookup_time += removed_packets;
             reads_for_evictions+=removed_packets;
         }else if (stored_packets >= capacity){
@@ -568,7 +568,7 @@ int32_t S_Cache::transfer_packets(const string& key){
               
    
     // delete the packet requested at this time.
-   // payloads.pop_front(); 
+    // payloads.pop_front(); 
     pr.second.erase(pr.second.begin());
 
     cache_table_r.insert(Cachetable::value_type(key, pr.second));

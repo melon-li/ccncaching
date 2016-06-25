@@ -111,10 +111,9 @@ vector<pair <string, uint32_t> > Initializer::parseWorkload(uint32_t sseed){
           vec.push_back (std::make_pair (line.substr(0, line.find(" ")).c_str(), file_map[line.substr(0, line.find(" ")).c_str()]));
         myfile.close();
       }    
-    std::srand(sseed);
-    std::random_shuffle(vec.begin(), vec.end()); // shuffle
+    //std::srand(sseed);
+    //std::random_shuffle(vec.begin(), vec.end()); // shuffle
     NS_LOG_INFO("workload size: "<<vec.size()<<" - items: first: "<< vec[0].first<<" middle: "<< vec[vec.size()/2].first<<" last: "<< vec[vec.size()-1].first);
-
     return vec;    
     }
 

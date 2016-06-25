@@ -172,19 +172,29 @@ void BootstrappingHelper::startExperiment(){
         NS_LOG_INFO("Initializing "<<receiver_nodes.size()<<" receivers");
         //start receivers - for every user give the worklad and the same file_map / catalog
         vector<pair<string, uint32_t> >  full_workload =  this->initializer->parseWorkload(seed);
+        vector<pair<string, uint32_t> >::iterator start, end;
         uint32_t segment_size = (full_workload.size()/receiver_nodes.size()> 1) ? full_workload.size()/receiver_nodes.size() : 1 ;
 
-        for(unsigned node_i=0;node_i<receiver_nodes.size();node_i++){        
-            std::cout<<node_i<<" ";
+        for(uint32_t node_i=0;node_i<receiver_nodes.size();node_i++){        
+            //std::cout<<node_i<<" ";
             if (node_i*segment_size+segment_size > full_workload.size()) 
                 break;
-            vector <pair<string, uint32_t> > sub_workload (&full_workload[node_i*segment_size], &full_workload[node_i*segment_size+segment_size]);
+            start = full_workload.begin() + node_i*segment_size;
+            end = start + segment_size;
+            if(node_i == (receiver_nodes.size() -1)) end = full_workload.end();
+            vector <pair<string, uint32_t> > sub_workload(start, end);
+
+            /*for(vector <pair <string, uint32_t> >::iterator it=sub_workload.begin(); it!=sub_workload.end(); it++){
+                std::cout<<"vec="<<it->first<<" "<<it->second<<std::endl;
+            }*/
+
             receiver_apps.at(node_i)->workload = sub_workload;
             receiver_apps.at(node_i)->start();
             NS_LOG_INFO("Receiver at "<<node_i<<" workload "<<sub_workload.at(0).first<<", "<<sub_workload.size() );
             //break;
         }
 
+        //NS_LOG_WARN("print vec finished!!");
         NS_LOG_INFO("Starting simulation");
         finished = false;
         //if (cache_mode!=0) cache_check(cache_nodes);

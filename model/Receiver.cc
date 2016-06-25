@@ -103,12 +103,12 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
             return;
         }
         //simulate download abortions
-        if (id%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
+        /*if (id%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
             aborted_chunks+=num_of_packets-id;
             NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" aborted chunks: "<<aborted_chunks);
             start();
             return;
-        }
+        }*/
         
         id++;
         stringstream sstream;
@@ -126,7 +126,7 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
  * */
 void Receiver::start() {
         if (workload.empty()){
-            std::cout<<"Receiver at node "<<ccnm->getNodeId()<<" finnished "<<Now().ToInteger(Time::MS)<<std::endl;
+            std::cout<<"Receiver at node "<<ccnm->getNodeId()<<" finnished "<<Now().ToInteger(Time::MS)<<" askedfor="<<askedfor<<std::endl;
             return;
         }
         if (workload.size()%100==0){
@@ -152,7 +152,7 @@ void Receiver::start() {
 void Receiver::doSendInterest(Ptr<CCN_Name> name){
     askedfor++;
     asked.insert(name);
-    //std::cout<<Now().ToInteger(Time::MS)<<" "<<ccnm->getNodeId()<<" asking for: "<<name->toString()<<std::endl;
+    std::cout<<Now().ToInteger(Time::MS)<<" "<<ccnm->getNodeId()<<" asking for: "<<name->toString()<<std::endl;
     this->ccnm->sendInterest(name, localApp);
 }
 

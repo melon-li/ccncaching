@@ -436,6 +436,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
             /* Delete the oldest file, or in options, we can use LRU algorithm to delete file
                Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
             */
+            NS_LOG_WARN("This slot is full(test)");
             cnt -= files[cur_index].size();
             files[cur_index].clear();
             files[cur_index].insert(Pkts::value_type(_ID, payload)); 

@@ -73,7 +73,7 @@ void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
 }
 
 void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
-    //std::cout<<Now().ToInteger(Time::MS)<<" Sender sending: "<<name->toString()<<std::endl;
+    std::cout<<Now().ToInteger(Time::MS)<<" Sender sending: "<<name->toString()<<std::endl;
     uint8_t *newBuff = (uint8_t*)malloc(data->GetSize());
     data->CopyData(newBuff, data->GetSize());
     this->ccnm->sendData(name, newBuff, data->GetSize());

@@ -574,11 +574,11 @@ int32_t S_Cache::transfer_packets(const string& key){
 
     cache_table_r.insert(Cachetable::value_type(key, pr.second));
     LRU_Object * _obj  = new LRU_Object(key);
-    LRU->add_object(_obj);	 
+    LRU->add_object(_obj);     
     readcache_pcks += pr.second.size();  
     
     // cal lookup_time
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size()) + \
+    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size() + 1) + \
                                       DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
     return lookup_time;
 }
@@ -687,21 +687,23 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     bool islast = false;
     uint32_t addr = 0;
     char* data = new char[PAYLOAD_SIZE];
+
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
     if(key.substr(0, key.find("-")) == "/domain1/1123") NS_LOG_WARN("key="<<key<<" ID="<<ID);
     NS_LOG_WARN("writecache="<<writecache_pcks);
+
     //if writecache is full, delete the least recent file
     if(writecache_pcks >= capacity_fast_table){
             NS_LOG_WARN("writecache_pcks >= "<<capacity_fast_table);
-	    int32_t removed_packets = remove_last_file_w();
-	    if (removed_packets == -1){
+        int32_t removed_packets = remove_last_file_w();
+        if (removed_packets == -1){
                 NS_LOG_ERROR("Internal error. Fail to remove packets in writecache!"); 
-		return 0;	
-            }		
-	    writecache_pcks -= removed_packets;
+        return 0;    
+            }        
+        writecache_pcks -= removed_packets;
             writecache_rmlru++;
-	   // write_time += removed_packets;
-	   // reads_for_evictions += removed_packets;
+       // write_time += removed_packets;
+       // reads_for_evictions += removed_packets;
     }
 
     string filename = key.substr(0, key.find("-"));
@@ -710,7 +712,10 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     Cachetable::iterator it = cache_table_w.find(key);
     if(it != cache_table_w.end()){
         //if the packet has exited or is out-of-order, ignore it and return 0
-        if(ID != it->second.size()) return 0;
+        if((ID-block_id*PKT_NUM) != it->second.size()){
+            write_outoforder++;
+            return 0;
+        }
 
         it->second.insert(Pkts::value_type(ID, data));
         writecache_pcks++;
@@ -746,7 +751,11 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
        /* NS_ASSERT_MSG(ID == block_id*PKT_NUM,
            "Internal error.packet is not the first key="<<key<<" ID="<<ID<<" block_id*PKT_NUM="<<(block_id*PKT_NUM));            
         */
-        if(ID != block_id*PKT_NUM) NS_LOG_WARN("Packet is not the first key="<<key<<" ID="<<ID<<" block_id*PKT_NUM="<<(block_id*PKT_NUM));
+        if(ID != block_id*PKT_NUM){
+            NS_LOG_ERROR("Packet is not the first key="<<key<<" ID="<<ID<<" block_id*PKT_NUM="<<(block_id*PKT_NUM));
+            write_outoforder++;
+            return 0;
+        }
         if(islast){
             addr = CityHash64(key.c_str(), key.size());
             addr = addr%slot_num; 
@@ -768,7 +777,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
             cache_table_w.insert(Cachetable::value_type(key, payloads));
             writecache_pcks++;
             LRU_Object * _obj  = new LRU_Object(key);
-            LRU_W->add_object(_obj);		
+            LRU_W->add_object(_obj);        
          } 
     }  
     return write_time;
@@ -787,13 +796,23 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     responses++;
     // if packet has existed in dram, ignore and return 0
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
-    if(iscache) return 0;
+    if(iscache){
+         uint32_t addr = CityHash64(key.c_str(), key.size());
+         addr = addr%slot_num;
+         map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
+         //print_data_table(data_table);
+         if(it != data_table.end()){
+             pair<bool, Pkts> pr = it->second.find(key);
+             if(pr.first) return 0;
+             false_positive_cnt_w++;
+         }
+    }
 
     /*cache them in "SRAM for writing(cache_table_w)"
     if up to PKT_NUM or islast, then transfer them from sram to dram*/
     write_time = add_packet(key, ID, block_id, _payload);
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
-    return write_time;	
+    return write_time;    
 }
     
 

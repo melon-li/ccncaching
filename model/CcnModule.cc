@@ -145,7 +145,7 @@ uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {
 void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     //struct timespec time_start={0, 0},time_end={0, 0};
     //clock_gettime(CLOCK_REALTIME, &time_start);
-   // NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
+    //NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
     //std::cout<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
@@ -177,7 +177,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     }// cache is not enabled
     else dohandleIncomingInterest(p, nd);
 
-  // NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t>>>>>>>>");
+   //NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t>>>>>>>>");
    //clock_gettime(CLOCK_REALTIME, &time_end);
    //printf("duration:%llus %lluns\n", time_end.tv_sec-time_start.tv_sec, time_end.tv_nsec-time_start.tv_nsec);
     

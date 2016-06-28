@@ -83,6 +83,8 @@ public:
         read_dram_cnt = 0;
         readcache_rmlru = 0;
         writecache_rmlru = 0;
+        write_outoforder = 0;
+        false_positive_cnt_w = 0;
     }
 
     ~CacheModule(){
@@ -117,6 +119,8 @@ public:
     uint64_t read_dram_cnt;
     uint64_t readcache_rmlru;
     uint64_t writecache_rmlru;
+    uint64_t write_outoforder;
+    uint64_t false_positive_cnt_w;
 
     uint32_t *log_chunk_id_hits ;
     map<string, uint32_t>log_file_hits; // this gets erazed when its written

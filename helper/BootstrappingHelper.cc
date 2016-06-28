@@ -222,6 +222,8 @@ void BootstrappingHelper::startExperiment(){
             uint64_t readcache_rmlru = 0;
             uint64_t writecache_rmlru = 0;
             uint64_t stored_packets = 0;
+            uint64_t write_outoforder = 0;
+            uint64_t false_positive_cnt_w = 0;
 
             for (uint8_t n = 0; n< cache_nodes.size(); n++){
                 Ptr<Node> nd = cache_nodes[n];
@@ -237,9 +239,12 @@ void BootstrappingHelper::startExperiment(){
                 readcache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->readcache_rmlru;
                 writecache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->writecache_rmlru;
                 stored_packets += nsNodeIdToModule[nd->GetId()]->cache->stored_packets;
+                write_outoforder += nsNodeIdToModule[nd->GetId()]->cache->write_outoforder;
+                false_positive_cnt_w += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt_w;
             }
             std::cout<<"Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<r_fetchings<<" r_insertions: "<<r_insertions<<endl;
             std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<" readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
+            std::cout<<"false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<write_outoforder<<endl;
         }
         
         //print results and initialize structures again

@@ -182,6 +182,7 @@ void Parser::parse(string& filepath, uint8_t group_size) {
         if (neighbors.size() == 1) {//if they are access nodes
             if (added_groups==sender_position) {
                 NS_LOG_INFO("Added sender at position "<<sender_position<<" ("<<iter->first <<")");
+                std::cout<<"Added sender at position "<<sender_position<<" ("<<iter->first <<")"<<std::endl;
                 sender_id = idToNode[iter->first]->GetId();
                 added_groups++;
                 continue;

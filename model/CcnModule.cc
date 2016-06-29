@@ -155,7 +155,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
         interest->setBetweenness(this->getBetweenness());
         NS_LOG_INFO("Router "<<getNode()->GetId()<<" updated btw from " << betw<<" to "<<this->getBetweenness());
     }
-    if (cache!=NULL){
+    if (cache != NULL){
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
         int32_t lookup_time = cache->get_cached_packet(pref, _id);
@@ -171,6 +171,9 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
             //sendData(interest->getName(), NULL, 0);
             NS_LOG_INFO("Router "<<getNode()->GetId()<<" found packet cached");
             return;
+         //if out-of-order, ingore it
+         }else if(lookup_time == 0){
+             return;
          }
         // lookup failed -> simulate SRAM delay
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME), &CcnModule::dohandleIncomingInterest, this, p, nd);
@@ -237,11 +240,11 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
+        //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
         unsigned lookup_time = cache->cache_packet(pref, _id, NULL);
        /* if(lookup_time>0){
-    std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
+            std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
         }*/
-        NS_LOG_WARN("node_id="<<nodePtr->GetId());
         NS_LOG_INFO("Cached packet "<<pref<<"/"<<_id<<" at router "<<getNode()->GetId()<<" router betw "<<this->getBetweenness()<<" packet "<<betw);
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
     }    

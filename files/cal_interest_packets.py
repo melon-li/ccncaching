@@ -31,6 +31,7 @@ with open(workload_file, 'r') as wkf:
 print "Total interest packets of receivers =             %d" % (pkt_size)
 #print len(files_name)
 total = 0
+old = pkt_size
 pkt_size = 0
 files_set = set(files_list)
 #print len(files_set)
@@ -40,3 +41,4 @@ while(len(files_set)):
     pkt = buf.split(" ")
     pkt_size = pkt_size + int(pkt[1])
 print "Total independent interest packets of receivers = %d" % (pkt_size)
+print "Red rate=%.2f" % (pkt_size/float(old))

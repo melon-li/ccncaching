@@ -85,6 +85,8 @@ public:
         writecache_rmlru = 0;
         write_outoforder = 0;
         false_positive_cnt_w = 0;
+        total_stored_packets = 0;
+        sram_stored_packets = 0;
     }
 
     ~CacheModule(){
@@ -121,6 +123,8 @@ public:
     uint64_t writecache_rmlru;
     uint64_t write_outoforder;
     uint64_t false_positive_cnt_w;
+    uint64_t total_stored_packets;
+    uint64_t sram_stored_packets;
 
     uint32_t *log_chunk_id_hits ;
     map<string, uint32_t>log_file_hits; // this gets erazed when its written
@@ -278,7 +282,7 @@ public:
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     bool is_last(const string &_filename, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
-    int32_t transfer_packets(const string& filename);
+    int32_t transfer_packets(const string& filename, const uint32_t ID);
     uint32_t remove_last_packets_r(const string& _filename);
     int32_t remove_last_file_r();//new by argi
     uint32_t remove_last_packets_w(const string& _filename);

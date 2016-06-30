@@ -148,7 +148,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     //NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
-    //std::cout<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
+    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
     //cache is enabled, look for stored response
     float betw = interest->getBetweenness();
     if (ExperimentGlobals::CACHE_PLACEMENT == 1 && betw < this->getBetweenness()){
@@ -236,6 +236,7 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         cache_packet = false;
     }
     
+    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId() << " got data"<<data->getName()->toString() <<"\n";
     // if caching is allowed at this node
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();

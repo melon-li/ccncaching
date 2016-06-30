@@ -14,10 +14,10 @@
 #define ROOT_DOMAIN "domain1"
 #define ZIPF_A 0.75
 
-#define LINK_DELAY "5ms"
-#define ACCESS_LINK_DELAY "5ms"
-#define LINK_CAPACITY "5Mbps"
-#define ACCESS_LINK_CAPACITY "50Mbps"
+#define LINK_DELAY "1ms"
+#define ACCESS_LINK_DELAY "1ms"
+#define LINK_CAPACITY "10000Mbps"
+#define ACCESS_LINK_CAPACITY "10Mbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
 

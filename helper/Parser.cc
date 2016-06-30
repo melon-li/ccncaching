@@ -213,8 +213,8 @@ void Parser::parse(string& filepath, uint8_t group_size) {
                 pph.SetQueue(string("ns3::DropTailQueue"), string("MaxPackets"),
                         ns3::UintegerValue(10000), string("MaxBytes"),
                         ns3::UintegerValue(10000));
-                pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
-                pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
+                pph.SetDeviceAttribute("DataRate", StringValue(ACCESS_LINK_CAPACITY));
+                pph.SetChannelAttribute("Delay", StringValue(ACCESS_LINK_DELAY));
                 NetDeviceContainer ndc = pph.Install(n);
 
                 nodes.insert(host_node_name);

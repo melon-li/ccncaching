@@ -14,6 +14,7 @@
 #define ROOT_DOMAIN "domain1"
 #define ZIPF_A 0.75
 
+#define WIN_MAX 8
 #define LINK_DELAY "1ms"
 #define ACCESS_LINK_DELAY "1ms"
 #define LINK_CAPACITY "10000Mbps"

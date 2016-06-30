@@ -35,6 +35,10 @@ public:
     uint32_t getAskedFor();
     uint32_t getReturned();
 
+   /* workload is the vector with requests
+    * this method always requests the first packet of the last file in the workload, which
+    * is then dropped out of the workload vector
+    */
     void start();
     
     vector<pair<string, uint32_t> > workload;
@@ -44,6 +48,8 @@ private:
     void handleInterest(Ptr<CCN_Name>);
     void handleData(Ptr<CCN_Name>, uint8_t*, uint32_t);
     void doSendInterest(Ptr<CCN_Name>);
+    void sendInterests();
+    string int2str(int n);
 
     Ptr<CcnModule> ccnm;
     Ptr<LocalApp> localApp;
@@ -59,6 +65,7 @@ private:
 
     string current_filename;
     uint32_t current_filesize;
+    uint32_t current_sequence;
 };
 }
 #endif

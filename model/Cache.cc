@@ -607,8 +607,8 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     Cachetable::iterator cit = cache_table_r.find(key);
     // if packets is cached in sram for reading,response them to requester,return 0
     if(cit != cache_table_r.end()){
-        Pkts::iterator front = cit->second.begin();
-       /* if(ID != front->first){
+       /* Pkts::iterator front = cit->second.begin();
+        if(ID != front->first){
             std::cout<<"order: "<<key<<" "<<ID<<" "<<front->first<<std::endl;
             return 0;
         }*/

@@ -212,7 +212,7 @@ public:
      *         if slot is full, instead the most front filename.
      *         int, stored_packet number at this time
      */
-    pair<bool, int> insert_packets(string key, uint32_t last_id, Pkts payloads);
+    pair<bool, int> insert_packets(const string& key, uint32_t last_id, Pkts pkts);
 
     /*
      *@param: filename without file ID(begin-id)
@@ -222,6 +222,7 @@ public:
     pair<bool, Pkts> find(const string & key);
 
     //File_Obj files[FILE_NUM];
+    void checkout_file(const string &key, uint32_t last_id);
      
 };
 
@@ -280,7 +281,7 @@ public:
     map<string , uint32_t> stats_table;
 
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
-    bool is_last(const string &_filename, const uint32_t ID);
+    bool is_last(const string &key, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
     int32_t transfer_packets(const string& filename, const uint32_t ID);
     uint32_t remove_last_packets_r(const string& _filename);
@@ -292,6 +293,9 @@ public:
     int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
+    void checkout_writecache();
+    bool is_reallycached(const string &key);
+    uint32_t store_packets(const string& key, const uint32_t last_id, const Pkts & pkts);
 //    string get_state();
 //    string get_packet_stats();
 

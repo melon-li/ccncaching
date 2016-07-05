@@ -130,6 +130,11 @@ public:
     map<string, uint32_t>log_file_hits; // this gets erazed when its written
     string get_file_hits();
     string get_chunk_id_hits();
+    map<string, uint32_t> log_file_requests;
+    uint32_t get_file_requests(const string &_filename, const string& _ID);
+    void increase_file_requests(const string &_filename, const string& _ID);
+    void clear_file_requests(const string &_filename, const string& _ID);
+    
 };
 
 class O_Cache: public CacheModule{
@@ -222,7 +227,7 @@ public:
     pair<bool, Pkts> find(const string & key);
 
     //File_Obj files[FILE_NUM];
-    void checkout_file(const string &key, uint32_t last_id);
+    inline void checkout_file(const string &key, uint32_t last_id);
      
 };
 
@@ -283,7 +288,10 @@ public:
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     bool is_last(const string &key, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
-    int32_t transfer_packets(const string& filename, const uint32_t ID);
+    int32_t get_dram_packet(const string& filename, const uint32_t ID);
+    inline void checkout_readcache(const Pkts& pkts);
+    int32_t get_writecached_packet(const string& key, const uint32_t ID);
+    int32_t get_readcached_packet(const string& key, const uint32_t ID);
     uint32_t remove_last_packets_r(const string& _filename);
     int32_t remove_last_file_r();//new by argi
     uint32_t remove_last_packets_w(const string& _filename);
@@ -293,11 +301,9 @@ public:
     int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
-    void checkout_writecache();
+    inline void checkout_writecache();
     bool is_reallycached(const string &key);
     uint32_t store_packets(const string& key, const uint32_t last_id, const Pkts & pkts);
-//    string get_state();
-//    string get_packet_stats();
 
     uint64_t zero_pcks;
     uint64_t readcache_pcks;

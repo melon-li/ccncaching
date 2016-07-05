@@ -44,7 +44,7 @@ class BootstrappingHelper : public Object
     vector< Ptr < Object > > vec3;
     
     void PITCheck(int ,int , vector<uint32_t>,Graph,uint32_t);
-    unsigned group_size;
+    uint32_t group_size;
     uint32_t seed;
     string seedString;
     string output;
@@ -53,7 +53,7 @@ class BootstrappingHelper : public Object
 
     int length;
 
-    BootstrappingHelper(string filename,string output,uint8_t gsize, uint32_t seed,
+    BootstrappingHelper(string filename,string output,uint32_t gsize, uint32_t seed,
                    pair<char, double> _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap);
     
     char cache_mode;
@@ -62,7 +62,7 @@ class BootstrappingHelper : public Object
     double   fp;
     
     ~BootstrappingHelper();
-    void parseTopology( uint8_t group_size);
+    void parseTopology( uint32_t group_size);
 
     void startExperiment();
     

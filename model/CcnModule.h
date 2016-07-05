@@ -35,6 +35,7 @@ public:
     static uint32_t RX_INTERESTS;
     static uint32_t RX_DATA;
     static int COUNT;
+    static uint32_t HITS;
 
     CcnModule(Ptr<Node> );
     ~CcnModule();

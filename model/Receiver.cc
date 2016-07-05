@@ -127,6 +127,7 @@ void Receiver::start() {
         }
 
         //NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" requested file: "<<workload.at(workload.size()-1).first);
+        std::cout<<"Receiver: "<<ccnm->getNodeId()<<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
         current_filename = workload.at(workload.size()-1).first;
         current_filesize = workload.at(workload.size()-1).second;
         current_sequence =  1;

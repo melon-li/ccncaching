@@ -49,7 +49,7 @@ vector<Ptr<Node> > Parser::getNeighbors(uint32_t graphNodeId) {
  * parses topology file (usualy placed in ./ccncaching/topology dir)
  * and updates some maps that contain vertexes and their associates
  */
-void Parser::parse(string& filepath, uint8_t group_size) {
+void Parser::parse(string& filepath, uint32_t group_size) {
     matrix_map.clear();
 
     ifstream f;
@@ -174,7 +174,7 @@ void Parser::parse(string& filepath, uint8_t group_size) {
     uint16_t sender_position = (num_of_access_nodes/2)%limit;
     map<uint32_t, set<uint32_t> > matrix_map_tmp = matrix_map;
     uint32_t host_node_name = matrix_map.size()-1;
-    uint8_t added_groups = 0;
+    uint32_t added_groups = 0;
 
     for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
             iter != matrix_map.end(); iter++) {
@@ -196,6 +196,7 @@ void Parser::parse(string& filepath, uint8_t group_size) {
             Ptr < Node > sourceNode = getNodeById(iter->first);
             uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
 
+            std::cout<<"group_size="<<group_size<<std::endl;
             for (unsigned gs = 0; gs < group_size; gs++) {
                 // add the new host node
                 Ptr < Node > newNode = CreateObject<Node>();

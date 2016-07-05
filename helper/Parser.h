@@ -56,7 +56,7 @@ class Parser : public Object
         Ptr<Node> getNodeById(uint32_t);
         uint32_t findId(Ptr<Node>);
         vector<Ptr<Node> > getNeighbors(uint32_t);
-        void parse(string &, uint8_t group_size);
+        void parse(string &, uint32_t group_size);
         Graph topology;
         Graph getGraph();
         

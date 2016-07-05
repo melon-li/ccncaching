@@ -13,6 +13,7 @@ NS_LOG_COMPONENT_DEFINE("CcnModule");
 uint32_t CcnModule::RX_INTERESTS = 0;
 uint32_t CcnModule::RX_DATA = 0;
 int CcnModule::COUNT = 0;
+uint32_t CcnModule::HITS = 0;
 
 Time CcnModule::ONE_NS = NanoSeconds(1);
 
@@ -158,10 +159,13 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     if (cache != NULL){
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
-        int32_t lookup_time = cache->get_cached_packet(pref, _id);
+        int64_t lookup_time = cache->get_cached_packet(pref, _id);
         //NS_LOG_UNCOND("lookup_time = "<<lookup_time);
         // if found cached response
-        if (lookup_time > 0)    {//if >0 then is found
+        if (lookup_time >= 0)    {//if >=0 then is found
+            //lookup_time=100000000000;
+            HITS++;
+            std::cout<<getNode()->GetId()<<" hit,"<<pref<<" "<<_id<<std::endl;
             uint8_t *tmp_p = new uint8_t[p->GetSize()] ;
             p->CopyData (tmp_p, p->GetSize());
             Ptr<CCN_Data> data = CreateObject<CCN_Data>(interest->getName(), tmp_p, p->GetSize(), interest->getBetweenness());
@@ -171,10 +175,11 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
             //sendData(interest->getName(), NULL, 0);
             NS_LOG_INFO("Router "<<getNode()->GetId()<<" found packet cached");
             return;
-         //if out-of-order, ingore it
-         }else if(lookup_time == 0){
-             return;
          }
+   
+        //if out-of-order, ingore and drop it
+        //if(lookup_time == 0) return;
+
         // lookup failed -> simulate SRAM delay
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME), &CcnModule::dohandleIncomingInterest, this, p, nd);
     }// cache is not enabled
@@ -242,12 +247,14 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
         //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
-        unsigned lookup_time = cache->cache_packet(pref, _id, NULL);
+        int64_t lookup_time = cache->cache_packet(pref, _id, NULL);
+        //lookup_time=100000000000;
        /* if(lookup_time>0){
             std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
         }*/
         NS_LOG_INFO("Cached packet "<<pref<<"/"<<_id<<" at router "<<getNode()->GetId()<<" router betw "<<this->getBetweenness()<<" packet "<<betw);
         Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
+        //Simulator::Schedule(Seconds(0.1), &CcnModule::dohandleIncomingData, this, p, nd);
     }    
     else{
         dohandleIncomingData(p, nd);

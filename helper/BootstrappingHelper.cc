@@ -13,7 +13,7 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("Bootstrapper");
 
-BootstrappingHelper::BootstrappingHelper(string filename,string output,uint8_t gsize, 
+BootstrappingHelper::BootstrappingHelper(string filename,string output,uint32_t gsize, 
        uint32_t seed, pair<char, double> _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap)
 {
     NS_LOG_INFO("Constructing BootstrappingHelper");
@@ -44,7 +44,7 @@ BootstrappingHelper::~BootstrappingHelper()
  * Intially reads topology file and creates NS-3 network, then adds a CCN_module at each
  * NS-3 network node
  */
-void BootstrappingHelper::parseTopology(uint8_t nodes_size)
+void BootstrappingHelper::parseTopology(uint32_t nodes_size)
 {
     parser=CreateObject<Parser>();
     parser->parse(filename, nodes_size); // creates the NS-3 network (nodes and links)
@@ -251,6 +251,7 @@ void BootstrappingHelper::startExperiment(){
             std::cout<<"false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<write_outoforder<<" total_stored_packets: "<<total_stored_packets<<" sram_stored_packets: "<<sram_stored_packets<<endl;
         }
         
+        std::cout<<"HITS="<<CcnModule::HITS<<std::endl;
         //print results and initialize structures again
         //----------------------------------------------------
         Ptr<ResultPrinter> rp=CreateObject<ResultPrinter>(nsNodeIdToModule,group_size,c,publisher_app,receiver_apps,output);

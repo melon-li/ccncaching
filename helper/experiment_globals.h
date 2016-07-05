@@ -17,8 +17,8 @@
 #define WIN_MAX 8
 #define LINK_DELAY "1ms"
 #define ACCESS_LINK_DELAY "1ms"
-#define LINK_CAPACITY "10000Mbps"
-#define ACCESS_LINK_CAPACITY "10Mbps"
+#define LINK_CAPACITY "100000Mbps"
+#define ACCESS_LINK_CAPACITY  "100000"// "10Mbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
 
@@ -47,7 +47,7 @@
 
 #define SRAM_ACCESS_TIME 450 // in pico seconds
 #define DRAM_ACCESS_TIME 30000 // in pico seconds
-#define DRAM_OLD_ACCESS_TIME 62.5
+#define DRAM_OLD_ACCESS_TIME 625
 
 
 #include "ns3/core-module.h"

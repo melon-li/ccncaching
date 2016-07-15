@@ -7,6 +7,7 @@
 #include <string>
 #include <unistd.h>
 #include "ns3/core-module.h"
+#include "ns3/data-rate.h"
 #include "ns3/network-module.h"
 #include "ns3/Trie.h"
 #include "ns3/PIT.h"
@@ -96,6 +97,15 @@ private:
 
     void doSendInterest(Ptr<CCN_Name> name, Ptr<LocalApp>);
     void doSendData(Ptr<CCN_Name>, uint8_t *buff, uint32_t bufflen);
+
+     
+    uint32_t buf_cnt;
+    map<Ptr<NetDevice>, int64_t> prev_sendtimes;
+    /*
+     *paragram: cache delay, PicoSeconds number
+     *return: PicoSeconds number after current time
+     */
+    int64_t get_sendtime(Ptr<NetDevice> nd, int64_t cache_delay);
 
     static Time ONE_NS;
     uint32_t terminator;

@@ -10,6 +10,7 @@
 
 #include "ns3/core-module.h"
 #include "ns3/CcnModule.h"
+#include "ns3/ccn-packets.h"
 #include "ns3/local_app.h"
 #include "ns3/CCN_Name.h"
 #include <map>
@@ -50,7 +51,7 @@ private:
     Ptr<LocalApp> localApp;
 
     uint32_t interests;
-
+    static uint8_t buf[PKT_SIZE];
     map<Ptr<CCN_Name>, Ptr<Packet> > data;
 };
 

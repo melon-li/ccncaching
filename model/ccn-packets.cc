@@ -10,7 +10,7 @@ namespace ns3 {
 
 uint8_t CCN_Packets::INTEREST = 0;
 uint8_t CCN_Packets::DATA = 1;
-
+uint8_t CCN_Data::buf[PKT_SIZE] = {0};
 
 
 CCN_Interest::CCN_Interest(Ptr<CCN_Name> nameIn, float _betweenness) {
@@ -78,6 +78,13 @@ CCN_Data::CCN_Data( Ptr<CCN_Name> nameIn,uint8_t* buffer, uint32_t buffsize, flo
 {
     name = nameIn;
     betweenness = _betweenness;
+    if(buffer == NULL){
+        uint32_t headerLength = sizeof(CCN_Packets::DATA)+ name->serializedSize()
+                              + sizeof(float) /*betweenness*/+ sizeof(uint32_t);
+        dataLength = PKT_SIZE - headerLength;
+        data = buf;
+        return;
+    }
     dataLength = buffsize;
     data = (uint8_t*) malloc(buffsize * sizeof(uint8_t));
     memcpy(data, buffer, buffsize * sizeof(uint8_t));
@@ -86,7 +93,7 @@ CCN_Data::CCN_Data( Ptr<CCN_Name> nameIn,uint8_t* buffer, uint32_t buffsize, flo
 CCN_Data::~CCN_Data() {
 
     name = 0;
-    if (data) {
+    if (data != buf) {
         free(data);
         data = 0;
     }
@@ -96,7 +103,7 @@ void CCN_Data::DoDispose(void) {
 
     name = 0;
     betweenness = 0;
-    if (data) {
+    if (data != buf) {
         free(data);
         data = 0;
     }

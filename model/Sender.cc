@@ -8,6 +8,7 @@ using std::string;
 namespace ns3 {
 
 int Sender::COUNT_SENDERS = 0;
+uint8_t Sender::buf[PKT_SIZE] = {0};
 
 Sender::Sender(Ptr<CcnModule> ccnmIn) {
     COUNT_SENDERS++;
@@ -84,8 +85,9 @@ void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
 Ptr<Packet> Sender::findData(Ptr<CCN_Name> ccnn){
     Ptr<Packet> packet = data[ccnn];
     if (packet == 0){
-        string nameString = ccnn->toString();
-        packet = Create<Packet>((uint8_t*)nameString.c_str(), nameString.size());
+        uint32_t headerlen = sizeof(CCN_Packets::DATA)+ ccnn->serializedSize()
+                              + sizeof(float) /*betweenness*/+ sizeof(uint32_t);
+        packet = Create<Packet>(buf, PKT_SIZE - headerlen);
         data[ccnn] = packet;
     }
 

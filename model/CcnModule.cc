@@ -30,6 +30,7 @@ CcnModule::CcnModule(Ptr<Node> node) {
     for (uint32_t i = 0; i < nodePtr->GetNDevices(); i++) {
 
         Ptr<NetDevice> device = nodePtr->GetDevice(i);
+        prev_sendtimes[device] = Simulator::Now().GetPicoSeconds();
         device->SetReceiveCallback(
                 MakeCallback(&CcnModule::handlePacket, this));
 
@@ -43,6 +44,7 @@ CcnModule::CcnModule(Ptr<Node> node) {
         addresses[device] = adr;
     }
     
+    buf_cnt = 0;
     terminator=0;
     betweenness=0;
 }
@@ -114,6 +116,7 @@ void CcnModule::sendThroughDevice(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     delete [] b;
     
     //bool sent = nd->Send(p2, addresses[nd], 0x88DD);
+    std::cout<<Simulator::Now ().GetSeconds ()<<" "<<getNode()->GetId()<<" SendThroughDevice"<<std::endl;
     bool sent = nd->Send(p2, addresses[nd], CCN_PROTO);
 
     if (!sent) {
@@ -143,13 +146,16 @@ uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {
     return b2;
 }
 
+
+
 void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     //struct timespec time_start={0, 0},time_end={0, 0};
     //clock_gettime(CLOCK_REALTIME, &time_start);
     //NS_LOG_UNCOND (Simulator::Now ().GetSeconds () << "\t<<<<<<<<<<<");
 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
-    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId() << " got interest "<<interest->getName()->toString() <<"\n";
+    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId() 
+             << " got interest "<<interest->getName()->toString() <<" packet size="<<p->GetSize()<<" \n";
     //cache is enabled, look for stored response
     float betw = interest->getBetweenness();
     if (ExperimentGlobals::CACHE_PLACEMENT == 1 && betw < this->getBetweenness()){
@@ -159,19 +165,20 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     if (cache != NULL){
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
-        int64_t lookup_time = cache->get_cached_packet(pref, _id);
+        int64_t lt = cache->get_cached_packet(pref, _id);
         //NS_LOG_UNCOND("lookup_time = "<<lookup_time);
         // if found cached response
-        if (lookup_time >= 0)    {//if >=0 then is found
-            //lookup_time=100000000000;
+        if (lt >= 0)    {//if >=0 then is found
+            uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME +lt);
+            //lookup_time *= 10;
+            std::cout<<"getcache time="<<lookup_time<<std::endl;
             HITS++;
+            uint8_t *tmp = NULL;
             std::cout<<getNode()->GetId()<<" hit,"<<pref<<" "<<_id<<std::endl;
-            uint8_t *tmp_p = new uint8_t[p->GetSize()] ;
-            p->CopyData (tmp_p, p->GetSize());
-            Ptr<CCN_Data> data = CreateObject<CCN_Data>(interest->getName(), tmp_p, p->GetSize(), interest->getBetweenness());
+            Ptr<CCN_Data> data = CreateObject<CCN_Data>(interest->getName(), tmp, 0, interest->getBetweenness());
             Ptr<const Packet> dataP=data->serializeToPacket();
             // simulate SRAM and DRAM delay 
-            Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::sendThroughDevice, this, dataP, nd);
+            Simulator::Schedule(PicoSeconds(lookup_time), &CcnModule::sendThroughDevice, this, dataP, nd);
             //sendData(interest->getName(), NULL, 0);
             NS_LOG_INFO("Router "<<getNode()->GetId()<<" found packet cached");
             return;
@@ -226,6 +233,7 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
     thePIT->update(interest->getName(), ptuple);
 
     Ptr<Packet> packet = interest->serializeToPacket();
+    std::cout<<Simulator::Now ().GetSeconds()<<" transfer, "<< nodePtr->GetId() <<" node, transfer "<<interest->getName()->toString()<<std::endl;
     sendThroughDevice(packet, outport);
 }
 
@@ -241,19 +249,27 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         cache_packet = false;
     }
     
-    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId() << " got data"<<data->getName()->toString() <<"\n";
+    //uint8_t *buffer = (uint8_t *)malloc((p->GetSize()+1)*sizeof(uint8_t));
+   // p->Serialize(buffer, p->GetSize());
+   // buffer[p->GetSize()+1] = '\0';
+    std::cout<<Simulator::Now ().GetSeconds()<<" "<<nodePtr->GetId()
+             << " got data"<<data->getName()->toString() 
+            <<" packet size="<<p->GetSize()<<"\n";
+    //free(buffer);
     // if caching is allowed at this node
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
         //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
-        int64_t lookup_time = cache->cache_packet(pref, _id, NULL);
-        //lookup_time=100000000000;
+        int64_t lt = cache->cache_packet(pref, _id, NULL);
+        uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME +lt);
+        //lookup_time *= 10;
+        std::cout<<"cache time="<<lookup_time<<std::endl;
        /* if(lookup_time>0){
             std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
         }*/
         NS_LOG_INFO("Cached packet "<<pref<<"/"<<_id<<" at router "<<getNode()->GetId()<<" router betw "<<this->getBetweenness()<<" packet "<<betw);
-        Simulator::Schedule(PicoSeconds(SRAM_ACCESS_TIME + lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
+        Simulator::Schedule(PicoSeconds(lookup_time), &CcnModule::dohandleIncomingData, this, p, nd);
         //Simulator::Schedule(Seconds(0.1), &CcnModule::dohandleIncomingData, this, p, nd);
     }    
     else{
@@ -360,6 +376,28 @@ map<Ptr<NetDevice>, Ptr<CcnModule> > CcnModule::getNeighborModules() {
 
 Ptr<PIT> CcnModule::getPIT() {
     return thePIT;
+}
+
+int64_t CcnModule::get_sendtime(Ptr<NetDevice> nd, int64_t cache_delay){
+    int64_t cur = Simulator::Now().GetPicoSeconds();
+    DataRate m_bps(LINK_CAPACITY);
+    uint64_t v = m_bps.GetBitRate();
+    int64_t pt = PKT_SIZE*8*pow(10,12)/v; // tranfering data time
+    map<Ptr<NetDevice>, int64_t>::iterator it =  prev_sendtimes.find(nd);
+    
+    if(it == prev_sendtimes.end()){
+        it->second = cur + cache_delay;
+        return cache_delay;
+    }
+   
+    if(cur >= (it->second+pt)){
+        it->second = cur + cache_delay;
+        return cache_delay;
+    }
+
+    it->second = cache_delay + it->second + pt;
+    cache_delay = cache_delay + it->second + pt - cur;
+    return cache_delay;
 }
 
 void CcnModule::doSendData(Ptr<CCN_Name> name, uint8_t* buff, uint32_t bufflen) {

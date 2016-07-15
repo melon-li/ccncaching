@@ -15,10 +15,10 @@
 #define ZIPF_A 0.75
 
 #define WIN_MAX 8
-#define LINK_DELAY "1ms"
-#define ACCESS_LINK_DELAY "1ms"
-#define LINK_CAPACITY "100000Mbps"
-#define ACCESS_LINK_CAPACITY  "100000"// "10Mbps"
+#define LINK_DELAY "0.2ms"
+#define ACCESS_LINK_DELAY "0.2ms"
+#define LINK_CAPACITY "100Gbps"
+#define ACCESS_LINK_CAPACITY  "100Mbps"// "10Mbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
 

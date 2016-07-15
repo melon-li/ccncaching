@@ -286,7 +286,9 @@ public:
     map<string , uint32_t> stats_table;
 
 //    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
-    bool is_last(const string &key, const uint32_t ID);
+    pair<bool,uint32_t>  is_last(const string &key, const uint32_t ID);
+    int32_t get_avg_writetime(const uint32_t ID, const uint32_t total_length);
+    int32_t get_avg_readtime(const string& key, const uint32_t ID);
     int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
     int32_t get_dram_packet(const string& filename, const uint32_t ID);
     inline void checkout_readcache(const Pkts& pkts);

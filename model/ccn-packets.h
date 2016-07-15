@@ -12,6 +12,7 @@
 #include "ns3/core-module.h"
 #include "ns3/packet.h"
 #include "ns3/CCN_Name.h"
+#include "ns3/experiment_globals.h"
 //#include "ns3/mod-module.h"
 
 using std::string;
@@ -78,6 +79,7 @@ private:
     Ptr<CCN_Name> name;
     uint8_t * data;
     uint32_t dataLength;
+    static uint8_t buf[PKT_SIZE];
     float betweenness;
 
 };

@@ -294,6 +294,7 @@ public:
     inline void checkout_readcache(const Pkts& pkts);
     int32_t get_writecached_packet(const string& key, const uint32_t ID);
     int32_t get_readcached_packet(const string& key, const uint32_t ID);
+    int32_t get_readcached_packet2(const string& key, const uint32_t ID);
     uint32_t remove_last_packets_r(const string& _filename);
     int32_t remove_last_file_r();//new by argi
     uint32_t remove_last_packets_w(const string& _filename);

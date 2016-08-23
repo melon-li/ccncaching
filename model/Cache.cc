@@ -607,16 +607,18 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
     }
 }
 
-//if return value >0:found,  <0: forward, delete the packet after read
-/*int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
+//if return value >0:found,  <0: forward, 
+//delete  packet after read to make room for residual data block from DRAM
+int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
     Cachetable::iterator cit = cache_table_r.find(key);
     if(cit != cache_table_r.end()){
-        Pkts::iterator front = cit->second.begin();
-        if(ID != front->first){
-            std::cout<<"order: "<<key<<" "<<ID<<" "<<front->first<<std::endl;
-            return 0;
+        Pkts::iterator pit = cit->second.begin();
+        if(ID != pit->first){
+            std::cout<<"WARNING: out of order, "<<key<<" "<<ID<<" "<<pit->first<<std::endl;
+            return -1;
         }
-        Pkts::iterator pit = cit->second.find(ID);
+        /*
+        //pit = cit->second.find(ID);
         //if request one packet repeatedly, do not response
         if(pit ==  cit->second.end()){
             std::cout<<"order: "<<key<<" "<<ID<<" "<<std::endl;
@@ -626,25 +628,27 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
    
              return 1;
              return -1;
-        }
-        //cit->second.erase(front);
+        }*/
+        cit->second.erase(pit);
+        readcache_pcks--;
         if(cit->second.size() == 0) {
             cache_table_r.erase(cit);
             LRU->remove_object(LRU->objects[key]);
         }else{
             LRU->update_object(LRU->objects[key]);
         }
-        //readcache_pcks--;
-        //}
-        log_file_hit(_filename, _ID);
-        hits++;
          
-        return 1;
+        uint32_t req = get_file_requests(key.substr(0, key.rfind("-")), 
+                                              std::to_string(ID+1));
+        clear_file_requests(key.substr(0, key.rfind("-")), 
+                                              std::to_string(ID+1));
+        hits += req;
+        return 0;
     }
+    return -1;
 }
-*/
 
-//if return value >0:found,  <0: forward
+//if return value >=0:found,  <0: forward
 int32_t S_Cache::get_readcached_packet(const string& key, const uint32_t ID){
     Cachetable::iterator cit = cache_table_r.find(key);
     if(cit == cache_table_r.end()) return -1;
@@ -657,22 +661,6 @@ int32_t S_Cache::get_readcached_packet(const string& key, const uint32_t ID){
     hits += req;
     return 0;
 }
-
-
-//if return value >0:found,  <0: forward, delete the packet after read
-/*int32_t S_Cache::get_readcached_packet2(const string& key, const uint32_t ID){
-    Cachetable::iterator cit = cache_table_r.find(key);
-    if(cit == cache_table_r.end()) return -1;
-    LRU->update_object(LRU->objects[key]);
-    //log_file_hit(_filename, _ID);
-    uint32_t req = get_file_requests(key.substr(0, key.rfind("-")), 
-                                              std::to_string(ID+1));
-    clear_file_requests(key.substr(0, key.rfind("-")), 
-                                              std::to_string(ID+1));
-    hits += req;
-    return 0;
-}
-*/
 
 //if return value >0:found,  <0: forward
 int32_t S_Cache::get_writecached_packet(const string& key, const uint32_t ID){
@@ -761,6 +749,7 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
    
     int32_t lt = get_avg_readtime(key, ID); 
+    //lookup_time = get_readcached_packet2(key, ID);
     lookup_time = get_readcached_packet(key, ID);
     //if(lookup_time >=0) return lookup_time;
     if(lookup_time >=0) return lt;

@@ -613,10 +613,18 @@ int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
     Cachetable::iterator cit = cache_table_r.find(key);
     if(cit != cache_table_r.end()){
         Pkts::iterator pit = cit->second.begin();
+        //drop first packet,it is for compatibility with S_Cache::get_readcached_packet
+        if(key.substr(key.rfind("-")+1) == std::to_string(ID-1)){
+            cit->second.erase(pit);
+            readcache_pcks--;
+            pit = cit->second.begin();
+        }
         if(ID != pit->first){
-            std::cout<<"WARNING: out of order, "<<key<<" "<<ID<<" "<<pit->first<<std::endl;
+            std::cout<<"WARNING: out of order, key="<<key<<"ID="<<ID<<" Front="<<pit->first<<std::endl;
             return -1;
         }
+        cit->second.erase(pit);
+        readcache_pcks--;
         /*
         //pit = cit->second.find(ID);
         //if request one packet repeatedly, do not response
@@ -629,8 +637,7 @@ int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
              return 1;
              return -1;
         }*/
-        cit->second.erase(pit);
-        readcache_pcks--;
+
         if(cit->second.size() == 0) {
             cache_table_r.erase(cit);
             LRU->remove_object(LRU->objects[key]);
@@ -683,7 +690,7 @@ inline void S_Cache::checkout_readcache(const Pkts& pkts){
     while(readcache_pcks + pkts.size() >= capacity_fast_table){
             int32_t removed_packets = remove_last_file_r();
             if (removed_packets == -1)
-                NS_ASSERT_MSG(false, "Failed to emove packets");
+                NS_ASSERT_MSG(false, "Failed to remove packets");
             readcache_pcks -= removed_packets;
             readcache_rmlru++;
     }
@@ -749,8 +756,8 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
    
     int32_t lt = get_avg_readtime(key, ID); 
-    //lookup_time = get_readcached_packet2(key, ID);
-    lookup_time = get_readcached_packet(key, ID);
+    lookup_time = get_readcached_packet2(key, ID);
+    //lookup_time = get_readcached_packet(key, ID);
     //if(lookup_time >=0) return lookup_time;
     if(lookup_time >=0) return lt;
 

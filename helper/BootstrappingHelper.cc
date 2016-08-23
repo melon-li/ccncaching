@@ -203,7 +203,7 @@ void BootstrappingHelper::startExperiment(){
         Simulator::Run();//start the simulator ekteleitai h start toy reiceiver
         Simulator::Stop(Seconds(10));
 
-        uint32_t dtime = Now().ToInteger(Time::MS);
+        uint64_t dtime = Now().ToInteger(Time::MS);
         finished = true;
         std::cout<<"Overall service time: ms:"<<Now().ToInteger(Time::MS)<<" ps:"<<Now().ToInteger(Time::PS)<<" ("<<(starttime)<<") "<<endl; 
         

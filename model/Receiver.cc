@@ -31,6 +31,9 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     localApp->setDataCallback(dataCb);
     
     aborted_chunks=0;
+    current_filename = "";
+    current_filesize = 0;
+    current_fileseq = 0;
 }
 
 Receiver::~Receiver() {
@@ -97,66 +100,70 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
     }else{
         returned++;
         asked.erase(name);
-        if(current_sequence > current_filesize){
-             start();
-             return;
-        }else{
-            //simulate download abortions
-            /*if (current_sequence%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
-                aborted_chunks += current_filesize - current_sequence;
-                NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" aborted chunks: "<<aborted_chunks);
-                start();
-                return;
-            }*/
-            sendInterests();
+        //simulate download abortions
+        /*if (current_sequence%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
+            aborted_chunks += current_filesize - current_sequence;
+            NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" aborted chunks: "<<aborted_chunks);
+            start();
             return;
-        }
+         }*/
+        sendInterests();
     }
 }
 
 void Receiver::start() {
-        if (workload.empty()){
-            std::cout<<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
-                     <<Now().ToInteger(Time::MS)<<" askedfor="<<askedfor<<std::endl;
-            return;
-        }
-
-        if (workload.size()%100==0){
-            NS_LOG_INFO(Now().ToInteger(Time::MS)<<" Receiver: "<<ccnm->getNodeId()
-                        <<" remaining downloads: "<<workload.size());
-        }
-
         //NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" requested file: "<<workload.at(workload.size()-1).first);
-        std::cout<<"Receiver: "<<ccnm->getNodeId()<<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
-        current_filename = workload.at(workload.size()-1).first;
-        current_filesize = workload.at(workload.size()-1).second;
-        current_sequence =  1;
         sendInterests();
-        workload.pop_back();
 }
 
 void Receiver::sendInterests(){
-        uint32_t i = 1;
+        uint32_t i = 0;
         vector<string> tokens;
-        tokens.push_back(ROOT_DOMAIN);//eg. domain1
-        tokens.push_back(current_filename);
-        Ptr<CCN_Name> theName;        
-        for(i=current_sequence; i<=current_filesize; i++){
+
+        while(1){
+            if(current_fileseq > current_filesize or current_filesize == 0){
+                if(workload.empty()){
+                    if(asked.size()) return;
+                    std::cout<<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
+                         <<Now().ToInteger(Time::MS)<<" askedfor="<<askedfor<<std::endl;
+                    return;
+                }
+
+                if (workload.size()%100==0){
+                    NS_LOG_INFO(Now().ToInteger(Time::MS)<<" Receiver: "<<ccnm->getNodeId()
+                                <<" remaining downloads: "<<workload.size());
+                }
+
+                std::cout<<"Receiver: "<<ccnm->getNodeId()
+                          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
+                current_filename = workload.at(workload.size()-1).first;
+                current_filesize = workload.at(workload.size()-1).second;
+                current_fileseq =  1;
+                workload.pop_back();
+            }
+
+            tokens.clear();
+            tokens.push_back(ROOT_DOMAIN);//eg. domain1
+            tokens.push_back(current_filename);
+            Ptr<CCN_Name> theName;        
+            for(i=current_fileseq; i<=current_filesize; i++){
+                if(asked.size() >= WIN_MAX) break;
+                tokens.push_back(int2str(i));
+                theName = CreateObject<CCN_Name>(tokens);        
+                tokens.pop_back();
+                if (asked.find(theName) != asked.end())  continue;
+                asked.insert(theName);
+                Simulator::Schedule(PicoSeconds(0), &Receiver::doSendInterest, this, theName);
+            }
+            current_fileseq = i;
             if(asked.size() >= WIN_MAX) break;
-            tokens.push_back(int2str(i));
-            theName = CreateObject<CCN_Name>(tokens);        
-            asked.insert(theName);
-            Simulator::Schedule(PicoSeconds(0), &Receiver::doSendInterest, this, theName);
-            tokens.pop_back();
         }
-        current_sequence = i; 
 }
 
 
 void Receiver::doSendInterest(Ptr<CCN_Name> name){
-    askedfor++;
-    asked.insert(name);
 //    std::cout<<Now().ToInteger(Time::MS)<<" "<<ccnm->getNodeId()<<" asking for: "<<name->toString()<<std::endl;
+    askedfor++;
     this->ccnm->sendInterest(name, localApp);
 }
 

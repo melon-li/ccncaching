@@ -607,7 +607,7 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
     }
 }
 
-//if return value >0:found, =0:ignore and drop it, <0: forward
+//if return value >0:found,  <0: forward, delete the packet after read
 /*int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
     Cachetable::iterator cit = cache_table_r.find(key);
     if(cit != cache_table_r.end()){
@@ -641,7 +641,8 @@ void S_Cache::log_file_hit(const string& _filename, const string& _ID){
          
         return 1;
     }
-}*/
+}
+*/
 
 //if return value >0:found,  <0: forward
 int32_t S_Cache::get_readcached_packet(const string& key, const uint32_t ID){
@@ -656,6 +657,22 @@ int32_t S_Cache::get_readcached_packet(const string& key, const uint32_t ID){
     hits += req;
     return 0;
 }
+
+
+//if return value >0:found,  <0: forward, delete the packet after read
+/*int32_t S_Cache::get_readcached_packet2(const string& key, const uint32_t ID){
+    Cachetable::iterator cit = cache_table_r.find(key);
+    if(cit == cache_table_r.end()) return -1;
+    LRU->update_object(LRU->objects[key]);
+    //log_file_hit(_filename, _ID);
+    uint32_t req = get_file_requests(key.substr(0, key.rfind("-")), 
+                                              std::to_string(ID+1));
+    clear_file_requests(key.substr(0, key.rfind("-")), 
+                                              std::to_string(ID+1));
+    hits += req;
+    return 0;
+}
+*/
 
 //if return value >0:found,  <0: forward
 int32_t S_Cache::get_writecached_packet(const string& key, const uint32_t ID){

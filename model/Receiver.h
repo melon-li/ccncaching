@@ -62,10 +62,12 @@ private:
     uint32_t returned;
     uint32_t aborted_chunks;
 
-
+    // current_filename, current_filesize,current_sequence
     string current_filename;
     uint32_t current_filesize;
-    uint32_t current_sequence;
+    uint32_t current_fileseq;
+    //typedef Info pair<uint32_t, uint32_t>;
+    //map<string, Info> requested_files;
 };
 }
 #endif

@@ -153,6 +153,7 @@ void Receiver::sendInterests(){
                 tokens.pop_back();
                 if (asked.find(theName) != asked.end())  continue;
                 asked.insert(theName);
+                std::cout<<"rec send interest "<<theName->toString()<<std::endl;
                 Simulator::Schedule(PicoSeconds(0), &Receiver::doSendInterest, this, theName);
             }
             current_fileseq = i;

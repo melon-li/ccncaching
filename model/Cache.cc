@@ -614,15 +614,16 @@ int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
     if(cit != cache_table_r.end()){
         Pkts::iterator pit = cit->second.begin();
         //drop first packet,it is for compatibility with S_Cache::get_readcached_packet
-        if(key.substr(key.rfind("-")+1) == std::to_string(ID-1)){
+        if(key.substr(key.rfind("-")+1) == std::to_string(ID-1) && pit->first == (ID-1)){
             cit->second.erase(pit);
             readcache_pcks--;
             pit = cit->second.begin();
         }
         if(ID != pit->first){
-            std::cout<<"WARNING: out of order, key="<<key<<"ID="<<ID<<" Front="<<pit->first<<std::endl;
+            std::cout<<"WARNING: out of order, key="<<key<<" ID="<<ID<<" Front="<<pit->first<<std::endl;
             return -1;
         }
+        //std::cout<<"getcache:"<<key<<" "<<pit->first<<std::endl;
         cit->second.erase(pit);
         readcache_pcks--;
         /*
@@ -726,7 +727,16 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
      
     checkout_readcache(pr.second);
 
-    cache_table_r.insert(Cachetable::value_type(key, pr.second));
+    pair<Cachetable::iterator,bool> result = cache_table_r.insert(Cachetable::value_type(key, pr.second));
+    // failed to insert, key may exist in cache_table_r
+    if (result.second == false){
+        if(cache_table_r.find(key) != cache_table_r.end()){
+            readcache_pcks -= cache_table_r[key].size();
+            LRU->remove_object(LRU->objects[key]);
+            cache_table_r[key] = pr.second;
+        }
+    }
+
     LRU_Object * _obj  = new LRU_Object(key);
     LRU->add_object(_obj);     
     readcache_pcks += pr.second.size();  

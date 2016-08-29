@@ -773,7 +773,7 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
 
     lookup_time = get_writecached_packet(key, ID);
     //if(lookup_time >=0) return lookup_time;
-    if(lookup_time >=0) return lt;
+    if(lookup_time >=0) return 0;
 
     //if not cached in sram, and checkout if stored in dram
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 

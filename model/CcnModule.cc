@@ -386,18 +386,20 @@ int64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, int64_t cache_delay){
    
     std::cout<<"cache_delay ="<<cache_delay<<",pt="<<pt<<std::endl;
     cache_delay = cache_delay > pt?cache_delay-pt:0; 
+
+    //there are not other packets in queue of nd device
     if(it == prev_sendtimes.end()){
         it->second = cur + cache_delay;
         return cache_delay;
     }
-   
     if(cur >= (it->second+pt)){
         it->second = cur + cache_delay;
         return cache_delay;
     }
 
-    it->second = cache_delay + it->second + pt;
-    cache_delay = cache_delay + it->second + pt - cur;
+    //there are other packets in queue of nd device
+    cache_delay = cache_delay + (it->second + pt - cur);
+    it->second += (cache_delay + pt);
     return cache_delay;
 }
 

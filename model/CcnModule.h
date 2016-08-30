@@ -105,7 +105,7 @@ private:
      *paragram: cache delay, PicoSeconds number
      *return: PicoSeconds number after current time
      */
-    int64_t get_sendtime(Ptr<NetDevice> nd, int64_t cache_delay);
+    uint64_t get_sendtime(Ptr<NetDevice> nd, uint64_t cache_delay);
 
     static Time ONE_NS;
     uint32_t terminator;

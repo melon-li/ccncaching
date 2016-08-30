@@ -717,6 +717,7 @@ int32_t S_Cache::get_avg_readtime(const string& key, const uint32_t ID){
 int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
     int32_t lookup_time = 0;
     uint32_t addr = 0;
+    int32_t pcks_num = 0;
     addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num;
     map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
@@ -731,7 +732,7 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
     // failed to insert, key may exist in cache_table_r
     if (result.second == false){
         if(cache_table_r.find(key) != cache_table_r.end()){
-            readcache_pcks -= cache_table_r[key].size();
+            pcks_num -= cache_table_r[key].size();
             LRU->remove_object(LRU->objects[key]);
             cache_table_r[key] = pr.second;
         }
@@ -739,10 +740,10 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
 
     LRU_Object * _obj  = new LRU_Object(key);
     LRU->add_object(_obj);     
-    readcache_pcks += pr.second.size();  
-    
+    pcks_num += pr.second.size();  
+    readcache_pcks += pcks_num;  
     // cal lookup_time
-    lookup_time = (PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME*(pr.second.size()) + \
+    lookup_time = (PKT_SIZE/WIDTH)*pcks_num*DRAM_OLD_ACCESS_TIME + \
                                       DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
 
     //log_file_hit(_filename, _ID);
@@ -765,11 +766,11 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     key += "-";
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
    
-    int32_t lt = get_avg_readtime(key, ID); 
-    lookup_time = get_readcached_packet2(key, ID);
-    //lookup_time = get_readcached_packet(key, ID);
-    //if(lookup_time >=0) return lookup_time;
-    if(lookup_time >=0) return lt;
+    //int32_t lt = get_avg_readtime(key, ID); 
+   // lookup_time = get_readcached_packet2(key, ID);
+    lookup_time = get_readcached_packet(key, ID);
+    if(lookup_time >=0) return lookup_time;
+    //if(lookup_time >=0) return lt;
 
     lookup_time = get_writecached_packet(key, ID);
     //if(lookup_time >=0) return lookup_time;
@@ -786,8 +787,8 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
         return -1;
     }
 
-    //return lookup_time;
-    return lt;
+    return lookup_time;
+    //return lt;
 }
 
 int32_t S_Cache::remove_last_file_w(){
@@ -886,7 +887,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
     pair<bool,uint32_t> islast = is_last(key, ID);
     char* data = NULL;
 
-    uint32_t wt = get_avg_writetime(ID, islast.second);
+    //uint32_t wt = get_avg_writetime(ID, islast.second);
 
     //data = new char[PAYLOAD_SIZE];
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
@@ -906,7 +907,7 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
         sram_stored_packets++;
         //up to PKT_NUM or islast is true
         if(it->second.size() >= PKT_NUM || islast.first){
-            //uint32_t wt = store_packets(key, ID, it->second);
+            uint32_t wt = store_packets(key, ID, it->second);
             store_packets(key, ID, it->second);
             LRU_W->remove_object(LRU_W->objects[key]);
             writecache_pcks -= it->second.size();
@@ -925,8 +926,8 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
         pkts.insert(Pkts::value_type(ID, data));
         if(islast.first){
              sram_stored_packets++;
-             //return store_packets(key, ID, pkts);
-             return wt;
+             return store_packets(key, ID, pkts);
+             //return wt;
          }else{
             cache_table_w.insert(Cachetable::value_type(key, pkts));
             writecache_pcks++;
@@ -935,8 +936,8 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
             LRU_W->add_object(_obj);        
          } 
     }  
-   //return 0;
-    return wt;
+    return 0;
+    //return wt;
 }
 
 bool S_Cache::is_reallycached(const string &key){
@@ -977,9 +978,6 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
     return write_time;    
 }
-
-
-    
 
 bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     NS_ASSERT_MSG(capacity, "capacity can not be zero");

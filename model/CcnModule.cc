@@ -146,8 +146,8 @@ uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {
 }
 
 
-
-void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
+uint8_t cnt = 0;
+void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
     //struct timespec time_start={0, 0},time_end={0, 0};
     //clock_gettime(CLOCK_REALTIME, &time_start);
     //NS_LOG_UNCOND (Simulator::Now ().GetPicoSeconds () << "\t<<<<<<<<<<<");
@@ -165,12 +165,22 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
         int64_t lt = cache->get_cached_packet(pref, _id);
+        //std::cout<<getNode()->GetId()<<" hit-pre,"<<pref<<" "<<_id<<std::endl;
         //NS_LOG_UNCOND("lookup_time = "<<lookup_time);
         // if found cached response
+       /* cnt++;
+        if(cnt >= 8){
+            cnt = 0;
+            lt = 966875;
+        }else{
+            lt = 0;
+        }*/
+        //lt = 120859;
         if (lt >= 0)    {//if >=0 then is found
-            uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME +lt);
-            //lookup_time *= 100;
-            std::cout<<"getcache time="<<lookup_time<<std::endl;
+        //lt = 45000000;
+            uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME+uint64_t(lt));
+            //lookup_time = 100;
+            std::cout<<"getcache time for interest="<<lookup_time<<std::endl;
             HITS++;
             uint8_t *tmp = NULL;
             std::cout<<getNode()->GetId()<<" hit,"<<pref<<" "<<_id<<std::endl;
@@ -262,8 +272,8 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
         int64_t lt = cache->cache_packet(pref, _id, NULL);
         uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME +lt);
-        //lookup_time *= 100;
-        std::cout<<"cache time="<<lookup_time<<std::endl;
+        //lookup_time = 100;
+        std::cout<<"data cache time="<<lookup_time<<std::endl;
        /* if(lookup_time>0){
             std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";
         }*/
@@ -377,14 +387,14 @@ Ptr<PIT> CcnModule::getPIT() {
     return thePIT;
 }
 
-int64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, int64_t cache_delay){
-    int64_t cur = Simulator::Now().GetPicoSeconds();
+uint64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, uint64_t cache_delay){
+    uint64_t cur = Simulator::Now().GetPicoSeconds();
     DataRate m_bps(LINK_CAPACITY);
     uint64_t v = m_bps.GetBitRate();
-    int64_t pt = PKT_SIZE*8*pow(10,12)/v; // tranfering data time
+    uint64_t pt = PKT_SIZE*8*pow(10,12)/v; // tranfering data time
     map<Ptr<NetDevice>, int64_t>::iterator it =  prev_sendtimes.find(nd);
    
-    std::cout<<"cache_delay ="<<cache_delay<<",pt="<<pt<<std::endl;
+    //std::cout<<"cache_delay ="<<cache_delay<<",pt="<<pt<<std::endl;
     cache_delay = cache_delay > pt?cache_delay-pt:0; 
 
     //there are not other packets in queue of nd device
@@ -399,7 +409,7 @@ int64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, int64_t cache_delay){
 
     //there are other packets in queue of nd device
     cache_delay = cache_delay + (it->second + pt - cur);
-    it->second += (cache_delay + pt);
+    it->second = cur + cache_delay;
     return cache_delay;
 }
 

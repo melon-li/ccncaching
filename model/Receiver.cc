@@ -18,7 +18,8 @@ int Receiver::COUNT_RECEIVERS = 0;
 Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     COUNT_RECEIVERS++;
     askedfor = 0;
-    asked = set<Ptr<CCN_Name> >();
+    asked = map<Ptr<CCN_Name>, uint64_t>();
+    asking = 0;
 
     returned = 0;
     ccnm = ccnmIn;
@@ -41,6 +42,7 @@ Receiver::~Receiver() {
     localApp = 0;
     dataName = 0;
     asked.clear();
+    asking = 0;
 }
 
 void Receiver::DoDispose(void){
@@ -48,6 +50,7 @@ void Receiver::DoDispose(void){
     localApp = 0;
     dataName = 0;
     asked.clear();
+    asking = 0;
 
     COUNT_RECEIVERS--;
 
@@ -95,11 +98,17 @@ void Receiver::handleInterest(Ptr<CCN_Name>){
 }
 
 void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
-    if (asked.find(name) == asked.end()){
+    map<Ptr<CCN_Name>, uint64_t>::iterator it = asked.find(name);
+    if (it == asked.end()){
         NS_ASSERT_MSG(false, "Got a Data for interest not asked " << name->toString());
     }else{
         returned++;
-        asked.erase(name);
+        asking--;
+        if(it->second > 1){
+            it->second--;
+        }else{
+            asked.erase(name);
+        }
         //simulate download abortions
         /*if (current_sequence%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
             aborted_chunks += current_filesize - current_sequence;
@@ -147,17 +156,22 @@ void Receiver::sendInterests(){
             tokens.push_back(current_filename);
             Ptr<CCN_Name> theName;        
             for(i=current_fileseq; i<=current_filesize; i++){
-                if(asked.size() >= WIN_MAX) break;
+                if(asking >= WIN_MAX) break;
                 tokens.push_back(int2str(i));
                 theName = CreateObject<CCN_Name>(tokens);        
                 tokens.pop_back();
-                if (asked.find(theName) != asked.end())  continue;
-                asked.insert(theName);
+                map<Ptr<CCN_Name>, uint64_t>::iterator it = asked.find(theName);
+                if (it != asked.end()){
+                    it->second++;
+                }else{
+                    asked.insert(std::make_pair(theName, 1));
+                }
+                asking++;
                 std::cout<<"rec send interest "<<theName->toString()<<std::endl;
                 Simulator::Schedule(PicoSeconds(0), &Receiver::doSendInterest, this, theName);
             }
             current_fileseq = i;
-            if(asked.size() >= WIN_MAX) break;
+            if(asking >= WIN_MAX) break;
         }
 }
 

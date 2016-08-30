@@ -14,11 +14,11 @@
 #define ROOT_DOMAIN "domain1"
 #define ZIPF_A 0.75
 
-#define WIN_MAX 7000//8
+#define WIN_MAX 7000 //7000
 #define LINK_DELAY "0.5ms"
 #define ACCESS_LINK_DELAY "0.5ms"
 #define LINK_CAPACITY "100Gbps"
-#define ACCESS_LINK_CAPACITY  "90Gbps"// "10Mbps"
+#define ACCESS_LINK_CAPACITY  "1Gbps"// "10Mbps" just for send rate, receiving rate is unlimited
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
 

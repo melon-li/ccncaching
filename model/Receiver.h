@@ -58,7 +58,8 @@ private:
     uint32_t length;
     Ptr<CCN_Name> dataName;
     uint32_t askedfor;
-    set<Ptr<CCN_Name> > asked;
+    map<Ptr<CCN_Name>, uint64_t> asked;
+    uint64_t asking;
     uint32_t returned;
     uint32_t aborted_chunks;
 

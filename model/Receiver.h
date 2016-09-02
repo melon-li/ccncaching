@@ -11,7 +11,7 @@
 #include "ns3/core-module.h"
 #include "ns3/CcnModule.h"
 #include "ns3/local_app.h"
-
+#include <math.h>
 #include <set>
 
 using std::set;
@@ -54,11 +54,14 @@ private:
     Ptr<CcnModule> ccnm;
     Ptr<LocalApp> localApp;
 
+    uint64_t sendRate;
+    uint64_t maxRate;
+    uint32_t asked_size;
     uint8_t* data;
     uint32_t length;
     Ptr<CCN_Name> dataName;
     uint32_t askedfor;
-    map<Ptr<CCN_Name>, uint64_t> asked;
+    set<Ptr<CCN_Name> > asked;
     uint64_t asking;
     uint32_t returned;
     uint32_t aborted_chunks;

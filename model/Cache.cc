@@ -36,6 +36,7 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         hits += req;
         //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second<<std::endl;
         uint16_t tmp = (it->second - ID + 1);
+        std::cout<<"tmp="<<tmp<<std::endl;
         reads_for_fetchings += tmp;
         lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
         return lookup_time;
@@ -767,7 +768,7 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
    
     //int32_t lt = get_avg_readtime(key, ID); 
-   // lookup_time = get_readcached_packet2(key, ID);
+    //lookup_time = get_readcached_packet2(key, ID);
     lookup_time = get_readcached_packet(key, ID);
     if(lookup_time >=0) return lookup_time;
     //if(lookup_time >=0) return lt;

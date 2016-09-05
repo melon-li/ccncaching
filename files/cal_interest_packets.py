@@ -8,9 +8,17 @@ Created on 2016.6.23
 
 
 import cityhash
+import sys
 
-workload_file = "./workload_globetraff"
-#workload_file = "./hehe"
+if len(sys.argv) != 2:
+    print 'Usage:%s <workload_file>' % sys.argv[0]
+    sys.exit(1)
+workload_file = sys.argv[1]
+
+if workload_file == "":
+    workload_file = "./workload_globetraff"
+
+print "Analyze %s" % workload_file
 
 i=0
 dram_dict = {}
@@ -21,9 +29,11 @@ collision_cnt = 0
 with open(workload_file, 'r') as wkf:
     while(True):
         buf = wkf.readline()
+        buf = buf.strip()
         if(buf == ""):
             break
         pkt = buf.split(" ")
+        if len(pkt) < 2: pkt = buf.split("\t")
         pkt_size = pkt_size + int(pkt[1])
        # files_name.add(pkt[0])
         files_list.append(buf)
@@ -39,6 +49,7 @@ while(len(files_set)):
 #    print "len = %d" % len(files_set)
     buf = files_set.pop()
     pkt = buf.split(" ")
+    if len(pkt) < 2: pkt = buf.split("\t")
     pkt_size = pkt_size + int(pkt[1])
 print "Total independent interest packets of receivers = %d" % (pkt_size)
 print "Red rate=%.2f" % (pkt_size/float(old))

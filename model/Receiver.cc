@@ -18,9 +18,9 @@ int Receiver::COUNT_RECEIVERS = 0;
 Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     COUNT_RECEIVERS++;
     maxRate = DataRate(LINK_THROUGHTPUT).GetBitRate();
+    maxLen = maxRate/(DataRate(USER_EXPERIENCED_RATE).GetBitRate());
     maxRate = maxRate*REQ_SIZE/PKT_SIZE;
     sendRate = maxRate;
-    maxLen = maxRate/(DataRate(USER_EXPERIENCED_RATE).GetBitRate());
     offSet = 0;
     asked_size = (maxRate*TTL)/(REQ_SIZE*8);
     askedfor = 0;
@@ -178,6 +178,7 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
         std::pair<string, std::pair<uint32_t, uint32_t>> p;
 
         //assemble sendFiles to MaxLen
+        std::cout<<"maxLen="<<maxLen<<std::endl;
         while(sendFiles.size() < maxLen){
 
             if(workload.empty()) break;
@@ -216,6 +217,7 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
             }
         }while(ENABLE_AGGREGATION && asked.find(theName) != asked.end());
 
+        std::cout<<"offSet="<<offSet<<std::endl;
         return theName;
 }
 

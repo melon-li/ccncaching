@@ -165,22 +165,10 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
         int64_t lt = cache->get_cached_packet(pref, _id);
-        //std::cout<<getNode()->GetId()<<" hit-pre,"<<pref<<" "<<_id<<std::endl;
-        //NS_LOG_UNCOND("lookup_time = "<<lookup_time);
-        // if found cached response
-       /* cnt++;
-        if(cnt >= 8){
-            cnt = 0;
-            lt = 966875;
-        }else{
-            lt = 0;
-        }*/
-        //lt = 120859;
-        lt = -1;
+        //int64_t lt = -1;
         if (lt >= 0)    {//if >=0 then is found
-        //lt = 45000000;
             uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME+uint64_t(lt));
-            lookup_time = 0;
+            //lookup_time = 0;
             std::cout<<"getcache time for interest="<<lookup_time<<std::endl;
             HITS++;
             uint8_t *tmp = NULL;
@@ -271,9 +259,11 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
         //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
+
         int64_t lt = cache->cache_packet(pref, _id, NULL);
+        //int64_t lt = 0;
         uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME +lt);
-        lookup_time = 0;
+        //lookup_time = 0;
         std::cout<<"data cache time="<<lookup_time<<std::endl;
        /* if(lookup_time>0){
             std::cout<<nodePtr->GetId() << " got data "<<data->getName()->toString()<<" lookup_time="<<lookup_time<<"\n";

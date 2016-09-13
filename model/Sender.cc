@@ -83,13 +83,14 @@ void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
 }
 
 Ptr<Packet> Sender::findData(Ptr<CCN_Name> ccnn){
-    Ptr<Packet> packet = data[ccnn];
-    if (packet == 0){
+    Ptr<Packet> packet = NULL;
+  //  Ptr<Packet> packet = data[ccnn];
+  //  if (packet == 0){
         uint32_t headerlen = sizeof(CCN_Packets::DATA)+ ccnn->serializedSize()
                               + sizeof(float) /*betweenness*/+ sizeof(uint32_t);
         packet = Create<Packet>(buf, PKT_SIZE - headerlen);
-        data[ccnn] = packet;
-    }
+  //      data[ccnn] = packet;
+   // }
 
     return packet;
 }

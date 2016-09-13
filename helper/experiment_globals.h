@@ -11,7 +11,7 @@
 #define CCN_PROTO 0x88DD
 #define NUMBER_OF_RUNS 1
 
-#define ROOT_DOMAIN "domain1"
+#define ROOT_DOMAIN "D1"
 #define ZIPF_A 0.75
 
 #define WIN_MAX 7000 //7000

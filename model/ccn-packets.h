@@ -77,7 +77,7 @@ public:
 private:
 
     Ptr<CCN_Name> name;
-    uint8_t * data;
+    uint8_t * data = NULL;
     uint32_t dataLength;
     static uint8_t buf[PKT_SIZE];
     float betweenness;

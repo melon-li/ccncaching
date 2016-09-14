@@ -104,8 +104,8 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
     }else{
         returned++;
         asked.erase(name);
-        std::cout<<"asking="<<asked.size()<<std::endl;
-        std::cout<<"asked_size="<<asked_size<<std::endl;
+        //std::cout<<"asking="<<asked.size()<<std::endl;
+        //std::cout<<"asked_size="<<asked_size<<std::endl;
         
         //simulate download abortions
         /*if (current_sequence%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
@@ -118,8 +118,9 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
 
         if(workload.empty()){
             if(asked.size()) return;
-            std::cout<<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
-                 <<Now().ToInteger(Time::MS)<<" askedfor="<<askedfor<<std::endl;
+            std::cout<<Simulator::Now ().GetPicoSeconds()<<" "
+                 <<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
+                 <<" askedfor="<<askedfor<<",returned="<<returned<<std::endl;
             return;
         }
     }
@@ -145,8 +146,8 @@ void Receiver::sendInterests(){
                                 <<" remaining downloads: "<<workload.size());
                 }
     
-                std::cout<<"Receiver: "<<ccnm->getNodeId()
-                          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
+                //std::cout<<"Receiver: "<<ccnm->getNodeId()
+                //          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
                 current_filename = workload.at(workload.size()-1).first;
                 current_filesize = workload.at(workload.size()-1).second;
                 current_fileseq =  1;
@@ -163,7 +164,7 @@ void Receiver::sendInterests(){
         }while(asked.find(theName) != asked.end());
 
         asked.insert(theName);
-        std::cout<<"rec send interest "<<theName->toString()<<std::endl;
+        //std::cout<<"rec send interest "<<theName->toString()<<std::endl;
         
         // congestion control algorithms
         if(asked.size() > asked_size*2){

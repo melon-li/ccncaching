@@ -36,7 +36,7 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         hits += req;
         //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second<<std::endl;
         uint16_t tmp = (it->second - ID + 1);
-        std::cout<<"tmp="<<tmp<<std::endl;
+        //std::cout<<"tmp="<<tmp<<std::endl;
         reads_for_fetchings += tmp;
         lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
         return lookup_time;
@@ -547,7 +547,6 @@ pair<bool, int> Slot_Object::insert_packets(const string& key, uint32_t last_id,
         NS_ASSERT_MSG(pr.first, "Internal error,insert_packet is failed");
         cnt += pr.second;
     }
-    std::cout<<std::endl;
  
     return std::make_pair(true, cnt);
 }

@@ -506,6 +506,9 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
            Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
         */
         NS_LOG_WARN("This slot is full(test)");
+        NS_ASSERT_MSG(files[cur_index].size()!=0,
+                     "File is empty");
+
         cnt -= files[cur_index].size();
         files[cur_index].clear();
         files[cur_index].insert(Pkts::value_type(_ID, payload)); 
@@ -522,7 +525,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
 
         // increment cur_index to can delete  the oldest file
         cur_index++;
-        if(cur_index > file_num) cur_index = 0;
+        if(cur_index >= file_num) cur_index = 0;
         return std::make_pair(true, cnt);
     }
 
@@ -985,7 +988,7 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     size_t ka; //The number of hash function for fp
     size_t cells; //bits, the number of cells to use
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
-    cells = 2*ka*(capacity/PKT_NUM)/std::log(2);
+    cells = ka*(capacity/PKT_NUM)/std::log(2);
     NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells);
     return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM, 1, 199};
 }

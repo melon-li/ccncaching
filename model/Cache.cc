@@ -986,7 +986,7 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     NS_ASSERT_MSG(capacity, "capacity can not be zero");
     NS_ASSERT_MSG(fp, "fp can not be zero");
     size_t ka; //The number of hash function for fp
-    size_t cells; //bits, the number of cells to use
+    size_t cells; //bits, the number of cells to use 
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
     cells = ka*(capacity/PKT_NUM)/std::log(2);
     NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells);

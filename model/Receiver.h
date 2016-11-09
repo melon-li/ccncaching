@@ -49,6 +49,8 @@ private:
     void handleData(Ptr<CCN_Name>, uint8_t*, uint32_t);
     void doSendInterest(Ptr<CCN_Name>);
     void sendInterests();
+    Ptr<CCN_Name> nextRequestName();
+    Ptr<CCN_Name> doNextRequestName();
     string int2str(int n);
 
     Ptr<CcnModule> ccnm;
@@ -67,9 +69,9 @@ private:
     uint32_t aborted_chunks;
 
     // current_filename, current_filesize,current_sequence
-    string current_filename;
-    uint32_t current_filesize;
-    uint32_t current_fileseq;
+    uint32_t offSet;
+    uint32_t maxLen;
+    vector<std::pair<string, std::pair<uint32_t, uint32_t>>> sendFiles;
     //typedef Info pair<uint32_t, uint32_t>;
     //map<string, Info> requested_files;
 };

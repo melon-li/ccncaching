@@ -8,6 +8,8 @@
 #ifndef EXPERIMENT_GLOBALS_H
 #define EXPERIMENT_GLOBALS_H
 
+//ENABLE_AGGREGATION: true enable; false disable.
+#define ENABLE_AGGREGATION false
 #define CCN_PROTO 0x88DD
 #define NUMBER_OF_RUNS 1
 
@@ -24,6 +26,7 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define LINK_CAPACITY "100Gbps"
 #define ACCESS_LINK_CAPACITY  "80Gbps"// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
 #define LINK_THROUGHTPUT "80Gbps"
+#define USER_EXPERIENCED_RATE "1Gbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
 #define REQ_SIZE 30

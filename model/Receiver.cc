@@ -20,6 +20,8 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     maxRate = DataRate(LINK_THROUGHTPUT).GetBitRate();
     maxRate = maxRate*REQ_SIZE/PKT_SIZE;
     sendRate = maxRate;
+    maxLen = maxRate/(DataRate(USER_EXPERIENCED_RATE).GetBitRate());
+    offSet = 0;
     asked_size = (maxRate*TTL)/(REQ_SIZE*8);
     askedfor = 0;
     asked = set<Ptr<CCN_Name> >();
@@ -35,9 +37,6 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     localApp->setDataCallback(dataCb);
     
     aborted_chunks=0;
-    current_filename = "";
-    current_filesize = 0;
-    current_fileseq = 0;
 }
 
 Receiver::~Receiver() {
@@ -100,6 +99,7 @@ void Receiver::handleInterest(Ptr<CCN_Name>){
 
 void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
     if (asked.find(name) == asked.end()){
+        if(ENABLE_AGGREGATION == false) return; 
         NS_ASSERT_MSG(false, "Got a Data for interest not asked " << name->toString());
     }else{
         returned++;
@@ -131,40 +131,14 @@ void Receiver::start() {
         sendInterests();
 }
 
-
 void Receiver::sendInterests(){
-        uint32_t i = 0;
         uint64_t tNext = 0;
-        vector<string> tokens;
-        Ptr<CCN_Name> theName;        
+        Ptr<CCN_Name> theName = NULL;        
 
-        do{
-            if(current_fileseq > current_filesize or current_filesize == 0){
-                if(workload.empty()) return;
-                if (workload.size()%100==0){
-                    NS_LOG_INFO(Now().ToInteger(Time::MS)<<" Receiver: "<<ccnm->getNodeId()
-                                <<" remaining downloads: "<<workload.size());
-                }
-    
-                //std::cout<<"Receiver: "<<ccnm->getNodeId()
-                //          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
-                current_filename = workload.at(workload.size()-1).first;
-                current_filesize = workload.at(workload.size()-1).second;
-                current_fileseq =  1;
-                workload.pop_back();
-            }
-    
-            tokens.clear();
-            tokens.push_back(ROOT_DOMAIN);//eg. domain1
-            tokens.push_back(current_filename);
-    
-            tokens.push_back(int2str(current_fileseq++));
-            theName = CreateObject<CCN_Name>(tokens);        
-            tokens.pop_back();
-        }while(asked.find(theName) != asked.end());
-
+        theName = nextRequestName();
+        if(!theName)return; 
         asked.insert(theName);
-        //std::cout<<"rec send interest "<<theName->toString()<<std::endl;
+        std::cout<<"rec send interest "<<theName->toString()<<std::endl;
         
         // congestion control algorithms
         if(asked.size() > asked_size*2){
@@ -178,12 +152,70 @@ void Receiver::sendInterests(){
         Simulator::Schedule(PicoSeconds(tNext), &Receiver::doSendInterest, this, theName);
 }
 
-
 void Receiver::doSendInterest(Ptr<CCN_Name> name){
-//    std::cout<<Now().ToInteger(Time::MS)<<" "<<ccnm->getNodeId()<<" asking for: "<<name->toString()<<std::endl;
+//    std::cout<<Now().ToInteger(Time::MS)<<" "<<ccnm->getNodeId()<<
+       //" asking for: "<<name->toString()<<std::endl;
     askedfor++;
     this->ccnm->sendInterest(name, localApp);
     sendInterests();
+}
+
+
+Ptr<CCN_Name> Receiver::nextRequestName(){
+        Ptr<CCN_Name> theName = NULL;
+        while(!theName){
+            theName = doNextRequestName();
+            if(!theName && sendFiles.size() == 0
+               && workload.empty()) return 0;
+        }
+       return theName;
+}
+
+Ptr<CCN_Name> Receiver::doNextRequestName(){
+        vector<string> tokens;
+        Ptr<CCN_Name> theName = NULL;
+        std::pair<string, std::pair<uint32_t, uint32_t>> p;
+
+        //assemble sendFiles to MaxLen
+        while(sendFiles.size() < maxLen){
+
+            if(workload.empty()) break;
+
+            if (workload.size()%100==0){
+                NS_LOG_INFO(Now().ToInteger(Time::MS)<<
+                                   " Receiver: "<<ccnm->getNodeId()<<
+                             " remaining downloads: "<<workload.size());
+            }
+
+            //std::cout<<"Receiver: "<<ccnm->getNodeId()
+            //          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
+            p.first = workload.at(workload.size()-1).first;
+            p.second.first = workload.at(workload.size()-1).second;
+            p.second.second = 1;
+            sendFiles.push_back(p);
+            workload.pop_back();
+        }
+        
+        //achieve the name of requesting packet
+        do{
+            if(sendFiles.size()==0) return NULL;
+            if(offSet >= sendFiles.size()) offSet = 0;
+
+            tokens.clear();
+            tokens.push_back(ROOT_DOMAIN);//eg. domain1
+            tokens.push_back(sendFiles[offSet].first);
+            tokens.push_back(int2str(sendFiles[offSet].second.second));
+            theName = CreateObject<CCN_Name>(tokens);        
+
+            if((sendFiles[offSet].second.first - sendFiles[offSet].second.second) <= 0){
+                sendFiles.erase(sendFiles.begin() + offSet);
+            }else{
+                sendFiles[offSet].second.second++;
+                offSet++;
+            }
+        }while(ENABLE_AGGREGATION && asked.find(theName) != asked.end());
+
+        return theName;
 }
 
 }//end ns3

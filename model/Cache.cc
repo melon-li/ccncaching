@@ -911,7 +911,6 @@ int32_t S_Cache::add_packet(const string& key, const uint32_t ID, const uint32_t
         //up to PKT_NUM or islast is true
         if(it->second.size() >= PKT_NUM || islast.first){
             uint32_t wt = store_packets(key, ID, it->second);
-            store_packets(key, ID, it->second);
             LRU_W->remove_object(LRU_W->objects[key]);
             writecache_pcks -= it->second.size();
             cache_table_w.erase(it);
@@ -989,7 +988,8 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     size_t cells; //bits, the number of cells to use 
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
     cells = ka*(capacity/PKT_NUM)/std::log(2);
-    NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells);
+    NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells
+                                <<" size = "<<cells/1024/1024<<" Mb");
     return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM, 1, 199};
 }
 

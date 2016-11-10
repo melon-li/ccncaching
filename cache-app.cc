@@ -46,7 +46,8 @@ int main(int argc ,char *argv[])
 
  
         cmd.AddValue("ds", "DRAM size(GB)", cache_size);
-        cmd.AddValue("ss", "SRAM size(MB)", fast_size);
+        cmd.AddValue("ss", "SRAM size(MB), In S_Cache, \
+it is the size of writing cache(or unoptimized reading cache)", fast_size);
 
         cmd.AddValue("fp", "The desired false-positive rate", fp);
 

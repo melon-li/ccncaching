@@ -116,6 +116,7 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
          }*/
         //sendInterests();
 
+        //std::cout<<"Receiver at node "<<ccnm->getNodeId()<<std::endl;
         if(workload.empty()){
             if(asked.size()) return;
             std::cout<<Simulator::Now ().GetPicoSeconds()<<" "

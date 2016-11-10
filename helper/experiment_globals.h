@@ -17,8 +17,8 @@
 #define ZIPF_A 0.75
 
 #define WIN_MAX 7000 //7000
-#define LINK_DELAY "0.25ms"
-#define ACCESS_LINK_DELAY "0.25ms"
+#define LINK_DELAY "5ms"
+#define ACCESS_LINK_DELAY "5ms"
 #define TTL 0.00025*4 //second
 /*
 The PointToPointNetDevice models a transmitter section that puts bits on a corresponding channel “wire.” The DataRate attribute specifies the number of bits per second that the device will simulate sending over the channel. In reality no bits are sent, but an event is scheduled for an elapsed time consistent with the number of bits in each packet and the specified DataRate. The implication here is that the receiving device models a receiver section that can receive any any data rate. Therefore there is no need, nor way to set a receive data rate in this model. By setting the DataRate on the transmitter of both devices connected to a given PointToPointChannel one can model a symmetric channel; or by setting different DataRates one can model an asymmetric channel.

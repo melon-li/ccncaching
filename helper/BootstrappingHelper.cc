@@ -246,8 +246,12 @@ void BootstrappingHelper::startExperiment(){
                 total_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->total_stored_packets;
                 sram_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->sram_stored_packets;
             }
-            std::cout<<"Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<r_fetchings<<" r_insertions: "<<r_insertions<<endl;
-            std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<" readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
+            std::cout<<"Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<
+                      stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<
+                                    r_fetchings<<" r_insertions: "<<r_insertions<<endl;
+            std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
+                   "Fp="<<(false_positive_cnt/read_dram_cnt)<<
+                   " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
             std::cout<<"false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<write_outoforder<<" total_stored_packets: "<<total_stored_packets<<" sram_stored_packets: "<<sram_stored_packets<<endl;
         }
         

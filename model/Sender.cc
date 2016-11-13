@@ -69,7 +69,7 @@ void Sender::AnnounceName(Ptr<CCN_Name> name) {
 void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
     interests++;
     //Time t = Seconds(this->waitingTime);
-    std::cout<<"Sender get "<<ccnn->toString()<<std::endl;
+    //std::cout<<"Sender get "<<ccnn->toString()<<std::endl;
     Ptr<Packet> data = findData(ccnn);
     Simulator::Schedule(PicoSeconds(0), &Sender::SendData, this, ccnn, data);
 }

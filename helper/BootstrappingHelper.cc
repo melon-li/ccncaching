@@ -162,7 +162,8 @@ void BootstrappingHelper::startExperiment(){
                     cache_nodes.push_back(all_nodes[l]); //there will be only one neighbor                
                     cache_modules.push_back(nsNodeIdToModule[all_nodes[l]->GetId()]);
                     nsNodeIdToModule[all_nodes[l]->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, &file_map, fp);
-                    NS_LOG_INFO("Added cache app at "<<  all_nodes[l]->GetId()<<" mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<
+                    NS_LOG_UNCOND("Added cache app at node "<<  all_nodes[l]->GetId()<<
+                                " mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<
                                 " betw "<<nsNodeIdToModule[all_nodes[l]->GetId()]->getBetweenness());                
                 }
                 
@@ -250,7 +251,6 @@ void BootstrappingHelper::startExperiment(){
                       stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<
                                     r_fetchings<<" r_insertions: "<<r_insertions<<endl;
             std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
-                   "Fp="<<(false_positive_cnt/read_dram_cnt)<<
                    " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
             std::cout<<"false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<write_outoforder<<" total_stored_packets: "<<total_stored_packets<<" sram_stored_packets: "<<sram_stored_packets<<endl;
         }

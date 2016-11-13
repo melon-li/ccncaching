@@ -173,7 +173,7 @@ void Parser::parse(string& filepath, uint32_t group_size) {
     //uint16_t sender_position = ExperimentGlobals::RANDOM_VAR->GetInteger(0,num_of_access_nodes-1)%limit;
     uint16_t sender_position = (num_of_access_nodes/2)%limit;
     map<uint32_t, set<uint32_t> > matrix_map_tmp = matrix_map;
-    uint32_t host_node_name = matrix_map.size()-1;
+    uint32_t receiver_node = matrix_map.size()-1;
     uint32_t added_groups = 0;
 
     for (map<uint32_t, set<uint32_t> >::iterator iter = matrix_map.begin();
@@ -181,29 +181,31 @@ void Parser::parse(string& filepath, uint32_t group_size) {
         vector < Ptr<Node> > neighbors = getNeighbors(iter->first);
         if (neighbors.size() == 1) {//if they are access nodes
             if (added_groups==sender_position) {
-                NS_LOG_INFO("Added sender at position "<<sender_position<<" ("<<iter->first <<")");
-                std::cout<<"Added sender at position "<<sender_position<<" ("<<iter->first <<")"<<std::endl;
+                //NS_LOG_INFO("Added sender at node "<<iter->first <<
+                //                   " (The "<<sender_position<<"th Group)");
+                NS_LOG_UNCOND("The sender node is access node "<<iter->first);
                 sender_id = idToNode[iter->first]->GetId();
                 added_groups++;
                 continue;
             }
             
+            std::ostringstream message;
+            message<< "The "<<(unsigned)added_groups<<"th Group is added at access node "<< iter->first<<":";
+
             if (added_groups++==limit)
                 break;
             
-            std::ostringstream message;
-            message << "Group " <<(unsigned)added_groups<<" (Access node: "<< iter->first<<"): ";
             Ptr < Node > sourceNode = getNodeById(iter->first);
             uint32_t sourceNodeGraphId = nodeToId[sourceNode->GetId()];
 
-            std::cout<<"group_size="<<group_size<<std::endl;
+            message<<"group_size="<<group_size<<", receiver_node=";
             for (unsigned gs = 0; gs < group_size; gs++) {
                 // add the new host node
                 Ptr < Node > newNode = CreateObject<Node>();
                 n.Add(newNode);
 
-                idToNode[++host_node_name] = newNode;
-                nodeToId[newNode->GetId()] = host_node_name;
+                idToNode[++receiver_node] = newNode;
+                nodeToId[newNode->GetId()] = receiver_node;
 
                 NodeContainer n;
                 n.Add(sourceNode);
@@ -218,20 +220,20 @@ void Parser::parse(string& filepath, uint32_t group_size) {
                 pph.SetChannelAttribute("Delay", StringValue(ACCESS_LINK_DELAY));
                 NetDeviceContainer ndc = pph.Install(n);
 
-                nodes.insert(host_node_name);
+                nodes.insert(receiver_node);
 
-                alreadyConnected[sourceNodeGraphId][host_node_name] = 1;
-                alreadyConnected[host_node_name][sourceNodeGraphId] = 1;
+                alreadyConnected[sourceNodeGraphId][receiver_node] = 1;
+                alreadyConnected[receiver_node][sourceNodeGraphId] = 1;
 
-                message << host_node_name<<", ";
+                message<< receiver_node<<", ";
                 // update the temporary matrix map
-                matrix_map_tmp[iter->first].insert(host_node_name);
-                matrix_map_tmp[host_node_name].insert(iter->first);
+                matrix_map_tmp[iter->first].insert(receiver_node);
+                matrix_map_tmp[receiver_node].insert(iter->first);
                 
                 active_nodes.push_back(newNode->GetId());
             }
             
-            NS_LOG_INFO(message.str());
+            NS_LOG_UNCOND(message.str());
             message.clear();
         }
     }

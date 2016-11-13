@@ -139,7 +139,7 @@ void Receiver::sendInterests(){
         theName = nextRequestName();
         if(!theName)return; 
         asked.insert(theName);
-        std::cout<<"rec send interest "<<theName->toString()<<std::endl;
+        //std::cout<<"rec send interest "<<theName->toString()<<std::endl;
         
         // congestion control algorithms
         if(asked.size() > asked_size*2){
@@ -178,7 +178,6 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
         std::pair<string, std::pair<uint32_t, uint32_t>> p;
 
         //assemble sendFiles to MaxLen
-        std::cout<<"maxLen="<<maxLen<<std::endl;
         while(sendFiles.size() < maxLen){
 
             if(workload.empty()) break;
@@ -217,7 +216,6 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
             }
         }while(ENABLE_AGGREGATION && asked.find(theName) != asked.end());
 
-        std::cout<<"offSet="<<offSet<<std::endl;
         return theName;
 }
 

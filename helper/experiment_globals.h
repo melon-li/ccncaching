@@ -9,7 +9,7 @@
 #define EXPERIMENT_GLOBALS_H
 
 //ENABLE_AGGREGATION: true enable; false disable.
-#define ENABLE_AGGREGATION false
+#define ENABLE_AGGREGATION true
 #define CCN_PROTO 0x88DD
 #define NUMBER_OF_RUNS 1
 
@@ -19,13 +19,13 @@
 #define WIN_MAX 7000 //7000
 #define LINK_DELAY "5ms"
 #define ACCESS_LINK_DELAY "5ms"
-#define TTL 0.00025*4 //second
+#define TTL 0.005*4 //second
 /*
 The PointToPointNetDevice models a transmitter section that puts bits on a corresponding channel “wire.” The DataRate attribute specifies the number of bits per second that the device will simulate sending over the channel. In reality no bits are sent, but an event is scheduled for an elapsed time consistent with the number of bits in each packet and the specified DataRate. The implication here is that the receiving device models a receiver section that can receive any any data rate. Therefore there is no need, nor way to set a receive data rate in this model. By setting the DataRate on the transmitter of both devices connected to a given PointToPointChannel one can model a symmetric channel; or by setting different DataRates one can model an asymmetric channel.
 */
 #define LINK_CAPACITY "100Gbps"
-#define ACCESS_LINK_CAPACITY  "80Gbps"// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
-#define LINK_THROUGHTPUT "80Gbps"
+#define ACCESS_LINK_CAPACITY  "100Gbps"// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
+#define LINK_THROUGHTPUT "93Gbps"
 #define USER_EXPERIENCED_RATE "1Gbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..

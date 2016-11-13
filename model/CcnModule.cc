@@ -153,8 +153,8 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
     //NS_LOG_UNCOND (Simulator::Now ().GetPicoSeconds () << "\t<<<<<<<<<<<");
 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
-    std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId() 
-             << " got interest "<<interest->getName()->toString() <<" packet size="<<p->GetSize()<<" \n";
+    //std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId() 
+    //         << " got interest "<<interest->getName()->toString() <<" packet size="<<p->GetSize()<<" \n";
     //cache is enabled, look for stored response
     float betw = interest->getBetweenness();
     if (ExperimentGlobals::CACHE_PLACEMENT == 1 && betw < this->getBetweenness()){
@@ -250,16 +250,16 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
     //uint8_t *buffer = (uint8_t *)malloc((p->GetSize()+1)*sizeof(uint8_t));
    // p->Serialize(buffer, p->GetSize());
    // buffer[p->GetSize()+1] = '\0';
-    std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()
+    /*std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()
              << " got data"<<data->getName()->toString() 
             <<" packet size="<<p->GetSize()<<"\n";
-    
+    */
     //free(buffer);
     // if caching is allowed at this node
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
-        std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
+        //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
 
         int64_t lt = cache->cache_packet(pref, _id, NULL);
         //int64_t lt = 0;

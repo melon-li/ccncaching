@@ -71,9 +71,9 @@ int main(int argc ,char *argv[])
 	NS_LOG_UNCOND("Caching policy: "<<(unsigned)caching<<" \nCache capacity DRAM = "<<cache_cap<<
                    " bytes, SRAM = "<<fast_cap<<" bytes");	
         if(enable_opt){
-            NS_LOG_UNCOND("enable_opt = true");
+            NS_LOG_UNCOND("enable_opt = true\n");
         }else{
-            NS_LOG_UNCOND("enable_opt = false");
+            NS_LOG_UNCOND("enable_opt = false\n");
 
         }
 

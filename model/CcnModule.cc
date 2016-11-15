@@ -57,8 +57,12 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
     if (mode == PACKET_CACHE_MODE){
         //In  Since LRU algorithm, DRAM entries to SRAM entries is one-to-one,
         //the _cache_fast_cap is not employed.
+        NS_LOG_UNCOND("In enableCache function, SRAM_Size = "<<
+                       float(_cache_fast_cap)/1024/1024<<"MB\n");
         cache = new P_Cache(capacity, _cache_fast_cap/LRU_ENTRY_SIZE);
     }else if(mode == OBJECT_CACHE_MODE){
+        NS_LOG_UNCOND("In enableCache function, SRAM_Size = "<<
+                       float(_cache_fast_cap)/1024/1024<<"MB\n");
         cache = new O_Cache(capacity, _cache_fast_cap/OPC_ENTRY_SIZE);
     }else{
         //In HCaching, L2 index is realized by A^2 bloom filter, 
@@ -67,17 +71,18 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
         size_t cells = ka*(capacity/PKT_NUM)/std::log(2); //bits
         uint64_t writing_cache_size;
-        NS_LOG_UNCOND("Enable Cache,ka = "<<ka<<" cells = "<<cells<<
-                      " size = "<<cells/1024/1024<<" Mb");
+        NS_LOG_UNCOND("In enableCache function,ka = "<<ka<<" cells = "<<cells<<
+                      " size = "<<float(cells)/1024/1024<<" Mb");
 
         //Get cache_size which is equit to (reading_cache_size + writing _cache_size) 
-        uint64_t cache_size = _cache_fast_cap - cells/8;
+        uint64_t cache_size = _cache_fast_cap - (cells/8);
         //Achieve the writing cache size
         if(enable_opt){
             writing_cache_size = uint64_t(cache_size/(1 + OPT_RATIO));
         }else{
             writing_cache_size = uint64_t(cache_size/2);
         }
+        NS_LOG_UNCOND("The writing_cache_size = "<<float(writing_cache_size)/1024/1024<<" MB\n");
         cache = new S_Cache(capacity, writing_cache_size/PKT_SIZE, _file_map_p, _fp, enable_opt);
     }
     return 0;

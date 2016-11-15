@@ -10,6 +10,8 @@
 
 #define LRU_ENTRY_SIZE 40
 #define OPC_ENTRY_SIZE 42
+
+//optimized_reading_cache_size = reading_cache_size*OPT_RATI
 #define OPT_RATIO   9/16
 
 //ENABLE_AGGREGATION: true enable; false disable.

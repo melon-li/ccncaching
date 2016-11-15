@@ -39,7 +39,7 @@ void Sender::DoDispose(void){
 
     if(COUNT_SENDERS==0)
     {
-        std::cout<<"SENDERS over."<<std::endl;
+        NS_LOG_UNCOND("SENDERS over.");
     }
 }
 
@@ -69,13 +69,13 @@ void Sender::AnnounceName(Ptr<CCN_Name> name) {
 void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
     interests++;
     //Time t = Seconds(this->waitingTime);
-    //std::cout<<"Sender get "<<ccnn->toString()<<std::endl;
+    //NS_LOG_DEBUG("Sender get "<<ccnn->toString());
     Ptr<Packet> data = findData(ccnn);
     Simulator::Schedule(PicoSeconds(0), &Sender::SendData, this, ccnn, data);
 }
 
 void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
-    //std::cout<<Now().ToInteger(Time::MS)<<" Sender sending: "<<name->toString()<<std::endl;
+    //NS_LOG_DEBUG(Now().ToInteger(Time::MS)<<" Sender sending: "<<name->toString());
     uint8_t *newBuff = (uint8_t*)malloc(data->GetSize());
     data->CopyData(newBuff, data->GetSize());
     this->ccnm->sendData(name, newBuff, data->GetSize());

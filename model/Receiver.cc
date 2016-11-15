@@ -56,7 +56,7 @@ void Receiver::DoDispose(void){
 
     if(COUNT_RECEIVERS==0)
     {
-        std::cout<<"RECEIVERS over."<<std::endl;
+        NS_LOG_UNCOND("RECEIVERS over.");
     }
 }
 
@@ -116,12 +116,12 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
          }*/
         //sendInterests();
 
-        //std::cout<<"Receiver at node "<<ccnm->getNodeId()<<std::endl;
+        NS_LOG_DEBUG("Data packet arrives at receiver at node "<<ccnm->getNodeId());
         if(workload.empty()){
             if(asked.size()) return;
-            std::cout<<Simulator::Now ().GetPicoSeconds()<<" "
+            NS_LOG_UNCOND(Simulator::Now ().GetPicoSeconds()<<" "
                  <<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
-                 <<" askedfor="<<askedfor<<",returned="<<returned<<std::endl;
+                 <<" askedfor="<<askedfor<<",returned="<<returned);
             return;
         }
     }
@@ -139,7 +139,7 @@ void Receiver::sendInterests(){
         theName = nextRequestName();
         if(!theName)return; 
         asked.insert(theName);
-        //std::cout<<"rec send interest "<<theName->toString()<<std::endl;
+        NS_LOG_DEBUG("rec send interest "<<theName->toString());
         
         // congestion control algorithms
         if(asked.size() > asked_size*2){

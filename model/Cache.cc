@@ -34,7 +34,7 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         uint32_t req = get_file_requests(_filename, _ID);
         clear_file_requests(_filename, _ID);
         hits += req;
-        //std::cout<<"Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second<<std::endl;
+        //NS_LOG_DEBUG("Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second);
         uint16_t tmp = (it->second - ID + 1);
         //std::cout<<"tmp="<<tmp<<std::endl;
         reads_for_fetchings += tmp;
@@ -623,10 +623,10 @@ int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){
             pit = cit->second.begin();
         }
         if(ID != pit->first){
-            std::cout<<"WARNING: out of order, key="<<key<<" ID="<<ID<<" Front="<<pit->first<<std::endl;
+            NS_LOG_WARN("WARNING: out of order, key="<<key<<" ID="<<ID<<" Front="<<pit->first);
             return -1;
         }
-        //std::cout<<"getcache:"<<key<<" "<<pit->first<<std::endl;
+        //NS_LOG_DEBUG("getcache:"<<key<<" "<<pit->first);
         cit->second.erase(pit);
         readcache_pcks--;
         /*
@@ -691,7 +691,19 @@ int32_t S_Cache::get_writecached_packet(const string& key, const uint32_t ID){
 
 //if readcache is full , delete LRU files
 inline void S_Cache::checkout_readcache(const Pkts& pkts){
-    while(readcache_pcks + pkts.size() >= capacity_fast_table){
+    if(!enable_opt){
+        while(readcache_pcks + pkts.size() >= capacity_fast_table){
+                int32_t removed_packets = remove_last_file_r();
+                if (removed_packets == -1)
+                    NS_ASSERT_MSG(false, "Failed to remove packets");
+                readcache_pcks -= removed_packets;
+                readcache_rmlru++;
+        }
+        return;
+    }
+
+    uint64_t opt_fast_table = uint64_t(capacity_fast_table*OPT_RATIO);
+    while(readcache_pcks + pkts.size() >= opt_fast_table){
             int32_t removed_packets = remove_last_file_r();
             if (removed_packets == -1)
                 NS_ASSERT_MSG(false, "Failed to remove packets");
@@ -770,8 +782,11 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
    
     //int32_t lt = get_avg_readtime(key, ID); 
-    //lookup_time = get_readcached_packet2(key, ID);
-    lookup_time = get_readcached_packet(key, ID);
+    if(enable_opt){
+        lookup_time = get_readcached_packet2(key, ID);
+    }else{
+        lookup_time = get_readcached_packet(key, ID);
+    }
     if(lookup_time >=0) return lookup_time;
     //if(lookup_time >=0) return lt;
 
@@ -986,11 +1001,13 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     NS_ASSERT_MSG(fp, "fp can not be zero");
     size_t ka; //The number of hash function for fp
     size_t cells; //bits, the number of cells to use 
-    std::cout<<"fp="<<fp<<std::endl;
+
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
     cells = ka*(capacity/PKT_NUM)/std::log(2);
-    NS_LOG_INFO("ka = "<<ka<<" cells = "<<cells
-                                <<" size = "<<cells/1024/1024<<" Mb");
+
+    NS_LOG_UNCOND("Init A^2  BF,ka = "<<ka<<" cells = "<<cells<<
+                 " size = "<<cells/1024/1024<<" Mb");
+
     return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM/2, 1, 199};
 }
 

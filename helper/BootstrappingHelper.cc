@@ -13,8 +13,9 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("Bootstrapper");
 
-BootstrappingHelper::BootstrappingHelper(string filename,string output,uint32_t gsize, 
-       uint32_t seed, pair<char, double> _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap)
+BootstrappingHelper::BootstrappingHelper(string filename,string output,uint32_t gsize, uint32_t seed, 
+                                         pair<pair<char,bool>, double> _cache_mode, 
+                                         uint64_t _caching_cap, uint64_t _fast_cap)
 {
     NS_LOG_INFO("Constructing BootstrappingHelper");
     this->seed=seed;
@@ -23,8 +24,10 @@ BootstrappingHelper::BootstrappingHelper(string filename,string output,uint32_t 
     this->group_size=gsize;
     cache_cap = _caching_cap;
     fast_cap = _fast_cap;
-    cache_mode = _cache_mode.first;
+    cache_mode = _cache_mode.first.first;
+    enable_opt =  _cache_mode.first.second;
     fp = _cache_mode.second;
+    if(fp == 0) fp = 0.001;
     ExperimentGlobals::RANDOM_VAR = CreateObject<UniformRandomVariable>();
     RngSeedManager::SetSeed (seed);
     finished = false;
@@ -150,7 +153,8 @@ void BootstrappingHelper::startExperiment(){
                         cache_nodes.push_back(access_node_i); //there will be only one neighbor
                     
                         cache_modules.push_back(nsNodeIdToModule[access_node_i->GetId()]);
-                        nsNodeIdToModule[access_node_i->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, &file_map, fp);
+                        nsNodeIdToModule[access_node_i->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, 
+                                                                             &file_map, fp, enable_opt);
                         NS_LOG_INFO("Added cache app at "<< type_of_node<<" "<<  access_node_i->GetId()<<" mode:"<<(unsigned)cache_mode<<
                                 " capacity:"<<cache_cap<<" betw "<<nsNodeIdToModule[access_node_i->GetId()]->getBetweenness());
                     }
@@ -161,7 +165,8 @@ void BootstrappingHelper::startExperiment(){
                 for (unsigned l=0;l<all_nodes.size(); l++){
                     cache_nodes.push_back(all_nodes[l]); //there will be only one neighbor                
                     cache_modules.push_back(nsNodeIdToModule[all_nodes[l]->GetId()]);
-                    nsNodeIdToModule[all_nodes[l]->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, &file_map, fp);
+                    nsNodeIdToModule[all_nodes[l]->GetId()]->enableCache(cache_mode, cache_cap, fast_cap, 
+                                                                         &file_map, fp, enable_opt);
                     NS_LOG_UNCOND("Added cache app at node "<<  all_nodes[l]->GetId()<<
                                 " mode:"<<(unsigned)cache_mode<<" capacity:"<<cache_cap<<
                                 " betw "<<nsNodeIdToModule[all_nodes[l]->GetId()]->getBetweenness());                

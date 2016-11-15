@@ -1,8 +1,6 @@
 #include "CcnModule.h"
 
 
-using std::cout;
-using std::endl;
 using std::string;
 using std::stringstream;
 
@@ -51,16 +49,36 @@ CcnModule::CcnModule(Ptr<Node> node) {
 /**
  * enables and initializes the cache module of the CcnModule
  */
-char CcnModule::enableCache(char _mode, uint32_t _cache_cap, uint32_t _cache_fast_cap,
-                                      map<string, uint32_t> *_file_map_p, double _fp){
-    // char * cache_cap = CACHE_CAPACITY;
+char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fast_cap,
+                            map<string, uint32_t> *_file_map_p, double _fp, bool enable_opt){
     char mode = _mode;
+    uint64_t capacity = _cache_cap/PKT_SIZE;
+
     if (mode == PACKET_CACHE_MODE){
-        cache = new P_Cache( _cache_cap, _cache_fast_cap);
+        //In  Since LRU algorithm, DRAM entries to SRAM entries is one-to-one,
+        //the _cache_fast_cap is not employed.
+        cache = new P_Cache(capacity, _cache_fast_cap/LRU_ENTRY_SIZE);
     }else if(mode == OBJECT_CACHE_MODE){
-        cache = new O_Cache( _cache_cap, _cache_fast_cap);
+        cache = new O_Cache(capacity, _cache_fast_cap/OPC_ENTRY_SIZE);
     }else{
-        cache = new S_Cache( _cache_cap, _cache_fast_cap, _file_map_p, _fp);
+        //In HCaching, L2 index is realized by A^2 bloom filter, 
+        //the size of L2 index is determined by DRAM size.
+        //We can calculate this size as follows:
+        size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
+        size_t cells = ka*(capacity/PKT_NUM)/std::log(2); //bits
+        uint64_t writing_cache_size;
+        NS_LOG_UNCOND("Enable Cache,ka = "<<ka<<" cells = "<<cells<<
+                      " size = "<<cells/1024/1024<<" Mb");
+
+        //Get cache_size which is equit to (reading_cache_size + writing _cache_size) 
+        uint64_t cache_size = _cache_fast_cap - cells/8;
+        //Achieve the writing cache size
+        if(enable_opt){
+            writing_cache_size = uint64_t(cache_size/(1 + OPT_RATIO));
+        }else{
+            writing_cache_size = uint64_t(cache_size/2);
+        }
+        cache = new S_Cache(capacity, writing_cache_size/PKT_SIZE, _file_map_p, _fp, enable_opt);
     }
     return 0;
 }
@@ -128,7 +146,9 @@ void CcnModule::sendThroughDevice(Ptr<const Packet> p, Ptr<NetDevice> nd) {
             Ptr<CCN_Data> data = CCN_Data::deserializeFromPacket(p->Copy());
             NS_LOG_UNCOND( Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()<<
                          " dropped data packet:"<<data->getName()->toString());
-        }
+        }else{
+            NS_LOG_UNCOND(nodePtr->GetId()<<" node dropped packet");
+       }
     }
 }
 
@@ -161,8 +181,8 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
     //NS_LOG_UNCOND (Simulator::Now ().GetPicoSeconds () << "\t<<<<<<<<<<<");
 
     Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
-    //std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId() 
-    //         << " got interest "<<interest->getName()->toString() <<" packet size="<<p->GetSize()<<" \n";
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()<<
+                " got interest "<<interest->getName()->toString() <<" packet size="<<p->GetSize());
     //cache is enabled, look for stored response
     float betw = interest->getBetweenness();
     if (ExperimentGlobals::CACHE_PLACEMENT == 1 && betw < this->getBetweenness()){
@@ -177,7 +197,7 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
         if (lt >= 0)    {//if >=0 then is found
             uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME+uint64_t(lt));
             //lookup_time = 0;
-            //std::cout<<"getcache time for interest="<<lookup_time<<std::endl;
+            //NS_LOG_DEBUG("getcache time for interest="<<lookup_time);
             HITS++;
             uint8_t *tmp = NULL;
             //std::cout<<getNode()->GetId()<<" hit,"<<pref<<" "<<_id<<std::endl;
@@ -228,7 +248,8 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
         nameToBetweenness[interest->getName()] = interest->getBetweenness();
         return;
     }
-    NS_ASSERT_MSG(tn->hasDevices(),"router " + nodePtr->GetId() << "does not know how to forward " << interest->getName()->toString());
+    NS_ASSERT_MSG(tn->hasDevices(),"router " + nodePtr->GetId() << 
+                  "does not know how to forward " << interest->getName()->toString());
             
     //interest will go to the first netdevice
     Ptr<NetDevice> outport = tn->getDevices().at(0);
@@ -239,7 +260,8 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
     thePIT->update(interest->getName(), ptuple);
 
     Ptr<Packet> packet = interest->serializeToPacket();
-    //std::cout<<Simulator::Now ().GetPicoSeconds()<<" transfer, "<< nodePtr->GetId() <<" node, transfer "<<interest->getName()->toString()<<std::endl;
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<" transfer, "<< nodePtr->GetId()<<
+                " node, transfer "<<interest->getName()->toString());
     sendThroughDevice(packet, outport);
 }
 
@@ -258,16 +280,16 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
     //uint8_t *buffer = (uint8_t *)malloc((p->GetSize()+1)*sizeof(uint8_t));
    // p->Serialize(buffer, p->GetSize());
    // buffer[p->GetSize()+1] = '\0';
-    /*std::cout<<Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()
              << " got data"<<data->getName()->toString() 
-            <<" packet size="<<p->GetSize()<<"\n";
-    */
+            <<" packet size="<<p->GetSize());
+    
     //free(buffer);
     // if caching is allowed at this node
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
-        //std::cout<<nodePtr->GetId()<<" get data to cache"<<std::endl;
+        NS_LOG_DEBUG(nodePtr->GetId()<<" get data to cache");
 
         int64_t lt = cache->cache_packet(pref, _id, NULL);
         //int64_t lt = 0;
@@ -315,8 +337,8 @@ void CcnModule::dohandleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd)
     }
     else
     {
-        if(ENABLE_AGGREGATION) std::cout<<
-                  "Does not know how to forward data."<<std::endl;
+        if(ENABLE_AGGREGATION) 
+            NS_LOG_WARN("Does not know how to forward data.");
     }
 }
 
@@ -327,8 +349,7 @@ void CcnModule::doSendInterest(Ptr<CCN_Name> name, Ptr<LocalApp> localApp) {
     if (pt != 0 && ENABLE_AGGREGATION) {
         bool added = pt->addLocalApp(localApp);
         if (!added) {
-            cout << "local app has already requested " << name->toString()
-                    << endl;
+            NS_LOG_WARN("local app has already requested "<<name->toString());
         }
         return;
     }
@@ -395,7 +416,7 @@ uint64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, uint64_t cache_delay){
     uint64_t pt = PKT_SIZE*8*pow(10,12)/v; // tranfering data time
     map<Ptr<NetDevice>, int64_t>::iterator it =  prev_sendtimes.find(nd);
    
-    //std::cout<<"cache_delay ="<<cache_delay<<",pt="<<pt<<std::endl;
+    //NS_LOG_DEBUG("cache_delay ="<<cache_delay<<",pt="<<pt);
     cache_delay = cache_delay > pt?cache_delay-pt:0; 
 
     //there are not other packets in queue of nd device
@@ -465,12 +486,12 @@ void CcnModule::doSendData(Ptr<CCN_Name> name, uint8_t* buff, uint32_t bufflen) 
 bool operator<(const Ptr<NetDevice>& lhs, const Ptr<NetDevice>& rhs) {
     if(lhs==0)
     {
-        std::cout<<"first was null"<<std::endl;
+        NS_LOG_WARN("first was null");
     }
 
     if(rhs==0)
     {
-        std::cout<<"second was null"<<std::endl;
+        NS_LOG_WARN("second was null");
     }
     return lhs->GetAddress() < rhs->GetAddress();
 }

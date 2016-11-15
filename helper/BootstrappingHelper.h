@@ -53,13 +53,15 @@ class BootstrappingHelper : public Object
 
     int length;
 
-    BootstrappingHelper(string filename,string output,uint32_t gsize, uint32_t seed,
-                   pair<char, double> _cache_mode, uint32_t _caching_cap, uint32_t _fast_cap);
+    BootstrappingHelper(string filename, string output, uint32_t gsize, uint32_t seed,
+                        pair<pair<char,bool>, double> _cache_mode, 
+                        uint64_t _caching_cap, uint64_t _fast_cap);
     
     char cache_mode;
-    uint32_t cache_cap;
-    uint32_t fast_cap;
+    uint64_t cache_cap;
+    uint64_t fast_cap;
     double   fp;
+    bool enable_opt;
     
     ~BootstrappingHelper();
     void parseTopology( uint32_t group_size);

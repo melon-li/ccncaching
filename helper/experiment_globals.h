@@ -8,8 +8,13 @@
 #ifndef EXPERIMENT_GLOBALS_H
 #define EXPERIMENT_GLOBALS_H
 
+#define LRU_ENTRY_SIZE 40
+#define OPC_ENTRY_SIZE 42
+#define OPT_RATIO   9/16
+
 //ENABLE_AGGREGATION: true enable; false disable.
 #define ENABLE_AGGREGATION true
+
 #define CCN_PROTO 0x88DD
 #define NUMBER_OF_RUNS 1
 

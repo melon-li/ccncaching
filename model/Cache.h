@@ -63,7 +63,7 @@ public:
 
 class CacheModule: public Object{
 public:
-    CacheModule(uint32_t _capacity,uint32_t _capacity_fast_table){
+    CacheModule(uint64_t _capacity,uint64_t _capacity_fast_table){
         capacity = _capacity;
         capacity_fast_table = _capacity_fast_table;
         stored_packets=0;
@@ -103,8 +103,8 @@ public:
     
     uint32_t stored_files;
     LRU_Table *LRU;
-    uint32_t capacity; // in packets
-    uint32_t capacity_fast_table; // fast index table cap
+    uint64_t capacity; // the number of  packets
+    uint64_t capacity_fast_table; // the number of entries in memory
     uint32_t stored_packets;
     uint32_t reads_for_insertions;
     uint32_t reads_for_fetchings;
@@ -139,7 +139,7 @@ public:
 
 class O_Cache: public CacheModule{
 public:
-    O_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity,_capacity_fast_table){
+    O_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity,_capacity_fast_table){
         stored_packets = 0;
         stored_files = 0;
         zero_pcks=0;   
@@ -168,7 +168,7 @@ public:
 
 class P_Cache: public CacheModule{
 public:
-    P_Cache(uint32_t _capacity, uint32_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
+    P_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
         
     int32_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
@@ -233,14 +233,15 @@ public:
 
 class S_Cache:public CacheModule{
 public:
-    S_Cache(uint32_t _capacity, uint32_t _capacity_fast_table, map<string, uint32_t> *_file_map_p, double _fp):
-                     CacheModule(_capacity,_capacity_fast_table){
+    S_Cache(uint64_t _capacity, uint64_t _capacity_fast_table,
+            map<string, uint32_t> *_file_map_p, double _fp, bool _enable_opt): CacheModule(_capacity,_capacity_fast_table){
         file_map_p = _file_map_p;
         stored_packets = 0;
         stored_files = 0;
         zero_pcks=0;
         readcache_pcks=0;
         writecache_pcks=0;
+        enable_opt = _enable_opt;
         LRU_W = new LRU_Table();
 
         if(_capacity == 0){
@@ -260,8 +261,7 @@ public:
        delete index_bf_ptr;
     }
 
-    // <filename, max chunk id>
-//    map<string , uint32_t> index_table;
+    bool enable_opt;
     bf::a2_bloom_filter  *index_bf_ptr;
     bf::a2_bloom_filter  *init_bf(double fp);
 

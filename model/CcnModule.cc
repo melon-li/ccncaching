@@ -114,14 +114,22 @@ void CcnModule::sendThroughDevice(Ptr<const Packet> p, Ptr<NetDevice> nd) {
     p->CopyData(b, p->GetSize());
     Ptr<Packet> p2 = Create<Packet>(b, p->GetSize());
     delete [] b;
-    
+
     //bool sent = nd->Send(p2, addresses[nd], 0x88DD);
     bool sent = nd->Send(p2, addresses[nd], CCN_PROTO);
 
     if (!sent) {
-        std::cout << "bytes dropped" << std::endl;
-        std::cout << "packets dropped" << std::endl;
-    }    
+        uint8_t type = extract_packet_type(p);
+        if (type == CCN_Packets::INTEREST) {
+             Ptr<CCN_Interest> interest = CCN_Interest::deserializeFromPacket(p->Copy());
+             NS_LOG_UNCOND(Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()<<
+                           " dropped interest packet:" <<interest->getName()->toString());
+        } else if (type == CCN_Packets::DATA) {
+            Ptr<CCN_Data> data = CCN_Data::deserializeFromPacket(p->Copy());
+            NS_LOG_UNCOND( Simulator::Now ().GetPicoSeconds()<<" "<<nodePtr->GetId()<<
+                         " dropped data packet:"<<data->getName()->toString());
+        }
+    }
 }
 
 bool CcnModule::handlePacket(Ptr<NetDevice> nd, Ptr<const Packet> p, uint16_t a,

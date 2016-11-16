@@ -211,7 +211,7 @@ void BootstrappingHelper::startExperiment(){
 
         uint64_t dtime = Now().ToInteger(Time::MS);
         finished = true;
-        std::cout<<"Overall service time: ms:"<<Now().ToInteger(Time::MS)<<" ps:"<<Now().ToInteger(Time::PS)<<" ("<<(starttime)<<") "<<endl; 
+        NS_LOG_UNCOND("Overall service time: ms:"<<Now().ToInteger(Time::MS)<<" ps:"<<Now().ToInteger(Time::PS)<<" ("<<(starttime)<<") "); 
         
         /**
         * print caching results
@@ -240,7 +240,8 @@ void BootstrappingHelper::startExperiment(){
                 r_evictions+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_evictions;
                 r_fetchings+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_fetchings;
                 r_insertions+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_insertions;
-                std::cout<<nsNodeIdToModule[nd->GetId()]->cache->get_chunk_id_hits();
+
+                //NS_LOG_UNCOND(nsNodeIdToModule[nd->GetId()]->cache->get_chunk_id_hits());
 
                 false_positive_cnt += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt;
                 read_dram_cnt += nsNodeIdToModule[nd->GetId()]->cache->read_dram_cnt;
@@ -252,15 +253,17 @@ void BootstrappingHelper::startExperiment(){
                 total_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->total_stored_packets;
                 sram_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->sram_stored_packets;
             }
-            std::cout<<"Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<
+            NS_LOG_UNCOND("Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<
                       stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<
-                                    r_fetchings<<" r_insertions: "<<r_insertions<<endl;
-            std::cout<<"false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
-                   " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru<<endl;
-            std::cout<<"false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<write_outoforder<<" total_stored_packets: "<<total_stored_packets<<" sram_stored_packets: "<<sram_stored_packets<<endl;
+                                    r_fetchings<<" r_insertions: "<<r_insertions);
+            NS_LOG_UNCOND("false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
+                   " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru);
+            NS_LOG_UNCOND("false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<
+                          write_outoforder<<" total_stored_packets: "<<total_stored_packets<<
+                          " sram_stored_packets: "<<sram_stored_packets);
         }
         
-        std::cout<<"HITS="<<CcnModule::HITS<<std::endl;
+        NS_LOG_UNCOND("HITS="<<CcnModule::HITS);
         //print results and initialize structures again
         //----------------------------------------------------
         Ptr<ResultPrinter> rp=CreateObject<ResultPrinter>(nsNodeIdToModule,group_size,c,publisher_app,receiver_apps,output);

@@ -19,9 +19,11 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     COUNT_RECEIVERS++;
     maxRate = DataRate(LINK_THROUGHTPUT).GetBitRate();
     maxLen = maxRate/(DataRate(USER_EXPERIENCED_RATE).GetBitRate());
+    // the max rate for requesting data
     maxRate = maxRate*REQ_SIZE/PKT_SIZE;
     sendRate = maxRate;
     offSet = 0;
+    // the max number of requesting packets for a TTL time.
     asked_size = (maxRate*TTL)/(REQ_SIZE*8);
     askedfor = 0;
     asked = set<Ptr<CCN_Name> >();
@@ -141,12 +143,16 @@ void Receiver::sendInterests(){
         asked.insert(theName);
         NS_LOG_DEBUG("rec send interest "<<theName->toString());
         
-        // congestion control algorithms
+        //simple congestion control algorithms
         if(asked.size() > asked_size*2){
             sendRate = sendRate/2;
+            //NS_LOG_UNCOND("asked_size > asked_size*2,descrease sendRate to "<<
+            //              float(sendRate)/1024/1024<<" Mb"); 
         }else if(asked.size() < asked_size/2){
             sendRate = sendRate*2;
             if(sendRate >= maxRate) sendRate = maxRate;
+            //NS_LOG_UNCOND("asked_size < asked_size/2,increase sendRate to "<<
+            //              float(sendRate)/1024/1024<<" Mb"); 
         }
 
         tNext = REQ_SIZE*8*pow(10, 12)/sendRate;

@@ -55,11 +55,15 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
     uint64_t capacity = _cache_cap/PKT_SIZE;
 
     if (mode == PACKET_CACHE_MODE){
-        //In  Since LRU algorithm, DRAM entries to SRAM entries is one-to-one,
-        //the _cache_fast_cap is not employed.
+        //Since LRU algorithm, DRAM entries to SRAM entries is one-to-one,
+        //the _cache_cap is not employed, we derive the DRAM_SIZE 
+        //by the formula dram_size=PKT_SIZE*_cache_fast_cap/LRU_ENTRY_SIZE
+        capacity = _cache_fast_cap/LRU_ENTRY_SIZE; 
         NS_LOG_UNCOND("In enableCache function, SRAM_Size = "<<
                        float(_cache_fast_cap)/1024/1024<<"MB\n");
-        cache = new P_Cache(capacity, _cache_fast_cap/LRU_ENTRY_SIZE);
+        NS_LOG_UNCOND("The final DRAM_Size = "<<
+                       float(capacity*1500)/1024/1024/1024<<"GB\n");
+        cache = new P_Cache(capacity, capacity);
     }else if(mode == OBJECT_CACHE_MODE){
         NS_LOG_UNCOND("In enableCache function, SRAM_Size = "<<
                        float(_cache_fast_cap)/1024/1024<<"MB\n");
@@ -415,27 +419,29 @@ Ptr<PIT> CcnModule::getPIT() {
 }
 
 uint64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, uint64_t cache_delay){
-    uint64_t cur = Simulator::Now().GetPicoSeconds();
+    /*
     DataRate m_bps(LINK_CAPACITY);
     uint64_t v = m_bps.GetBitRate();
-    uint64_t pt = PKT_SIZE*8*pow(10,12)/v; // tranfering data time
-    map<Ptr<NetDevice>, int64_t>::iterator it =  prev_sendtimes.find(nd);
-   
+    //The time for tranfering a data packet
+    uint64_t pt = PKT_SIZE*8*pow(10,12)/v; 
+    cache_delay = cache_delay > pt ? (cache_delay-pt):0; 
     //NS_LOG_DEBUG("cache_delay ="<<cache_delay<<",pt="<<pt);
-    cache_delay = cache_delay > pt?cache_delay-pt:0; 
+    */
 
-    //there are not other packets in queue of nd device
+    uint64_t cur = Simulator::Now().GetPicoSeconds();
+    map<Ptr<NetDevice>, int64_t>::iterator it =  prev_sendtimes.find(nd);
+    //There are not other packets in queue of nd device.
     if(it == prev_sendtimes.end()){
         it->second = cur + cache_delay;
         return cache_delay;
     }
-    if(cur >= (it->second+pt)){
+    if(cur >= (it->second)){
         it->second = cur + cache_delay;
         return cache_delay;
     }
 
-    //there are other packets in queue of nd device
-    cache_delay = cache_delay + (it->second + pt - cur);
+    //There are other packets in queue of nd device.
+    cache_delay = cache_delay + (it->second - cur);
     it->second = cur + cache_delay;
     return cache_delay;
 }

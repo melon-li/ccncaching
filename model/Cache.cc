@@ -505,7 +505,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
         /* Delete the oldest file, or in options, we can use LRU algorithm to delete file
            Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
         */
-        NS_LOG_WARN("This slot is full(test)");
+        //NS_LOG_WARN("This slot is full(test)");
         NS_ASSERT_MSG(files[cur_index].size()!=0,
                      "File is empty");
 
@@ -801,7 +801,7 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     lookup_time = get_dram_packet(key, ID); 
     if(lookup_time == -1){
         false_positive_cnt++;
-        NS_LOG_WARN("Bloom Filter:False positive");
+        //NS_LOG_WARN("Bloom Filter:False positive");
         return -1;
     }
 

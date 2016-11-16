@@ -24,7 +24,7 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     sendRate = maxRate;
     offSet = 0;
     // the max number of requesting packets for a TTL time.
-    asked_size = (maxRate*TTL)/(REQ_SIZE*8);
+    asked_size = (maxRate*TTL)/(REQ_SIZE);
     askedfor = 0;
     asked = set<Ptr<CCN_Name> >();
 

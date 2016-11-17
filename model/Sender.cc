@@ -7,6 +7,7 @@ using std::string;
 
 namespace ns3 {
 
+NS_LOG_COMPONENT_DEFINE("Sender");
 int Sender::COUNT_SENDERS = 0;
 uint8_t Sender::buf[PKT_SIZE] = {0};
 
@@ -69,13 +70,15 @@ void Sender::AnnounceName(Ptr<CCN_Name> name) {
 void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
     interests++;
     //Time t = Seconds(this->waitingTime);
-    //NS_LOG_DEBUG("Sender get "<<ccnn->toString());
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
+                 " Sender gets "<<ccnn->toString());
     Ptr<Packet> data = findData(ccnn);
     Simulator::Schedule(PicoSeconds(0), &Sender::SendData, this, ccnn, data);
 }
 
 void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
-    //NS_LOG_DEBUG(Now().ToInteger(Time::MS)<<" Sender sending: "<<name->toString());
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
+                 " Sender sends "<<name->toString());
     uint8_t *newBuff = (uint8_t*)malloc(data->GetSize());
     data->CopyData(newBuff, data->GetSize());
     this->ccnm->sendData(name, newBuff, data->GetSize());

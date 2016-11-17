@@ -56,6 +56,8 @@ private:
     Ptr<CcnModule> ccnm;
     Ptr<LocalApp> localApp;
 
+    uint64_t t = 0;
+    uint64_t c = 0;
     uint64_t sendRate;
     uint64_t maxRate;
     uint32_t asked_size;

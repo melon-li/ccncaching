@@ -16,15 +16,20 @@ NS_LOG_COMPONENT_DEFINE("Receiver");
 int Receiver::COUNT_RECEIVERS = 0;
 
 Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
+    t = 0;
+    c = 0;
     COUNT_RECEIVERS++;
     maxRate = DataRate(LINK_THROUGHTPUT).GetBitRate();
     maxLen = maxRate/(DataRate(USER_EXPERIENCED_RATE).GetBitRate());
-    // the max rate for requesting data
+    //The max rate for requesting data
     maxRate = maxRate*REQ_SIZE/PKT_SIZE;
     sendRate = maxRate;
+    //The offset in sending files array
     offSet = 0;
-    // the max number of requesting packets for a TTL time.
-    asked_size = (maxRate*TTL)/(REQ_SIZE);
+    //The max number of requesting packets for a TTL time.
+    //Note, the maxRate unit is bps, so 
+    asked_size = (maxRate*TTL)/(8*REQ_SIZE);
+    NS_LOG_UNCOND("The asked_size(SEINDING_WIN_SIZE)="<<asked_size);
     askedfor = 0;
     asked = set<Ptr<CCN_Name> >();
 
@@ -100,25 +105,25 @@ void Receiver::handleInterest(Ptr<CCN_Name>){
 }
 
 void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
+    if(Now().ToInteger(Time::MS) -t >=10){
+       //NS_LOG_UNCOND("asking = "<<asked.size());
+       //NS_LOG_UNCOND("asked_size = "<<asked_size);
+       NS_LOG_UNCOND("receiveing_data_rate = "<<
+                    (float(c)*1500*8/0.01/1024/1024/1024)<<" Gbps"); 
+       c = 0;
+       t = Now().ToInteger(Time::MS);
+    }
+    c++;
+    
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
+                 " Data packet arrives at receiver at node "<<ccnm->getNodeId());
     if (asked.find(name) == asked.end()){
         if(ENABLE_AGGREGATION == false) return; 
         NS_ASSERT_MSG(false, "Got a Data for interest not asked " << name->toString());
     }else{
         returned++;
         asked.erase(name);
-        //std::cout<<"asking="<<asked.size()<<std::endl;
-        //std::cout<<"asked_size="<<asked_size<<std::endl;
         
-        //simulate download abortions
-        /*if (current_sequence%10==0 &&  ExperimentGlobals::RANDOM_VAR->GetInteger(0,5000)<10){
-            aborted_chunks += current_filesize - current_sequence;
-            NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" aborted chunks: "<<aborted_chunks);
-            start();
-            return;
-         }*/
-        //sendInterests();
-
-        NS_LOG_DEBUG("Data packet arrives at receiver at node "<<ccnm->getNodeId());
         if(workload.empty()){
             if(asked.size()) return;
             NS_LOG_UNCOND(Simulator::Now ().GetPicoSeconds()<<" "
@@ -141,7 +146,6 @@ void Receiver::sendInterests(){
         theName = nextRequestName();
         if(!theName)return; 
         asked.insert(theName);
-        NS_LOG_DEBUG("rec send interest "<<theName->toString());
         
         //simple congestion control algorithms
         if(asked.size() > asked_size*2){
@@ -156,6 +160,8 @@ void Receiver::sendInterests(){
         }
 
         tNext = REQ_SIZE*8*pow(10, 12)/sendRate;
+        NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
+                     " rec sends interest "<<theName->toString());
         Simulator::Schedule(PicoSeconds(tNext), &Receiver::doSendInterest, this, theName);
 }
 

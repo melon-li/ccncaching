@@ -298,7 +298,7 @@ void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){
     if (cache_packet && cache!=NULL){
         string pref = data->getName()->getPrefix();
         string _id = data->getName()->getID();
-        NS_LOG_DEBUG(nodePtr->GetId()<<" get data to cache");
+        //NS_LOG_DEBUG(nodePtr->GetId()<<" get data to cache");
 
         int64_t lt = cache->cache_packet(pref, _id, NULL);
         //int64_t lt = 0;

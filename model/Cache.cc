@@ -332,7 +332,8 @@ int32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
         log_chunk_id_hits[std::min(MAX_LOG_CHUNK_ID-1,atoi(_ID.c_str()))]++;
         NS_LOG_DEBUG("Found key: "<<key<<" cached");
         reads_for_fetchings++;
-        lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
+        //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
+        lookup_time = PKT_SIZE*8*1000/LRU_RATE; //ps
         return lookup_time;
         }
     return -1;
@@ -366,7 +367,8 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     stored_packets++;
     //NS_LOG_DEBUG("Added packet "<<_filename<<"/"<<_ID<<" stored_pcks:"<<stored_packets<<"/"<<capacity);
     reads_for_insertions++;
-    lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
+    //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
+    lookup_time = PKT_SIZE*1000*8/LRU_RATE; //ps
     return lookup_time;
 }
     

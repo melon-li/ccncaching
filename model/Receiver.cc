@@ -108,7 +108,7 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
     if(Now().ToInteger(Time::MS) -t >=10){
        //NS_LOG_UNCOND("asking = "<<asked.size());
        //NS_LOG_UNCOND("asked_size = "<<asked_size);
-       NS_LOG_UNCOND("receiveing_data_rate = "<<
+       NS_LOG_UNCOND("rec_data_rate = "<<
                     (float(c)*1500*8/0.01/1024/1024/1024)<<" Gbps"); 
        c = 0;
        t = Now().ToInteger(Time::MS);

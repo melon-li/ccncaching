@@ -105,7 +105,7 @@ void Receiver::handleInterest(Ptr<CCN_Name>){
 }
 
 void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
-    if(Now().ToInteger(Time::MS) -t >=10){
+    /*if(Now().ToInteger(Time::MS) -t >=10){
        //NS_LOG_UNCOND("asking = "<<asked.size());
        //NS_LOG_UNCOND("asked_size = "<<asked_size);
        NS_LOG_UNCOND("rec_data_rate = "<<
@@ -114,7 +114,7 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
        t = Now().ToInteger(Time::MS);
     }
     c++;
-    
+    */
     NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
                  " Data packet arrives at receiver at node "<<ccnm->getNodeId());
     if (asked.find(name) == asked.end()){

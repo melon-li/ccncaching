@@ -33,7 +33,7 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 */
 #define LINK_CAPACITY "100Gbps"
 #define ACCESS_LINK_CAPACITY  "100Gbps"// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
-#define LINK_THROUGHTPUT "1Gbps" // 1Gbps
+#define LINK_THROUGHTPUT "93Gbps" // 1Gbps
 #define USER_EXPERIENCED_RATE "1Gbps"
 
 #define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..

@@ -39,7 +39,7 @@ int main(int argc ,char *argv[])
         cmd.AddValue("cpl", "The Cache placement(0: caching at edge nodes only, >0: betweenness or NDN)", cpl);
 
 	//caching policy: 0 for no cache, 1 for packet_level, 2 for object level
-        cmd.AddValue("cpo", "The Cache policy(0:none, 1:LRU, 2:OPC, 3:HCaching)", cpo);
+        cmd.AddValue("cpo", "The Cache policy(0:none, 1:LRU, 2:OPC, 3:HCaching, 4:DRAM-SSD)", cpo);
 
         //DRAM capacity, S
         cmd.AddValue("dc", "Total DRAM capacity(uint64_t Bytes)", cache_cap);

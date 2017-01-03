@@ -43,7 +43,8 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define CACHE_MODE "packet" // "packet" or "object"
 #define PACKET_CACHE_MODE 1  //LRU
 #define OBJECT_CACHE_MODE 2  //OPC
-#define SRAM_CACHE_MODE 3  //sram cache for dram, certainly file index is also stored in sram 
+#define SRAM_CACHE_MODE 3  //SRAM cache for dram
+#define DRAM_CACHE_MODE 4  //DRAM cache for SSD
 
 //sram cache parameters
 #define WIDTH 8 //bytes
@@ -65,7 +66,7 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define SRAM_ACCESS_TIME 450 // pico seconds
 #define DRAM_ACCESS_TIME 30000 // pico seconds
 #define DRAM_OLD_ACCESS_TIME 625 //pico seconds
-
+#define SSD_DATA_RATE 4.8 //Gbps
 
 #include "ns3/core-module.h"
 

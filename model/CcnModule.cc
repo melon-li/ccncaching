@@ -68,7 +68,7 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         NS_LOG_UNCOND("In enableCache function, SRAM_Size = "<<
                        float(_cache_fast_cap)/1024/1024<<"MB\n");
         cache = new O_Cache(capacity, _cache_fast_cap/OPC_ENTRY_SIZE);
-    }else{
+    }else if (mode == SRAM_CACHE_MODE){
         //In HCaching, L2 index is realized by A^2 bloom filter, 
         //the size of L2 index is determined by DRAM size.
         //We can calculate this size as follows:
@@ -88,6 +88,8 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         }
         NS_LOG_UNCOND("The writing_cache_size = "<<float(writing_cache_size)/1024/1024<<" MB\n");
         cache = new S_Cache(capacity, writing_cache_size/PKT_SIZE, _file_map_p, _fp, enable_opt);
+    }else if (mode == DRAM_CACHE_MODE){
+      cache = new D_Cache(capacity, _cache_fast_cap/PKT_SIZE, _file_map_p);
     }
     return 0;
 }

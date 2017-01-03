@@ -87,6 +87,12 @@ public:
         false_positive_cnt_w = 0;
         total_stored_packets = 0;
         sram_stored_packets = 0;
+   
+
+        dramcache_pcks=0;
+        dramcache_outoforder = 0;
+        dramcache_rmlru = 0;
+        ssd_rmlru = 0;
     }
 
     ~CacheModule(){
@@ -125,6 +131,12 @@ public:
     uint64_t false_positive_cnt_w;
     uint64_t total_stored_packets;
     uint64_t sram_stored_packets;
+
+
+    uint64_t dramcache_pcks;
+    uint64_t dramcache_outoforder;
+    uint64_t dramcache_rmlru;
+    uint64_t ssd_rmlru;
 
     uint32_t *log_chunk_id_hits ;
     map<string, uint32_t>log_file_hits; // this gets erazed when its written
@@ -181,6 +193,7 @@ public:
 };
 
 typedef map<uint32_t, char *> Pkts;
+typedef map<string, Pkts > Cachetable;
 class Slot_Object{
 private:
     typedef map<string, uint8_t> Name2index;
@@ -272,7 +285,6 @@ public:
 
     //SRAM table for reading
     //filename-begin_id, packets
-    typedef map<string, Pkts > Cachetable;
     Cachetable cache_table_r;
 
     //SRAM table for writing
@@ -313,6 +325,49 @@ public:
     uint64_t writecache_pcks;
     // the number of slot, one slot has FILE_NUM files, one file has equal to or less than PKT_NUM packets
     uint64_t slot_num;
+};
+
+
+//Use DRAM as the cache of SSD 
+class D_Cache:public CacheModule{
+public:
+     D_Cache(uint64_t _capacity, 
+             uint64_t _capacity_fast_table,
+             map<string, uint32_t> *_file_map_p):
+            CacheModule(_capacity,_capacity_fast_table){
+        file_map_p = _file_map_p;
+        //zero_pcks=0;
+        L1_LRU = new LRU_Table();
+        L2_LRU = new LRU_Table();
+
+        /*if(_capacity == 0){
+            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE);
+        }else{
+            slot_num = _capacity/PKT_NUM;
+        }*/
+    }
+    
+    LRU_Table *L1_LRU;
+    LRU_Table *L2_LRU;
+    map<string, uint32_t> *file_map_p;   
+    Cachetable DRAM_table;
+    Cachetable SSD_table;
+        
+    int32_t get_cached_packet(const string& _filename, const string& _ID);
+    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    int32_t add_packet(const string& chunk_name,  const uint32_t ID, const uint32_t chunk_id, const char *_payload);
+    uint32_t store_packets(const string& chunk_name, const Pkts & pkts);
+    pair<bool,uint32_t>  is_last(const string& chunk_name, const uint32_t ID);
+    int32_t get_cached_packets_ssd(const string& chunk_name);
+    int32_t get_cached_packets_dram(const string& chunk_name);
+    int32_t remove_last_chunk_ssd();
+    int32_t remove_last_chunk_dram();
+    inline void checkout_ssd();
+    inline void checkout_dramcache();
+
+    
+    //string get_state();
+    string get_packet_stats(){return "";}
 };
 
 }

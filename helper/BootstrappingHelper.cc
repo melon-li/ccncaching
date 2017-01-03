@@ -144,7 +144,7 @@ void BootstrappingHelper::startExperiment(){
         //setup caching nodes
         vector < Ptr< Node > > cache_nodes;
         vector < Ptr< CcnModule > > cache_modules;
-        if (cache_mode!=0){ //cache enable (0=no cache,1=LRU,2=OPC)
+        if (cache_mode != 0){ //cache enable (0=no cache,1=LRU,2=OPC)
             if (ExperimentGlobals::CACHE_PLACEMENT == 0 ){ //caching at edge nodes only
                 //start caching nodes
                 for (vector<uint32_t>::iterator it=receiver_nodes.begin(); it!=receiver_nodes.end(); ++it){
@@ -232,6 +232,10 @@ void BootstrappingHelper::startExperiment(){
             uint64_t false_positive_cnt_w = 0;
             uint64_t total_stored_packets = 0;
             uint64_t sram_stored_packets = 0;
+            uint64_t dramcache_pcks=0;
+            uint64_t dramcache_outoforder = 0;
+            uint64_t dramcache_rmlru = 0;
+            uint64_t ssd_rmlru = 0;
 
             for (uint8_t n = 0; n< cache_nodes.size(); n++){
                 Ptr<Node> nd = cache_nodes[n];
@@ -252,10 +256,20 @@ void BootstrappingHelper::startExperiment(){
                 false_positive_cnt_w += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt_w;
                 total_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->total_stored_packets;
                 sram_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->sram_stored_packets;
+                dramcache_pcks += nsNodeIdToModule[nd->GetId()]->cache->dramcache_pcks;
+                dramcache_outoforder += nsNodeIdToModule[nd->GetId()]->cache->dramcache_outoforder;
+                dramcache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->dramcache_rmlru;
+                ssd_rmlru += nsNodeIdToModule[nd->GetId()]->cache->ssd_rmlru;
+                 
             }
             NS_LOG_UNCOND("Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<
                       stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<
                                     r_fetchings<<" r_insertions: "<<r_insertions);
+            NS_LOG_UNCOND("dramcache_pcks:"<<dramcache_pcks<<
+                          ", dramcache_outoforder:"<<dramcache_outoforder<<
+                          ", dramcache_rmlru:"<<dramcache_rmlru<<
+                          ", ssd_rmlru:"<<ssd_rmlru
+                         );          
             NS_LOG_UNCOND("false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
                    " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru);
             NS_LOG_UNCOND("false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<

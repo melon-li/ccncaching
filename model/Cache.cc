@@ -11,11 +11,11 @@ namespace ns3 {
  * returns >0  if packet is found cached
  * the actual data are never stored/retrieved
  */
-int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
+int64_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
     //click_chatter("Searching chunk.. %d", ID);
-    uint32_t lookup_time = 0;
+    int64_t lookup_time = 0;
     uint32_t ID = atoi(_ID.c_str());
     map<string, uint32_t>::iterator it = index_table.find(_filename);
     // chunk is cached
@@ -42,6 +42,7 @@ int32_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         return lookup_time;
        // return tmp * DRAM_ACCESS_TIME;
     }
+    miss++;
     return -1;
 }
     
@@ -310,10 +311,10 @@ string P_Cache::get_state(){
  * Looks for cached packet in Packet-organised cache
  * returns the amount of time spend in DRAM
  */
-int32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
+int64_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
-    uint32_t lookup_time; 
+    int64_t lookup_time = -1; 
     string key = _filename+"-";
     key.append(_ID);
     map<string, char*>::iterator it = data_table.find(key);
@@ -336,7 +337,8 @@ int32_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
         lookup_time = PKT_SIZE*8*1000/LRU_RATE; //ps
         return lookup_time;
         }
-    return -1;
+    miss++;
+    return lookup_time;
 
     }
     
@@ -384,6 +386,7 @@ int32_t P_Cache::add_packet(const string& _filename, const string& _ID, const  c
       char *data = NULL;
     //memcpy(data, _payload->data(), PAYLOAD_SIZE);
     data_table.insert (std::pair<string,char*>(key, data));
+    write_for_storings++;
     NS_LOG_DEBUG("Added key "<< key<<" data 1st byte "<< *(data));
     LRU_Object * _obj  = new LRU_Object(key);
     LRU->add_object(_obj);        
@@ -759,6 +762,7 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
     LRU->add_object(_obj);     
     pcks_num += pr.second.size();  
     readcache_pcks += pcks_num;  
+    slow_memory_hit +=  pcks_num;
     // cal lookup_time
     lookup_time = (PKT_SIZE/WIDTH)*pcks_num*DRAM_OLD_ACCESS_TIME + \
                                       DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
@@ -769,12 +773,13 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
     clear_file_requests(key.substr(0, key.rfind("-")), 
                                               std::to_string(ID+1));
     hits += req;
+    reads_for_fetchings++;
     return lookup_time;
 }
 
 
-int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
-    int32_t lookup_time = 0;
+int64_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
+    int64_t lookup_time = -1;
     uint32_t ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
     requests++;
     increase_file_requests(_filename, _ID);
@@ -789,21 +794,31 @@ int32_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     }else{
         lookup_time = get_readcached_packet(key, ID);
     }
-    if(lookup_time >=0) return lookup_time;
+    if(lookup_time >=0){
+        fast_memory_hit++;
+        return lookup_time;
+    }
     //if(lookup_time >=0) return lt;
 
     lookup_time = get_writecached_packet(key, ID);
     //if(lookup_time >=0) return lookup_time;
-    if(lookup_time >=0) return 0;
+    if(lookup_time >=0){
+        fast_memory_hit++;
+        return 0;
+    }
 
     //if not cached in sram, and checkout if stored in dram
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
-    if(iscache == 0) return -1;
+    if(iscache == 0){
+        miss++;
+        return -1;
+    }
     read_dram_cnt++;
     lookup_time = get_dram_packet(key, ID); 
     if(lookup_time == -1){
         false_positive_cnt++;
         //NS_LOG_WARN("Bloom Filter:False positive");
+        miss++;
         return -1;
     }
 
@@ -886,6 +901,7 @@ uint32_t S_Cache::store_packets(const string& key, const uint32_t last_id, const
     
     write_time = (pkts.size())*(PKT_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME + \
                  DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
+    write_for_storings++;
     return write_time;
 }
 
@@ -1021,9 +1037,9 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
  * Looks for cached packet in DRAM-SSD cache
  * returns the amount of time spend in DRAM-SSD cache
  */
-int32_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
+int64_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
     //lookup_time, timeunit:ps
-    uint64_t lt = 0; 
+    int64_t lt = 0; 
 
     //For the statistics of requests and hits
     requests++;
@@ -1036,8 +1052,12 @@ int32_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
     Cachetable::iterator it = DRAM_table.find(chunk_name);
     if (it != DRAM_table.end()){
         Pkts::iterator pt = it->second.find(ID);
-        if( pt == it->second.end()) return -1;
+        if( pt == it->second.end()){
+            miss++;
+            return -1;
+        }
         L1_LRU->update_object(L1_LRU->objects[chunk_name]);
+        fast_memory_hit++;
     }
 
     // If packet is cached in DRAM or it stored in SSD, 
@@ -1047,12 +1067,16 @@ int32_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
 
     if (it == DRAM_table.end()){
         Cachetable::iterator it = SSD_table.find(chunk_name);
-        if(it == SSD_table.end()) return -1;
+        if(it == SSD_table.end()){
+            miss++;
+            return -1;
+        }
         L2_LRU->update_object(L2_LRU->objects[chunk_name]);
         DRAM_table.insert(std::make_pair(it->first, it->second));
         LRU_Object * _obj  = new LRU_Object(chunk_name);
         L1_LRU->add_object(_obj);        
         lt += (it->second.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE; 
+        slow_memory_hit += it->second.size();
         reads_for_fetchings++;
     }
 
@@ -1172,6 +1196,45 @@ int32_t D_Cache::add_packet(const string& chunk_name,
     return wt;
 }
 
+uint32_t D_Cache::store_packets(const string& chunk_name,
+                                const Pkts & pkts){
+    uint64_t wt = 0;
+
+    // If ssd cache is full, 
+    // then delete file recently used in L1_LRU.
+    checkout_ssd();
+    if ( SSD_table.find(chunk_name) != SSD_table.end()){
+        L2_LRU->update_object(L2_LRU->objects[chunk_name]);
+        return wt;
+    }else{
+        LRU_Object* _obj  = new LRU_Object(chunk_name);
+        L2_LRU->add_object(_obj);        
+        SSD_table.insert(Cachetable::value_type(chunk_name, pkts));
+        stored_packets += pkts.size();
+        total_stored_packets += pkts.size();
+        wt += (pkts.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE;
+    }
+    write_for_storings++;
+    return wt;
+}
+
+pair<bool,uint32_t> D_Cache::is_last(const string &chunk_name, 
+                                     const uint32_t ID){
+   uint32_t filesize = ID + CACHING_START_INDEX; 
+   string filename = chunk_name.substr(0, chunk_name.find("-"));
+   filename = filename.substr(filename.rfind('/') + 1);
+   map<string, uint32_t>::iterator it = (*file_map_p).find(filename); 
+   if(it == (*file_map_p).end()){
+        NS_ASSERT_MSG(false, "Error. Do not find file("
+                      <<filename<<")");
+   }
+   if(filesize == it->second) return std::make_pair(true, it->second);
+   if(filesize > it->second) 
+       NS_ASSERT_MSG(false, "Error.filesize can not be more than "
+                     <<it->second);
+   return std::make_pair(false, it->second);
+}
+
 inline void D_Cache::checkout_dramcache(){
     if(dramcache_pcks >= capacity_fast_table){
         int32_t removed_packets = remove_last_chunk_dram();
@@ -1206,44 +1269,6 @@ int32_t D_Cache::get_cached_packets_dram(const string& chunk_name){
     }else{
         return -1;
     }
-}
-
-pair<bool,uint32_t> D_Cache::is_last(const string &chunk_name, 
-                                     const uint32_t ID){
-   uint32_t filesize = ID + CACHING_START_INDEX; 
-   string filename = chunk_name.substr(0, chunk_name.find("-"));
-   filename = filename.substr(filename.rfind('/') + 1);
-   map<string, uint32_t>::iterator it = (*file_map_p).find(filename); 
-   if(it == (*file_map_p).end()){
-        NS_ASSERT_MSG(false, "Error. Do not find file("
-                      <<filename<<")");
-   }
-   if(filesize == it->second) return std::make_pair(true, it->second);
-   if(filesize > it->second) 
-       NS_ASSERT_MSG(false, "Error.filesize can not be more than "
-                     <<it->second);
-   return std::make_pair(false, it->second);
-}
-
-uint32_t D_Cache::store_packets(const string& chunk_name,
-                                const Pkts & pkts){
-    uint64_t wt = 0;
-
-    // If ssd cache is full, 
-    // then delete file recently used in L1_LRU.
-    checkout_ssd();
-    if ( SSD_table.find(chunk_name) != SSD_table.end()){
-        L2_LRU->update_object(L2_LRU->objects[chunk_name]);
-        return wt;
-    }else{
-        LRU_Object* _obj  = new LRU_Object(chunk_name);
-        L2_LRU->add_object(_obj);        
-        SSD_table.insert(Cachetable::value_type(chunk_name, pkts));
-        stored_packets += pkts.size();
-        total_stored_packets += pkts.size();
-        wt += (pkts.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE;
-    }
-    return wt;
 }
 
 inline void D_Cache::checkout_ssd(){

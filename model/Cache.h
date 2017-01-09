@@ -83,6 +83,7 @@ public:
         read_dram_cnt = 0;
         readcache_rmlru = 0;
         writecache_rmlru = 0;
+        write_for_storings = 0;
         write_outoforder = 0;
         false_positive_cnt_w = 0;
         total_stored_packets = 0;
@@ -93,6 +94,11 @@ public:
         dramcache_outoforder = 0;
         dramcache_rmlru = 0;
         ssd_rmlru = 0;
+
+
+        miss = 0;
+        slow_memory_hit = 0;
+        fast_memory_hit = 0;
     }
 
     ~CacheModule(){
@@ -102,7 +108,7 @@ public:
     //these used to be pure virtual but ns3 could not handle it
     virtual int32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
     virtual uint32_t remove_last_packet(const string& _filename){return 0;}
-    virtual int32_t get_cached_packet(const string& _filename, const string& ID){return 0;}
+    virtual int64_t get_cached_packet(const string& _filename, const string& ID){return 0;}
     virtual uint32_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}
     virtual string get_state(){return 0;}
     virtual string get_packet_stats(){return 0;}
@@ -111,10 +117,10 @@ public:
     LRU_Table *LRU;
     uint64_t capacity; // the number of  packets
     uint64_t capacity_fast_table; // the number of entries in memory
-    uint32_t stored_packets;
-    uint32_t reads_for_insertions;
-    uint32_t reads_for_fetchings;
-    uint32_t reads_for_evictions;
+    uint64_t stored_packets;
+    uint64_t reads_for_insertions;
+    uint64_t reads_for_fetchings;
+    uint64_t reads_for_evictions;
 
     map<string , char* > data_table; 
       
@@ -128,6 +134,7 @@ public:
     uint64_t readcache_rmlru;
     uint64_t writecache_rmlru;
     uint64_t write_outoforder;
+    uint64_t write_for_storings;
     uint64_t false_positive_cnt_w;
     uint64_t total_stored_packets;
     uint64_t sram_stored_packets;
@@ -137,6 +144,10 @@ public:
     uint64_t dramcache_outoforder;
     uint64_t dramcache_rmlru;
     uint64_t ssd_rmlru;
+
+    uint64_t miss;
+    uint64_t slow_memory_hit;
+    uint64_t fast_memory_hit;
 
     uint32_t *log_chunk_id_hits ;
     map<string, uint32_t>log_file_hits; // this gets erazed when its written
@@ -169,7 +180,7 @@ public:
     uint32_t remove_last_packet(const string& _filename);  
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
-    int32_t get_cached_packet(const string& _filename, const string& _ID);
+    int64_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
@@ -182,7 +193,7 @@ class P_Cache: public CacheModule{
 public:
     P_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
         
-    int32_t get_cached_packet(const string& _filename, const string& _ID);
+    int64_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
@@ -313,7 +324,7 @@ public:
     int32_t remove_last_file_w();//new by argi
     int32_t get_stored_packets_r(const string& _filename);//new by argi
     int32_t get_stored_packets_w(const string& _filename);//new by argi
-    int32_t get_cached_packet(const string& _filename, const string& _ID);
+    int64_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
     inline void checkout_writecache();
@@ -328,7 +339,11 @@ public:
 };
 
 
-//Use DRAM as the cache of SSD 
+/*The DRAM_SSD caching system uses DRAM as the cache of SSD.
+ *It is presented in "Multi-Terabyte and Multi-Gbps Information Centric Routers".
+ *Here we do not implement the Start of Video (SoV) area 
+ *in L1 storage of DRAM_SSD system for simplicity.
+ */
 class D_Cache:public CacheModule{
 public:
      D_Cache(uint64_t _capacity, 
@@ -353,7 +368,7 @@ public:
     Cachetable DRAM_table;
     Cachetable SSD_table;
         
-    int32_t get_cached_packet(const string& _filename, const string& _ID);
+    int64_t get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     int32_t add_packet(const string& chunk_name,  const uint32_t ID, const uint32_t chunk_id, const char *_payload);
     uint32_t store_packets(const string& chunk_name, const Pkts & pkts);

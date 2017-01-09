@@ -66,7 +66,19 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define SRAM_ACCESS_TIME 450 // pico seconds
 #define DRAM_ACCESS_TIME 30000 // pico seconds
 #define DRAM_OLD_ACCESS_TIME 625 //pico seconds
-#define SSD_DATA_RATE 4.8 //Gbps
+
+/*
+ssd_data_rate = (read_throughput*read_ratio + write_throughput*write_ratio), 
+we derive the SSD_DATA_RATE by dividing ssd_data_rate by 2, 
+because our caching system assume SSD is dual-port memory, and in fact it is not. 
+Now we calculate Samsung 960 Pro: The fastest consumer SSD you can buy in 2016,
+http://www.samsung.com/cn/memory-storage/ssd-960-pro/MZ-V6P2T0Z.
+the sequential read performance of 3,500MB/s and sequential write speeds of 2,100MB/s. 
+Let 3,500MB/s read_throughput, 2,100MB/s be write_throughput.
+We Assume the read_ratio: write_ratio = 1:2.73,
+then we can derive SSD_DATA_RATE = (3500*1 + 2100*2.73)/(3.73*2)= 1237.67MB/s = 9.7 Gbps
+*/
+#define SSD_DATA_RATE 9.7 //Gbps
 
 #include "ns3/core-module.h"
 

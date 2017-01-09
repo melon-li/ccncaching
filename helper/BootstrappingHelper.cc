@@ -217,17 +217,18 @@ void BootstrappingHelper::startExperiment(){
         * print caching results
         */
         if (cache_mode != 0){
-            uint32_t reqs = 0;
-            uint32_t hits = 0;
-            uint32_t r_evictions = 0;
-            uint32_t r_fetchings = 0;
-            uint32_t r_insertions = 0;
+            uint64_t reqs = 0;
+            uint64_t hits = 0;
+            uint64_t r_evictions = 0;
+            uint64_t r_fetchings = 0;
+            uint64_t r_insertions = 0;
             
             uint64_t false_positive_cnt = 0;
             uint64_t read_dram_cnt = 0;
             uint64_t readcache_rmlru = 0;
             uint64_t writecache_rmlru = 0;
             uint64_t stored_packets = 0;
+            uint64_t w_storings = 0;
             uint64_t write_outoforder = 0;
             uint64_t false_positive_cnt_w = 0;
             uint64_t total_stored_packets = 0;
@@ -236,6 +237,9 @@ void BootstrappingHelper::startExperiment(){
             uint64_t dramcache_outoforder = 0;
             uint64_t dramcache_rmlru = 0;
             uint64_t ssd_rmlru = 0;
+            uint64_t miss = 0;
+            uint64_t fast_memory_hit = 0;
+            uint64_t slow_memory_hit = 0;
 
             for (uint8_t n = 0; n< cache_nodes.size(); n++){
                 Ptr<Node> nd = cache_nodes[n];
@@ -243,6 +247,7 @@ void BootstrappingHelper::startExperiment(){
                 hits+=nsNodeIdToModule[nd->GetId()]->cache->hits;
                 r_evictions+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_evictions;
                 r_fetchings+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_fetchings;
+                w_storings+=nsNodeIdToModule[nd->GetId()]->cache->write_for_storings;
                 r_insertions+=nsNodeIdToModule[nd->GetId()]->cache->reads_for_insertions;
 
                 //NS_LOG_UNCOND(nsNodeIdToModule[nd->GetId()]->cache->get_chunk_id_hits());
@@ -260,16 +265,22 @@ void BootstrappingHelper::startExperiment(){
                 dramcache_outoforder += nsNodeIdToModule[nd->GetId()]->cache->dramcache_outoforder;
                 dramcache_rmlru += nsNodeIdToModule[nd->GetId()]->cache->dramcache_rmlru;
                 ssd_rmlru += nsNodeIdToModule[nd->GetId()]->cache->ssd_rmlru;
+                miss += nsNodeIdToModule[nd->GetId()]->cache->miss;
+                fast_memory_hit += nsNodeIdToModule[nd->GetId()]->cache->fast_memory_hit;
+                slow_memory_hit += nsNodeIdToModule[nd->GetId()]->cache->slow_memory_hit;
                  
             }
             NS_LOG_UNCOND("Cache requests: "<<reqs<<" hits: "<<hits<<" stored_packets: "<<
                       stored_packets<<" r_evictions: "<<r_evictions<<" r_fetchings: "<<
-                                    r_fetchings<<" r_insertions: "<<r_insertions);
+                                    r_fetchings<<" r_insertions: "<<r_insertions<<
+                           " w_storings: "<<w_storings);
+            NS_LOG_UNCOND("miss: "<<miss<<
+                          ", fast_memory_hit: "<<fast_memory_hit<<
+                          ", slow_memory_hit: "<<slow_memory_hit);
             NS_LOG_UNCOND("dramcache_pcks:"<<dramcache_pcks<<
                           ", dramcache_outoforder:"<<dramcache_outoforder<<
                           ", dramcache_rmlru:"<<dramcache_rmlru<<
-                          ", ssd_rmlru:"<<ssd_rmlru
-                         );          
+                          ", ssd_rmlru:"<<ssd_rmlru);          
             NS_LOG_UNCOND("false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
                    " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru);
             NS_LOG_UNCOND("false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<

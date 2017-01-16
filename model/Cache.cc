@@ -37,7 +37,8 @@ pair<int64_t, int64_t> O_Cache::get_cached_packet(const string& _filename, const
         //NS_LOG_DEBUG("Got hit for ID "<<ID<<" it->second:"<<(uint32_t)it->second);
         uint16_t tmp = (it->second - ID + 1);
         //std::cout<<"tmp="<<tmp<<std::endl;
-        reads_for_fetchings += tmp;
+        //reads_for_fetchings += tmp;
+        reads_for_fetchings++;
         lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
         return std::make_pair(0, lookup_time);
        // return tmp * DRAM_ACCESS_TIME;
@@ -78,7 +79,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
         }else if (stored_packets >= capacity){
             if (remove_last_packet(_filename)==0)
                 return 0;
-            lookup_time ++;
+            lookup_time++;
             stored_packets--;
             reads_for_evictions++;
         }
@@ -86,6 +87,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
         lookup_time += tmp;
         reads_for_insertions += tmp;
         stored_packets++;
+        write_for_storings++;
         //std::cout<<"Added packet in cache\n";
 
     }    

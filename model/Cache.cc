@@ -11,7 +11,7 @@ namespace ns3 {
  * returns >0  if packet is found cached
  * the actual data are never stored/retrieved
  */
-int64_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
+pair<int64_t, int64_t> O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
     //click_chatter("Searching chunk.. %d", ID);
@@ -39,11 +39,11 @@ int64_t O_Cache::get_cached_packet(const string& _filename, const string& _ID){
         //std::cout<<"tmp="<<tmp<<std::endl;
         reads_for_fetchings += tmp;
         lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (tmp-1)*DRAM_ACCESS_TIME;
-        return lookup_time;
+        return std::make_pair(0, lookup_time);
        // return tmp * DRAM_ACCESS_TIME;
     }
     miss++;
-    return -1;
+    return std::make_pair(-1, 0);
 }
     
 /**
@@ -311,10 +311,10 @@ string P_Cache::get_state(){
  * Looks for cached packet in Packet-organised cache
  * returns the amount of time spend in DRAM
  */
-int64_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
+pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
-    int64_t lookup_time = -1; 
+    int64_t lookup_time = 0; 
     string key = _filename+"-";
     key.append(_ID);
     map<string, char*>::iterator it = data_table.find(key);
@@ -335,10 +335,10 @@ int64_t P_Cache::get_cached_packet(const string& _filename, const string& _ID){
         reads_for_fetchings++;
         //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
         lookup_time = PKT_SIZE*8*1000/LRU_RATE; //ps
-        return lookup_time;
-        }
+        return std::make_pair(0, lookup_time);
+    }
     miss++;
-    return lookup_time;
+    return std::make_pair(-1, 0);
 
     }
     
@@ -505,7 +505,7 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
         return std::make_pair(true, cnt);
      }
 
-     //2.The file named key was not  cached!, and this slot is full
+     //2.The file named key was not cached!, and this slot is full
     if(files.size() >= file_num){
         /* Delete the oldest file, or in options, we can use LRU algorithm to delete file
            Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
@@ -777,9 +777,10 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
     return lookup_time;
 }
 
-
-int64_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
-    int64_t lookup_time = -1;
+pair<int64_t, int64_t> S_Cache::get_cached_packet(
+                         const string& _filename,
+                         const string& _ID){
+    int64_t lookup_time = 0;
     uint32_t ID = atoi(_ID.c_str()) - CACHING_START_INDEX;
     requests++;
     increase_file_requests(_filename, _ID);
@@ -796,7 +797,8 @@ int64_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     }
     if(lookup_time >=0){
         fast_memory_hit++;
-        return lookup_time;
+        //return 0;
+        return std::make_pair(0, 0);
     }
     //if(lookup_time >=0) return lt;
 
@@ -804,25 +806,29 @@ int64_t S_Cache::get_cached_packet(const string& _filename, const string& _ID){
     //if(lookup_time >=0) return lookup_time;
     if(lookup_time >=0){
         fast_memory_hit++;
-        return 0;
+        //return 0;
+        return std::make_pair(0, 0);
     }
 
     //if not cached in sram, and checkout if stored in dram
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache == 0){
         miss++;
-        return -1;
+        //return -1;
+        return std::make_pair(-1, 0);
     }
     read_dram_cnt++;
-    lookup_time = get_dram_packet(key, ID); 
-    if(lookup_time == -1){
+    lookup_time += DRAM_OLD_ACCESS_TIME + 
+                      DRAM_OLD_ACCESS_TIME*FILE_NUM*LRU_ENTRY_SIZE/WIDTH;
+    int64_t lt = get_dram_packet(key, ID); 
+    if(lt == -1){
         false_positive_cnt++;
         //NS_LOG_WARN("Bloom Filter:False positive");
         miss++;
-        return -1;
+        return std::make_pair(-1, lookup_time);
     }
 
-    return lookup_time;
+    return std::make_pair(0, lookup_time+lt);
     //return lt;
 }
 
@@ -1008,12 +1014,14 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     // if packet has existed in dram, ignore and return 0
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache){
-        if(is_reallycached(key)) return 0;
+        write_time += DRAM_OLD_ACCESS_TIME + 
+                      DRAM_OLD_ACCESS_TIME*FILE_NUM*LRU_ENTRY_SIZE/WIDTH;
+        if(is_reallycached(key)) return write_time;
         false_positive_cnt_w++;
     }
 
     //if not exist in dram,store it
-    write_time = add_packet(key, ID, chunk_id, _payload);
+    write_time += add_packet(key, ID, chunk_id, _payload);
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
     return write_time;    
 }
@@ -1037,7 +1045,7 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
  * Looks for cached packet in DRAM-SSD cache
  * returns the amount of time spend in DRAM-SSD cache
  */
-int64_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
+pair<int64_t, int64_t> D_Cache::get_cached_packet(const string& _filename, const string& _ID){
     //lookup_time, timeunit:ps
     int64_t lt = 0; 
 
@@ -1049,12 +1057,13 @@ int64_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
     string chunk_name = _filename + "-";
     chunk_name.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
 
+    //DRAM_table is cached in SRAM
     Cachetable::iterator it = DRAM_table.find(chunk_name);
     if (it != DRAM_table.end()){
         Pkts::iterator pt = it->second.find(ID);
         if( pt == it->second.end()){
             miss++;
-            return -1;
+            return std::make_pair(-1, 0);
         }
         L1_LRU->update_object(L1_LRU->objects[chunk_name]);
         fast_memory_hit++;
@@ -1066,10 +1075,15 @@ int64_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
                DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
 
     if (it == DRAM_table.end()){
+        //SSD_table is cached in DRAM
         Cachetable::iterator it = SSD_table.find(chunk_name);
+        
+        //In fact, the lookup time can be much longer the following value.
+        lt += LRU_ENTRY_SIZE*DRAM_OLD_ACCESS_TIME/WIDTH +
+              DRAM_ACCESS_TIME; 
         if(it == SSD_table.end()){
             miss++;
-            return -1;
+            return std::make_pair(-1, lt);
         }
         L2_LRU->update_object(L2_LRU->objects[chunk_name]);
         DRAM_table.insert(std::make_pair(it->first, it->second));
@@ -1095,7 +1109,7 @@ int64_t D_Cache::get_cached_packet(const string& _filename, const string& _ID){
     log_chunk_id_hits[std::min(MAX_LOG_CHUNK_ID-1, atoi(_ID.c_str()))]++;
     NS_LOG_DEBUG("Found key: "<<key<<" cached");
 
-    return lt;
+    return std::make_pair(0, lt);
 }
 
 // Returns the lookup delay in SSD-DRAM caching system (picosecond)

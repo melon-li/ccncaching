@@ -75,7 +75,8 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
         size_t cells = ka*(capacity/PKT_NUM)/std::log(2); //bits
         uint64_t writing_cache_size;
-        NS_LOG_UNCOND("In enableCache function,ka = "<<ka<<" cells = "<<cells<<
+        NS_LOG_UNCOND("In enableCache function,fp="<<_fp<<
+                      " ka = "<<ka<<" cells = "<<cells<<
                       " size = "<<float(cells)/1024/1024<<" Mb");
 
         //Get cache_size which is equit to (reading_cache_size + writing _cache_size) 
@@ -89,7 +90,8 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         NS_LOG_UNCOND("The writing_cache_size = "<<float(writing_cache_size)/1024/1024<<" MB\n");
         cache = new S_Cache(capacity, writing_cache_size/PKT_SIZE, _file_map_p, _fp, enable_opt);
     }else if (mode == DRAM_CACHE_MODE){
-      cache = new D_Cache(capacity, _cache_fast_cap/PKT_SIZE, _file_map_p);
+      //_cache_fast_cap is the size of SRAM which is used as index for chunk cached in DRAM.
+      cache = new D_Cache(capacity, _cache_fast_cap/LRU_ENTRY_SIZE, _file_map_p);
     }
     return 0;
 }
@@ -203,10 +205,10 @@ void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){
     if (cache != NULL){
         string pref = interest->getName()->getPrefix();
         string _id = interest->getName()->getID();
-        int64_t lt = cache->get_cached_packet(pref, _id);
+        pair<int64_t, int64_t> lt = cache->get_cached_packet(pref, _id);
         //int64_t lt = -1;
-        if (lt >= 0)    {//if >=0 then is found
-            uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME+uint64_t(lt));
+        if (lt.first >= 0)    {//if >=0 then is found
+            uint64_t lookup_time = get_sendtime(nd, SRAM_ACCESS_TIME+uint64_t(lt.second));
             //lookup_time = 0;
             //NS_LOG_DEBUG("getcache time for interest="<<lookup_time);
             HITS++;

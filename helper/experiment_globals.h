@@ -70,7 +70,7 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 /*
 ssd_data_rate = (read_throughput*read_ratio + write_throughput*write_ratio), 
 we derive the SSD_DATA_RATE by dividing ssd_data_rate by 2, 
-because our caching system assume SSD is dual-port memory, and in fact it is not. 
+because our caching system assume SSD is dual-port storage, and in fact it is not. 
 Now we calculate Samsung 960 Pro: The fastest consumer SSD you can buy in 2016,
 http://www.samsung.com/cn/memory-storage/ssd-960-pro/MZ-V6P2T0Z.
 the sequential read performance of 3,500MB/s and sequential write speeds of 2,100MB/s. 

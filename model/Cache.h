@@ -108,7 +108,7 @@ public:
     //these used to be pure virtual but ns3 could not handle it
     virtual int32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
     virtual uint32_t remove_last_packet(const string& _filename){return 0;}
-    virtual int64_t get_cached_packet(const string& _filename, const string& ID){return 0;}
+    virtual pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& ID){return std::make_pair(0, 0);}
     virtual uint32_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}
     virtual string get_state(){return 0;}
     virtual string get_packet_stats(){return 0;}
@@ -180,7 +180,7 @@ public:
     uint32_t remove_last_packet(const string& _filename);  
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
-    int64_t get_cached_packet(const string& _filename, const string& _ID);
+    pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
@@ -193,7 +193,7 @@ class P_Cache: public CacheModule{
 public:
     P_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
         
-    int64_t get_cached_packet(const string& _filename, const string& _ID);
+    pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
@@ -324,7 +324,7 @@ public:
     int32_t remove_last_file_w();//new by argi
     int32_t get_stored_packets_r(const string& _filename);//new by argi
     int32_t get_stored_packets_w(const string& _filename);//new by argi
-    int64_t get_cached_packet(const string& _filename, const string& _ID);
+    pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
     inline void checkout_writecache();
@@ -368,7 +368,7 @@ public:
     Cachetable DRAM_table;
     Cachetable SSD_table;
         
-    int64_t get_cached_packet(const string& _filename, const string& _ID);
+    pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
     uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     int32_t add_packet(const string& chunk_name,  const uint32_t ID, const uint32_t chunk_id, const char *_payload);
     uint32_t store_packets(const string& chunk_name, const Pkts & pkts);

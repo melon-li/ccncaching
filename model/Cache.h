@@ -269,9 +269,9 @@ public:
         LRU_W = new LRU_Table();
 
         if(_capacity == 0){
-            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE);
+            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
         }else{
-            slot_num = _capacity/PKT_NUM;
+            slot_num = _capacity/PKT_NUM/FILE_NUM;
         }
        
         if(_fp){
@@ -355,11 +355,6 @@ public:
         L1_LRU = new LRU_Table();
         L2_LRU = new LRU_Table();
 
-        /*if(_capacity == 0){
-            slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE);
-        }else{
-            slot_num = _capacity/PKT_NUM;
-        }*/
     }
     
     LRU_Table *L1_LRU;

@@ -73,7 +73,7 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         //the size of L2 index is determined by DRAM size.
         //We can calculate this size as follows:
         size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
-        size_t cells = ka*(capacity/PKT_NUM)/std::log(2); //bits
+        size_t cells = ka*(capacity/PKT_NUM/FILE_NUM)/std::log(2); //bits
         uint64_t writing_cache_size;
         NS_LOG_UNCOND("In enableCache function,fp="<<_fp<<
                       " ka = "<<ka<<" cells = "<<cells<<

@@ -293,9 +293,7 @@ string O_Cache::get_packet_stats(){
     log_file_hits.clear();
 
     return s;
-    
-    
-    }
+}
     
 string P_Cache::get_state(){
     std::stringstream ss;
@@ -320,6 +318,7 @@ pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const
     string key = _filename+"-";
     key.append(_ID);
     map<string, char*>::iterator it = data_table.find(key);
+
     if (it!=data_table.end()){    
         LRU->update_object(LRU->objects[key]);
         map<string, uint32_t>::iterator it = log_file_hits.find(key);
@@ -358,9 +357,10 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     uint32_t access_time = 0;
     uint32_t lookup_time = 0;
     map<string, char*>::iterator it = data_table.find(key);
+
+    
     /* chunk is already stored, do nothing */
-    if (it!=data_table.end())
-        return 0;
+    if (it != data_table.end()) return 0;
     /* remove the last chunk from the least recently used file*/
     if (stored_packets >= capacity){
         remove_last_packet(key); // do not add DRAM delay, overwritte wth one access
@@ -374,7 +374,6 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     reads_for_insertions++;
     //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
     lookup_time = PKT_SIZE*1000*8/LRU_RATE; //ps
-    //lookup_time = LRU_ACCESS_TIME;
     return lookup_time;
 }
     
@@ -752,7 +751,7 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
      
     checkout_readcache(pr.second);
 
-    pair<Cachetable::iterator,bool> result = cache_table_r.insert(Cachetable::value_type(key, pr.second));
+    pair<Cachetable::iterator, bool> result = cache_table_r.insert(Cachetable::value_type(key, pr.second));
     // failed to insert, key may exist in cache_table_r
     if (result.second == false){
         if(cache_table_r.find(key) != cache_table_r.end()){
@@ -772,10 +771,12 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
                               DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME;
 
     //log_file_hit(_filename, _ID);
-    uint32_t req = get_file_requests(key.substr(0, key.rfind("-")), 
-                                              std::to_string(ID+1));
-    clear_file_requests(key.substr(0, key.rfind("-")), 
-                                              std::to_string(ID+1));
+    uint32_t req = get_file_requests(
+        key.substr(0, key.rfind("-")), 
+        std::to_string(ID+1));
+    clear_file_requests(
+        key.substr(0, key.rfind("-")), 
+        std::to_string(ID+1));
     hits += req;
     reads_for_fetchings++;
     return lookup_time;
@@ -801,16 +802,12 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
     }
     if(lookup_time >=0){
         fast_memory_hit++;
-        //return 0;
         return std::make_pair(0, 0);
     }
-    //if(lookup_time >=0) return lt;
 
     lookup_time = get_writecached_packet(key, ID);
-    //if(lookup_time >=0) return lookup_time;
     if(lookup_time >=0){
         fast_memory_hit++;
-        //return 0;
         return std::make_pair(0, 0);
     }
 
@@ -818,7 +815,6 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache == 0){
         miss++;
-        //return -1;
         return std::make_pair(-1, 0);
     }
     read_dram_cnt++;
@@ -833,7 +829,6 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
     }
 
     return std::make_pair(0, lookup_time+lt);
-    //return lt;
 }
 
 int32_t S_Cache::remove_last_file_w(){
@@ -889,7 +884,8 @@ int32_t S_Cache::get_avg_writetime(const uint32_t ID, const uint32_t total_lengt
     }
 }
 
-uint32_t S_Cache::store_packets(const string& key, const uint32_t last_id, const Pkts & pkts){
+uint32_t S_Cache::store_packets(const string& key, 
+    const uint32_t last_id, const Pkts & pkts){
     uint32_t write_time = 0;
     uint32_t addr = 0;
     addr = CityHash64(key.c_str(), key.size());
@@ -915,7 +911,6 @@ uint32_t S_Cache::store_packets(const string& key, const uint32_t last_id, const
     return write_time;
 }
 
-
 inline void S_Cache::checkout_writecache(){
     if(writecache_pcks >= capacity_fast_table){
         int32_t removed_packets = remove_last_file_w();
@@ -936,7 +931,6 @@ int32_t S_Cache::add_packet(const string& key,
                             const char *_payload){
     pair<bool,uint32_t> islast = is_last(key, ID);
     char* data = NULL;
-
     //uint32_t wt = get_avg_writetime(ID, islast.second);
 
     //data = new char[PAYLOAD_SIZE];
@@ -967,7 +961,8 @@ int32_t S_Cache::add_packet(const string& key,
          }
     }else{ //is first packet
         if(ID != chunk_id*PKT_NUM){
-            NS_LOG_ERROR("Packet is not the first key="<<key<<" ID="<<ID<<" chunk_id*PKT_NUM="<<(chunk_id*PKT_NUM));
+            NS_LOG_ERROR("Packet is not the first key="<<key
+                <<" ID="<<ID<<" chunk_id*PKT_NUM="<<(chunk_id*PKT_NUM));
             write_outoforder++;
             return 0;
         }
@@ -1015,20 +1010,20 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     string key(_filename);
     key = key + "-";
     key.append(std::to_string(chunk_id*PKT_NUM)); 
-    // if packet has existed in dram, ignore and return 0
+    // if packet has existed in dram, ignore and
+    // return time taked to look up tables
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache){
         write_time += DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME +
-                      DRAM_OLD_ACCESS_TIME*FILE_NUM*LRU_ENTRY_SIZE/WIDTH;
+                      (FILE_NUM*LRU_ENTRY_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME;
         if(is_reallycached(key)) return write_time;
         false_positive_cnt_w++;
     }
 
-    //if not exist in dram,store it
+    //if not exist in dram, store it
     write_time += add_packet(key, ID, chunk_id, _payload);
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
-    //return write_time;    
-    return LRU_ACCESS_TIME;
+    return write_time;    
 }
 
 bf::a2_bloom_filter *S_Cache::init_bf(double fp){

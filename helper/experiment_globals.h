@@ -9,8 +9,8 @@
 #define EXPERIMENT_GLOBALS_H
 
 #define LRU_RATE  10 //Gbps
-#define LRU_ACCESS_TIME 131562 //ps,the chunk consists of 2 packets
-//#define LRU_ACCESS_TIME 120546 //ps,the chunk consists of 8 packets
+//#define LRU_ACCESS_TIME 131875 //ps,the chunk consists of 2 packets
+//#define LRU_ACCESS_TIME 120859 //ps,the chunk consists of 8 packets
 #define LRU_ENTRY_SIZE 40
 #define OPC_ENTRY_SIZE 42
 
@@ -26,19 +26,26 @@
 #define ROOT_DOMAIN "D1"
 #define ZIPF_A 0.75
 
-#define WIN_MAX 7000 //7000
+//#define WIN_MAX 7000 //7000
 #define LINK_DELAY "5ms"
 #define ACCESS_LINK_DELAY "5ms"
 #define TTL 0.005*4 //second
+// If the workload is small relative to LINK_CPACITY, 
+// we should disable the congestion control algorithm 
+// to reduce the factors of interfering experiments.
+#define ENABLE_CONGESTION_CONTROL false
 /*
 The PointToPointNetDevice models a transmitter section that puts bits on a corresponding channel “wire.” The DataRate attribute specifies the number of bits per second that the device will simulate sending over the channel. In reality no bits are sent, but an event is scheduled for an elapsed time consistent with the number of bits in each packet and the specified DataRate. The implication here is that the receiving device models a receiver section that can receive any any data rate. Therefore there is no need, nor way to set a receive data rate in this model. By setting the DataRate on the transmitter of both devices connected to a given PointToPointChannel one can model a symmetric channel; or by setting different DataRates one can model an asymmetric channel.
+1 Gbps = 1000 bps
 */
-#define LINK_CAPACITY "150Gbps"
-#define ACCESS_LINK_CAPACITY  "150Gbps"// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
+#define LINK_CAPACITY "150Gbps"  
+// LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
+#define ACCESS_LINK_CAPACITY  "150Gbps"
 #define LINK_THROUGHTPUT "120Gbps" // 1Gbps
 #define USER_EXPERIENCED_RATE "1Gbps"
 
-#define PAYLOAD_SIZE 10 // The actual data packet is not saved, but its used for compatibility..
+// The actual data packet is not saved, but its used for compatibility..
+#define PAYLOAD_SIZE 10 
 #define REQ_SIZE 30
 
 #define CACHE_CAPACITY 100 

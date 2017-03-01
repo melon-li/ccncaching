@@ -109,7 +109,7 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
        //NS_LOG_UNCOND("asking = "<<asked.size());
        //NS_LOG_UNCOND("asked_size = "<<asked_size);
        NS_LOG_UNCOND("rec_data_rate = "<<
-                    (float(c)*1500*8/0.01/1024/1024/1024)<<" Gbps"); 
+                    (float(c)*1500*8/0.01/1000/1000/1000)<<" Gbps"); 
        c = 0;
        t = Now().ToInteger(Time::MS);
     }
@@ -129,7 +129,6 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
             NS_LOG_UNCOND(Simulator::Now ().GetPicoSeconds()<<" "
                  <<"Receiver at node "<<ccnm->getNodeId()<<" finnished "
                  <<" askedfor="<<askedfor<<",returned="<<returned);
-            return;
         }
     }
 }
@@ -147,22 +146,25 @@ void Receiver::sendInterests(){
         if(!theName)return; 
         asked.insert(theName);
         
-        //simple congestion control algorithms
-        if(asked.size() > asked_size*2){
-            sendRate = sendRate/2;
-            //NS_LOG_UNCOND("asked_size > asked_size*2,descrease sendRate to "<<
-            //              float(sendRate)/1024/1024<<" Mb"); 
-        }else if(asked.size() < asked_size/2){
-            sendRate = sendRate*2;
-            if(sendRate >= maxRate) sendRate = maxRate;
-            //NS_LOG_UNCOND("asked_size < asked_size/2,increase sendRate to "<<
-            //              float(sendRate)/1024/1024<<" Mb"); 
-        }
-
+        if (ENABLE_CONGESTION_CONTROL) controlCongestion();
         tNext = REQ_SIZE*8*pow(10, 12)/sendRate;
         NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
                      " rec sends interest "<<theName->toString());
         Simulator::Schedule(PicoSeconds(tNext), &Receiver::doSendInterest, this, theName);
+}
+
+void Receiver::controlCongestion(){
+        ////simple congestion control algorithms
+        if(asked.size() > asked_size*2){
+            sendRate = sendRate/2;
+            //NS_LOG_UNCOND("asked_size > asked_size*2,descrease sendRate to "<<
+                          //float(sendRate)/1000/1000<<" Mb"); 
+        }else if(asked.size() < asked_size/2){
+            sendRate = sendRate*2;
+            if(sendRate >= maxRate) sendRate = maxRate;
+            //NS_LOG_UNCOND("asked_size < asked_size/2,increase sendRate to "<<
+                          //float(sendRate)/1000/1000<<" Mb"); 
+        }
 }
 
 void Receiver::doSendInterest(Ptr<CCN_Name> name){
@@ -191,15 +193,12 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
 
         //assemble sendFiles to MaxLen
         while(sendFiles.size() < maxLen){
-
             if(workload.empty()) break;
-
             if (workload.size()%100==0){
                 NS_LOG_INFO(Now().ToInteger(Time::MS)<<
                                    " Receiver: "<<ccnm->getNodeId()<<
                              " remaining downloads: "<<workload.size());
             }
-
             //std::cout<<"Receiver: "<<ccnm->getNodeId()
             //          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
             p.first = workload.at(workload.size()-1).first;

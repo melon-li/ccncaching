@@ -28,12 +28,13 @@ public:
     Receiver(Ptr<CcnModule> ccnm);
     ~Receiver();
     virtual void DoDispose(void);
-
     static TypeId GetTypeId(void);
     Ptr<CcnModule> getModule();
     virtual TypeId GetInstanceTypeId(void) const;
     uint32_t getAskedFor();
     uint32_t getReturned();
+    void controlCongestion();
+
 
    /* workload is the vector with requests
     * this method always requests the first packet of the last file in the workload, which

@@ -1,0 +1,681 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AnnounceName	Sender.cc	/^void Sender::AnnounceName(Ptr<CCN_Name> name) {$/;"	f	class:ns3::Sender
+BLOCK_BYTES	sha1.h	/^    static const unsigned int BLOCK_BYTES = BLOCK_INTS * 4;$/;"	m	class:SHA1
+BLOCK_INTS	sha1.h	/^    static const unsigned int BLOCK_INTS = 16;  \/* number of 32bit integers per SHA1 block *\/$/;"	m	class:SHA1
+BZF_MD5_H	md5.h	34;"	d
+CACHE_H_	Cache.h	13;"	d
+CCNCACHING_H	ccncaching.h	3;"	d
+CCNMODULE_H	CcnModule.h	2;"	d
+CCN_Data	ccn-packets.cc	/^CCN_Data::CCN_Data( Ptr<CCN_Name> nameIn,uint8_t* buffer, uint32_t buffsize, float _betweenness)$/;"	f	class:ns3::CCN_Data
+CCN_Data	ccn-packets.h	/^class CCN_Data: public Object {$/;"	c	namespace:ns3
+CCN_Interest	ccn-packets.cc	/^CCN_Interest::CCN_Interest(Ptr<CCN_Name> nameIn, float _betweenness) {$/;"	f	class:ns3::CCN_Interest
+CCN_Interest	ccn-packets.h	/^class CCN_Interest : public Object$/;"	c	namespace:ns3
+CCN_NAMES	CCN_Name.cc	/^int CCN_Name::CCN_NAMES = 0;$/;"	m	class:ns3::CCN_Name	file:
+CCN_NAMES	CCN_Name.h	/^    static int CCN_NAMES;$/;"	m	class:ns3::CCN_Name
+CCN_NAME_H_	CCN_Name.h	2;"	d
+CCN_Name	CCN_Name.cc	/^CCN_Name::CCN_Name(vector<string>& names) {$/;"	f	class:ns3::CCN_Name
+CCN_Name	CCN_Name.h	/^class CCN_Name: public Object {$/;"	c	namespace:ns3
+CCN_PACKETS_H_	ccn-packets.h	9;"	d
+CCN_Packets	ccn-packets.h	/^class CCN_Packets{$/;"	c	namespace:ns3
+CHUNK	city.cc	538;"	d	file:
+CHUNK	city.cc	539;"	d	file:
+CITY_HASH_CRC_H_	citycrc.h	29;"	d
+CITY_HASH_H_	city.h	63;"	d
+COUNT	CcnModule.cc	/^int CcnModule::COUNT = 0;$/;"	m	class:ns3::CcnModule	file:
+COUNT	CcnModule.h	/^    static int COUNT;$/;"	m	class:ns3::CcnModule
+COUNT_APPS	local_app.cc	/^int LocalApp::COUNT_APPS = 0;$/;"	m	class:ns3::LocalApp	file:
+COUNT_APPS	local_app.h	/^        static int COUNT_APPS;$/;"	m	class:ns3::LocalApp
+COUNT_PITS	PIT.cc	/^int PIT::COUNT_PITS = 0;$/;"	m	class:ns3::PIT	file:
+COUNT_PITS	PIT.h	/^    static int COUNT_PITS;$/;"	m	class:ns3::PIT
+COUNT_RECEIVERS	Receiver.cc	/^int Receiver::COUNT_RECEIVERS = 0;$/;"	m	class:ns3::Receiver	file:
+COUNT_RECEIVERS	Receiver.h	/^    static int COUNT_RECEIVERS;$/;"	m	class:ns3::Receiver
+COUNT_SENDERS	Sender.cc	/^int Sender::COUNT_SENDERS = 0;$/;"	m	class:ns3::Sender	file:
+COUNT_SENDERS	Sender.h	/^    static int COUNT_SENDERS;$/;"	m	class:ns3::Sender
+COUNT_TRIENODES	TrieNode.cc	/^int TrieNode::COUNT_TRIENODES = 0;$/;"	m	class:ns3::TrieNode	file:
+COUNT_TRIENODES	TrieNode.h	/^    static int COUNT_TRIENODES;$/;"	m	class:ns3::TrieNode
+COUNT_TRIES	Trie.cc	/^int Trie::COUNT_TRIES = 0;$/;"	m	class:ns3::Trie	file:
+COUNT_TRIES	Trie.h	/^    static int COUNT_TRIES;$/;"	m	class:ns3::Trie
+COUNT_TUPLES	PTuple.cc	/^int PTuple::COUNT_TUPLES = 0;$/;"	m	class:ns3::PTuple	file:
+COUNT_TUPLES	PTuple.h	/^    static int COUNT_TUPLES;$/;"	m	class:ns3::PTuple
+CacheModule	Cache.h	/^    CacheModule(uint64_t _capacity,uint64_t _capacity_fast_table){$/;"	f	class:ns3::CacheModule
+CacheModule	Cache.h	/^class CacheModule: public Object{$/;"	c	namespace:ns3
+Cachetable	Cache.h	/^typedef map<string, Pkts > Cachetable;$/;"	t	namespace:ns3
+CcnModule	CcnModule.cc	/^CcnModule::CcnModule(Ptr<Node> node) {$/;"	f	class:ns3::CcnModule
+CcnModule	CcnModule.h	/^class CcnModule: public Object {$/;"	c	namespace:ns3
+CityHash128	city.cc	/^uint128 CityHash128(const char *s, size_t len) {$/;"	f
+CityHash128WithSeed	city.cc	/^uint128 CityHash128WithSeed(const char *s, size_t len, uint128 seed) {$/;"	f
+CityHash32	city.cc	/^uint32 CityHash32(const char *s, size_t len) {$/;"	f
+CityHash64	city.cc	/^uint64 CityHash64(const char *s, size_t len) {$/;"	f
+CityHash64WithSeed	city.cc	/^uint64 CityHash64WithSeed(const char *s, size_t len, uint64 seed) {$/;"	f
+CityHash64WithSeeds	city.cc	/^uint64 CityHash64WithSeeds(const char *s, size_t len,$/;"	f
+CityHashCrc128	city.cc	/^uint128 CityHashCrc128(const char *s, size_t len) {$/;"	f
+CityHashCrc128WithSeed	city.cc	/^uint128 CityHashCrc128WithSeed(const char *s, size_t len, uint128 seed) {$/;"	f
+CityHashCrc256	city.cc	/^void CityHashCrc256(const char *s, size_t len, uint64 *result) {$/;"	f
+CityHashCrc256Long	city.cc	/^static void CityHashCrc256Long(const char *s, size_t len,$/;"	f	file:
+CityHashCrc256Short	city.cc	/^static void CityHashCrc256Short(const char *s, size_t len, uint64 *result) {$/;"	f	file:
+CityMurmur	city.cc	/^static uint128 CityMurmur(const char *s, size_t len, uint128 seed) {$/;"	f	file:
+DATA	ccn-packets.cc	/^uint8_t CCN_Packets::DATA = 1;$/;"	m	class:ns3::CCN_Packets	file:
+DATA	ccn-packets.h	/^    static uint8_t DATA;$/;"	m	class:ns3::CCN_Packets
+DIGEST_INTS	sha1.h	/^    static const unsigned int DIGEST_INTS = 5;  \/* number of 32bit integers per SHA1 digest *\/$/;"	m	class:SHA1
+DRAM_table	Cache.h	/^    Cachetable DRAM_table;$/;"	m	class:ns3::D_Cache
+D_Cache	Cache.h	/^     D_Cache(uint64_t _capacity, $/;"	f	class:ns3::D_Cache
+D_Cache	Cache.h	/^class D_Cache:public CacheModule{$/;"	c	namespace:ns3
+DoDispose	CCN_Name.cc	/^void CCN_Name::DoDispose(void) {$/;"	f	class:ns3::CCN_Name
+DoDispose	CcnModule.cc	/^void CcnModule::DoDispose(void) {$/;"	f	class:ns3::CcnModule
+DoDispose	PIT.cc	/^void PIT::DoDispose(void) {$/;"	f	class:ns3::PIT
+DoDispose	PIT_Key.cc	/^void PIT_Key::DoDispose(void) {$/;"	f	class:ns3::PIT_Key
+DoDispose	PTuple.cc	/^void PTuple::DoDispose(void)$/;"	f	class:ns3::PTuple
+DoDispose	Receiver.cc	/^void Receiver::DoDispose(void){$/;"	f	class:ns3::Receiver
+DoDispose	ResultPrinter.cc	/^void ResultPrinter::DoDispose(void) {$/;"	f	class:ResultPrinter
+DoDispose	Sender.cc	/^void Sender::DoDispose(void){$/;"	f	class:ns3::Sender
+DoDispose	Text.cc	/^void Text::DoDispose(void){$/;"	f	class:ns3::Text
+DoDispose	Trie.cc	/^void Trie::DoDispose(void){$/;"	f	class:ns3::Trie
+DoDispose	TrieNode.cc	/^void TrieNode::DoDispose(void){$/;"	f	class:ns3::TrieNode
+DoDispose	ccn-packets.cc	/^void CCN_Data::DoDispose(void) {$/;"	f	class:ns3::CCN_Data
+DoDispose	ccn-packets.cc	/^void CCN_Interest::DoDispose(void) {$/;"	f	class:ns3::CCN_Interest
+DoDispose	local_app.h	/^        virtual void DoDispose()$/;"	f	class:ns3::LocalApp
+F	md5.cc	/^inline MD5::uint4 MD5::F(uint4 x, uint4 y, uint4 z) {$/;"	f	class:MD5
+FF	md5.cc	/^inline void MD5::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {$/;"	f	class:MD5
+FIB	CcnModule.h	/^    Ptr<Trie> FIB;$/;"	m	class:ns3::CcnModule
+Fetch32	city.cc	/^static uint32 Fetch32(const char *p) {$/;"	f	file:
+Fetch64	city.cc	/^static uint64 Fetch64(const char *p) {$/;"	f	file:
+Files	Cache.h	/^    typedef vector<Pkts> Files;$/;"	t	class:ns3::Slot_Object
+G	md5.cc	/^inline MD5::uint4 MD5::G(uint4 x, uint4 y, uint4 z) {$/;"	f	class:MD5
+GG	md5.cc	/^inline void MD5::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {$/;"	f	class:MD5
+GetInstanceTypeId	Receiver.cc	/^TypeId Receiver::GetInstanceTypeId(void) const {$/;"	f	class:ns3::Receiver
+GetInstanceTypeId	Sender.cc	/^TypeId Sender::GetInstanceTypeId(void) const {$/;"	f	class:ns3::Sender
+GetTypeId	Receiver.cc	/^TypeId Receiver::GetTypeId(void) {$/;"	f	class:ns3::Receiver
+GetTypeId	Sender.cc	/^TypeId Sender::GetTypeId(void) {$/;"	f	class:ns3::Sender
+H	md5.cc	/^inline MD5::uint4 MD5::H(uint4 x, uint4 y, uint4 z) {$/;"	f	class:MD5
+HAVE_BUILTIN_EXPECT	config.h	8;"	d
+HAVE_DLFCN_H	config.h	11;"	d
+HAVE_INTTYPES_H	config.h	14;"	d
+HAVE_MEMORY_H	config.h	17;"	d
+HAVE_STDINT_H	config.h	20;"	d
+HAVE_STDLIB_H	config.h	23;"	d
+HAVE_STRINGS_H	config.h	26;"	d
+HAVE_STRING_H	config.h	29;"	d
+HAVE_SYS_STAT_H	config.h	32;"	d
+HAVE_SYS_TYPES_H	config.h	35;"	d
+HAVE_UNISTD_H	config.h	38;"	d
+HH	md5.cc	/^inline void MD5::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {$/;"	f	class:MD5
+HITS	CcnModule.cc	/^uint32_t CcnModule::HITS = 0;$/;"	m	class:ns3::CcnModule	file:
+HITS	CcnModule.h	/^    static uint32_t HITS;$/;"	m	class:ns3::CcnModule
+Hash128to64	city.h	/^inline uint64 Hash128to64(const uint128& x) {$/;"	f
+Hash32Len0to4	city.cc	/^static uint32 Hash32Len0to4(const char *s, size_t len) {$/;"	f	file:
+Hash32Len13to24	city.cc	/^static uint32 Hash32Len13to24(const char *s, size_t len) {$/;"	f	file:
+Hash32Len5to12	city.cc	/^static uint32 Hash32Len5to12(const char *s, size_t len) {$/;"	f	file:
+HashLen0to16	city.cc	/^static uint64 HashLen0to16(const char *s, size_t len) {$/;"	f	file:
+HashLen16	city.cc	/^static uint64 HashLen16(uint64 u, uint64 v) {$/;"	f	file:
+HashLen16	city.cc	/^static uint64 HashLen16(uint64 u, uint64 v, uint64 mul) {$/;"	f	file:
+HashLen17to32	city.cc	/^static uint64 HashLen17to32(const char *s, size_t len) {$/;"	f	file:
+HashLen33to64	city.cc	/^static uint64 HashLen33to64(const char *s, size_t len) {$/;"	f	file:
+I	md5.cc	/^inline MD5::uint4 MD5::I(uint4 x, uint4 y, uint4 z) {$/;"	f	class:MD5
+II	md5.cc	/^inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {$/;"	f	class:MD5
+INITIALIZER_H_	Initializer.h	2;"	d
+INTEREST	ccn-packets.cc	/^uint8_t CCN_Packets::INTEREST = 0;$/;"	m	class:ns3::CCN_Packets	file:
+INTEREST	ccn-packets.h	/^    static uint8_t INTEREST;$/;"	m	class:ns3::CCN_Packets
+Initializer	Initializer.cc	/^Initializer::Initializer(Ptr<Parser> parser,$/;"	f	class:ns3::Initializer
+Initializer	Initializer.h	/^class Initializer: public Object {$/;"	c	namespace:ns3
+L1_LRU	Cache.h	/^    LRU_Table *L1_LRU;$/;"	m	class:ns3::D_Cache
+L2_LRU	Cache.h	/^    LRU_Table *L2_LRU;$/;"	m	class:ns3::D_Cache
+LIKELY	city.cc	106;"	d	file:
+LIKELY	city.cc	108;"	d	file:
+LOCAL_APP_H_	local_app.h	2;"	d
+LRU	Cache.h	/^    LRU_Table *LRU;$/;"	m	class:ns3::CacheModule
+LRU_Object	Cache.h	/^    LRU_Object(){}$/;"	f	class:ns3::LRU_Object
+LRU_Object	Cache.h	/^    LRU_Object(const string & _filename){$/;"	f	class:ns3::LRU_Object
+LRU_Object	Cache.h	/^class LRU_Object{$/;"	c	namespace:ns3
+LRU_Table	Cache.h	/^    LRU_Table(){$/;"	f	class:ns3::LRU_Table
+LRU_Table	Cache.h	/^class LRU_Table{$/;"	c	namespace:ns3
+LRU_W	Cache.h	/^    LRU_Table *LRU_W;$/;"	m	class:ns3::S_Cache
+LT_OBJDIR	config.h	42;"	d
+LocalApp	local_app.h	/^        LocalApp(){COUNT_APPS++;};$/;"	f	class:ns3::LocalApp
+LocalApp	local_app.h	/^class LocalApp : public Object{$/;"	c	namespace:ns3
+MD5	md5.cc	/^MD5::MD5()$/;"	f	class:MD5
+MD5	md5.cc	/^MD5::MD5(const std::string &text)$/;"	f	class:MD5
+MD5	md5.h	/^class MD5$/;"	c
+Mur	city.cc	/^static uint32 Mur(uint32 a, uint32 h) {$/;"	f	file:
+Name2index	Cache.h	/^    typedef map<string, uint8_t> Name2index;$/;"	t	class:ns3::Slot_Object
+ONE_NS	CcnModule.cc	/^Time CcnModule::ONE_NS = NanoSeconds(1);$/;"	m	class:ns3::CcnModule	file:
+ONE_NS	CcnModule.h	/^    static Time ONE_NS;$/;"	m	class:ns3::CcnModule
+ONE_NS	local_app.cc	/^Time LocalApp::ONE_NS = NanoSeconds(1);$/;"	m	class:ns3::LocalApp	file:
+ONE_NS	local_app.h	/^        static Time ONE_NS;$/;"	m	class:ns3::LocalApp
+O_Cache	Cache.h	/^    O_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity,_capacity_fast_table){$/;"	f	class:ns3::O_Cache
+O_Cache	Cache.h	/^class O_Cache: public CacheModule{$/;"	c	namespace:ns3
+PACKAGE_BUGREPORT	config.h	45;"	d
+PACKAGE_NAME	config.h	48;"	d
+PACKAGE_STRING	config.h	51;"	d
+PACKAGE_TARNAME	config.h	54;"	d
+PACKAGE_URL	config.h	57;"	d
+PACKAGE_VERSION	config.h	60;"	d
+PERMUTE3	city.cc	145;"	d	file:
+PERMUTE3	city.cc	146;"	d	file:
+PIT	PIT.cc	/^PIT::PIT() {$/;"	f	class:ns3::PIT
+PIT	PIT.h	/^class PIT: public Object {$/;"	c	namespace:ns3
+PIT_H_	PIT.h	2;"	d
+PIT_KEY_H_	PIT_Key.h	3;"	d
+PIT_Key	PIT_Key.cc	/^PIT_Key::PIT_Key(Ptr<CCN_Name> name,Ptr<LocalApp>  app)$/;"	f	class:ns3::PIT_Key
+PIT_Key	PIT_Key.cc	/^PIT_Key::PIT_Key(Ptr<CCN_Name> name,Ptr<NetDevice>  device)$/;"	f	class:ns3::PIT_Key
+PIT_Key	PIT_Key.h	/^class PIT_Key : public Object {$/;"	c	namespace:ns3
+PTUPLE_H_	PTuple.h	2;"	d
+PTuple	PTuple.cc	/^PTuple::PTuple( vector<Ptr<LocalApp> >* apps)$/;"	f	class:ns3::PTuple
+PTuple	PTuple.cc	/^PTuple::PTuple( vector<Ptr<NetDevice> >* devices)$/;"	f	class:ns3::PTuple
+PTuple	PTuple.cc	/^PTuple::PTuple()$/;"	f	class:ns3::PTuple
+PTuple	PTuple.h	/^class PTuple : public Object {$/;"	c	namespace:ns3
+P_Cache	Cache.h	/^    P_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}$/;"	f	class:ns3::P_Cache
+P_Cache	Cache.h	/^class P_Cache: public CacheModule{$/;"	c	namespace:ns3
+Pkts	Cache.h	/^typedef map<uint32_t, char *> Pkts;$/;"	t	namespace:ns3
+PtrString	CCN_Name.h	/^    PtrString(const char *str){ content = string(str); }$/;"	f	class:ns3::PtrString
+PtrString	CCN_Name.h	/^    PtrString(string &str){ content = str; }$/;"	f	class:ns3::PtrString
+PtrString	CCN_Name.h	/^class PtrString: public Object {$/;"	c	namespace:ns3
+RECEIVER_H_	Receiver.h	9;"	d
+RESULTPRINTER_H_	ResultPrinter.h	9;"	d
+RX_DATA	CcnModule.cc	/^uint32_t CcnModule::RX_DATA = 0;$/;"	m	class:ns3::CcnModule	file:
+RX_DATA	CcnModule.h	/^    static uint32_t RX_DATA;$/;"	m	class:ns3::CcnModule
+RX_INTERESTS	CcnModule.cc	/^uint32_t CcnModule::RX_INTERESTS = 0;$/;"	m	class:ns3::CcnModule	file:
+RX_INTERESTS	CcnModule.h	/^    static uint32_t RX_INTERESTS;$/;"	m	class:ns3::CcnModule
+Receiver	Receiver.cc	/^Receiver::Receiver(Ptr<CcnModule> ccnmIn) {$/;"	f	class:ns3::Receiver
+Receiver	Receiver.h	/^class Receiver: public Application {$/;"	c	namespace:ns3
+ResultPrinter	ResultPrinter.cc	/^ResultPrinter::ResultPrinter(map<uint32_t, Ptr<CcnModule> > nsNodeToModule, uint32_t gs, uint32_t exp, Ptr<Sender> s, vector<Ptr<Receiver> > receiver,std::string output)$/;"	f	class:ResultPrinter
+ResultPrinter	ResultPrinter.h	/^class ResultPrinter: public ns3::Object {$/;"	c	namespace:ns3
+Rotate	city.cc	/^static uint64 Rotate(uint64 val, int shift) {$/;"	f	file:
+Rotate32	city.cc	/^static uint32 Rotate32(uint32 val, int shift) {$/;"	f	file:
+S11	md5.cc	41;"	d	file:
+S12	md5.cc	42;"	d	file:
+S13	md5.cc	43;"	d	file:
+S14	md5.cc	44;"	d	file:
+S21	md5.cc	45;"	d	file:
+S22	md5.cc	46;"	d	file:
+S23	md5.cc	47;"	d	file:
+S24	md5.cc	48;"	d	file:
+S31	md5.cc	49;"	d	file:
+S32	md5.cc	50;"	d	file:
+S33	md5.cc	51;"	d	file:
+S34	md5.cc	52;"	d	file:
+S41	md5.cc	53;"	d	file:
+S42	md5.cc	54;"	d	file:
+S43	md5.cc	55;"	d	file:
+S44	md5.cc	56;"	d	file:
+SENDER_H_	Sender.h	9;"	d
+SHA1	sha1.cc	/^SHA1::SHA1()$/;"	f	class:SHA1
+SHA1	sha1.h	/^class SHA1$/;"	c
+SHA1_BLK	sha1.cc	25;"	d	file:
+SHA1_HPP	sha1.h	19;"	d
+SHA1_R0	sha1.cc	28;"	d	file:
+SHA1_R1	sha1.cc	29;"	d	file:
+SHA1_R2	sha1.cc	30;"	d	file:
+SHA1_R3	sha1.cc	31;"	d	file:
+SHA1_R4	sha1.cc	32;"	d	file:
+SHA1_ROL	sha1.cc	24;"	d	file:
+SSD_table	Cache.h	/^    Cachetable SSD_table;$/;"	m	class:ns3::D_Cache
+STDC_HEADERS	config.h	63;"	d
+S_Cache	Cache.h	/^    S_Cache(uint64_t _capacity, uint64_t _capacity_fast_table,$/;"	f	class:ns3::S_Cache
+S_Cache	Cache.h	/^class S_Cache:public CacheModule{$/;"	c	namespace:ns3
+SendData	Sender.cc	/^void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {$/;"	f	class:ns3::Sender
+Sender	Sender.cc	/^Sender::Sender(Ptr<CcnModule> ccnmIn) {$/;"	f	class:ns3::Sender
+Sender	Sender.h	/^class Sender: public ns3::Application {$/;"	c	namespace:ns3
+ShiftMix	city.cc	/^static uint64 ShiftMix(uint64 val) {$/;"	f	file:
+Slot_Object	Cache.h	/^    Slot_Object(){}$/;"	f	class:ns3::Slot_Object
+Slot_Object	Cache.h	/^class Slot_Object{$/;"	c	namespace:ns3
+TEXT_H_	Text.h	2;"	d
+TRIENODE_H_	TrieNode.h	9;"	d
+TRIE_H_	Trie.h	9;"	d
+Text	Text.cc	/^Text::Text()$/;"	f	class:ns3::Text
+Text	Text.h	/^class Text  : public Object$/;"	c	namespace:ns3
+Trie	Trie.cc	/^Trie::Trie() {$/;"	f	class:ns3::Trie
+Trie	Trie.h	/^class Trie: public Object {$/;"	c	namespace:ns3
+TrieNode	TrieNode.cc	/^TrieNode::TrieNode(Ptr<PtrString> incoming_word) {$/;"	f	class:ns3::TrieNode
+TrieNode	TrieNode.h	/^class TrieNode: public Object {$/;"	c	namespace:ns3
+UNALIGNED_LOAD32	city.cc	/^static uint32 UNALIGNED_LOAD32(const char *p) {$/;"	f	file:
+UNALIGNED_LOAD64	city.cc	/^static uint64 UNALIGNED_LOAD64(const char *p) {$/;"	f	file:
+UTILS_H_	utils.h	9;"	d
+Uint128High64	city.h	/^inline uint64 Uint128High64(const uint128& x) { return x.second; }$/;"	f
+Uint128Low64	city.h	/^inline uint64 Uint128Low64(const uint128& x) { return x.first; }$/;"	f
+Utils	utils.h	/^class Utils{$/;"	c	namespace:ns3
+WORDS_BIGENDIAN	config.h	69;"	d
+WeakHashLen32WithSeeds	city.cc	/^static pair<uint64, uint64> WeakHashLen32WithSeeds($/;"	f	file:
+aborted_chunks	Receiver.h	/^    uint32_t aborted_chunks;$/;"	m	class:ns3::Receiver
+addDevice	PTuple.cc	/^bool PTuple::addDevice(Ptr<NetDevice> device){$/;"	f	class:ns3::PTuple
+addDevice	TrieNode.cc	/^bool TrieNode::addDevice(Ptr<NetDevice> d){$/;"	f	class:ns3::TrieNode
+addLocalApp	PTuple.cc	/^bool PTuple::addLocalApp(Ptr<LocalApp> app){$/;"	f	class:ns3::PTuple
+addLocalApp	TrieNode.cc	/^bool TrieNode::addLocalApp(Ptr<LocalApp> app){$/;"	f	class:ns3::TrieNode
+add_object	Cache.cc	/^void LRU_Table::add_object(LRU_Object* obj){$/;"	f	class:ns3::LRU_Table
+add_packet	Cache.cc	/^int32_t D_Cache::add_packet(const string& chunk_name, $/;"	f	class:ns3::D_Cache
+add_packet	Cache.cc	/^int32_t O_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){$/;"	f	class:ns3::O_Cache
+add_packet	Cache.cc	/^int32_t P_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){$/;"	f	class:ns3::P_Cache
+add_packet	Cache.cc	/^int32_t S_Cache::add_packet(const string& key, $/;"	f	class:ns3::S_Cache
+add_packet	Cache.h	/^    virtual int32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}$/;"	f	class:ns3::CacheModule
+added_pcks	Cache.h	/^    uint64_t added_pcks; $/;"	m	class:ns3::O_Cache
+addresses	CcnModule.h	/^    map<Ptr<NetDevice>, Address> addresses;$/;"	m	class:ns3::CcnModule
+app	PIT_Key.h	/^    Ptr<LocalApp>  app;$/;"	m	class:ns3::PIT_Key
+asked	Receiver.h	/^    set<Ptr<CCN_Name> > asked;$/;"	m	class:ns3::Receiver
+asked_size	Receiver.h	/^    uint32_t asked_size;$/;"	m	class:ns3::Receiver
+askedfor	Receiver.h	/^    uint32_t askedfor;$/;"	m	class:ns3::Receiver
+asking	Receiver.h	/^    uint64_t asking;$/;"	m	class:ns3::Receiver
+betw_iter	CcnModule.h	/^    map <Ptr<CCN_Name>, float >::iterator betw_iter;$/;"	m	class:ns3::CcnModule
+betweenness	CcnModule.h	/^    double betweenness;$/;"	m	class:ns3::CcnModule
+betweenness	ccn-packets.h	/^    float betweenness;$/;"	m	class:ns3::CCN_Data
+betweenness	ccn-packets.h	/^    float betweenness;$/;"	m	class:ns3::CCN_Interest
+blocksize	md5.h	/^  enum {blocksize = 64}; \/\/ VC6 won't eat a const static int here$/;"	e	enum:MD5::__anon1
+bswap_32	city.cc	53;"	d	file:
+bswap_32	city.cc	60;"	d	file:
+bswap_32	city.cc	66;"	d	file:
+bswap_32	city.cc	72;"	d	file:
+bswap_32	city.cc	78;"	d	file:
+bswap_32	city.cc	86;"	d	file:
+bswap_64	city.cc	54;"	d	file:
+bswap_64	city.cc	61;"	d	file:
+bswap_64	city.cc	67;"	d	file:
+bswap_64	city.cc	73;"	d	file:
+bswap_64	city.cc	79;"	d	file:
+bswap_64	city.cc	87;"	d	file:
+buf	Sender.cc	/^uint8_t Sender::buf[PKT_SIZE] = {0};$/;"	m	class:ns3::Sender	file:
+buf	Sender.h	/^    static uint8_t buf[PKT_SIZE];$/;"	m	class:ns3::Sender
+buf	ccn-packets.cc	/^uint8_t CCN_Data::buf[PKT_SIZE] = {0};$/;"	m	class:ns3::CCN_Data	file:
+buf	ccn-packets.h	/^    static uint8_t buf[PKT_SIZE];$/;"	m	class:ns3::CCN_Data
+buf_cnt	CcnModule.h	/^    uint32_t buf_cnt;$/;"	m	class:ns3::CcnModule
+buffEquals	ccn-packets.cc	/^bool buffEquals(uint8_t *rhs, uint8_t* lhs, uint32_t length) {$/;"	f	namespace:ns3
+buffer	md5.h	/^  uint1 buffer[blocksize]; \/\/ bytes that didn't fit in last 64 byte chunk$/;"	m	class:MD5
+buffer	sha1.h	/^    std::string buffer;$/;"	m	class:SHA1
+buffer_to_block	sha1.cc	/^void SHA1::buffer_to_block(const std::string &buffer, uint32 block[BLOCK_BYTES])$/;"	f	class:SHA1
+c	Receiver.h	/^    uint64_t c = 0;$/;"	m	class:ns3::Receiver
+c1	city.cc	/^static const uint32 c1 = 0xcc9e2d51;$/;"	v	file:
+c2	city.cc	/^static const uint32 c2 = 0x1b873593;$/;"	v	file:
+cache	CcnModule.h	/^    Ptr<CacheModule> cache;$/;"	m	class:ns3::CcnModule
+cache_packet	Cache.cc	/^uint32_t D_Cache::cache_packet(const string& _filename, $/;"	f	class:ns3::D_Cache
+cache_packet	Cache.cc	/^uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){$/;"	f	class:ns3::O_Cache
+cache_packet	Cache.cc	/^uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){$/;"	f	class:ns3::P_Cache
+cache_packet	Cache.cc	/^uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){$/;"	f	class:ns3::S_Cache
+cache_packet	Cache.h	/^    virtual uint32_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}$/;"	f	class:ns3::CacheModule
+cache_table_r	Cache.h	/^    Cachetable cache_table_r;$/;"	m	class:ns3::S_Cache
+cache_table_w	Cache.h	/^    Cachetable cache_table_w;$/;"	m	class:ns3::S_Cache
+cachedTokens	CCN_Name.cc	/^map<string, Ptr<PtrString> > CCN_Name::cachedTokens = map<string, Ptr<PtrString> >();$/;"	m	class:ns3::CCN_Name	file:
+cachedTokens	CCN_Name.h	/^    static map<string, Ptr<PtrString> > cachedTokens;$/;"	m	class:ns3::CCN_Name
+capacity	Cache.h	/^    uint64_t capacity; \/\/ the number of  packets$/;"	m	class:ns3::CacheModule
+capacity_fast_table	Cache.h	/^    uint64_t capacity_fast_table; \/\/ the number of entries in memory$/;"	m	class:ns3::CacheModule
+ccnm	Receiver.h	/^    Ptr<CcnModule> ccnm;$/;"	m	class:ns3::Receiver
+ccnm	Sender.h	/^    Ptr<CcnModule> ccnm;$/;"	m	class:ns3::Sender
+check	PIT.cc	/^Ptr<PTuple> PIT::check(Ptr<CCN_Name> key)$/;"	f	class:ns3::PIT
+checkout_dramcache	Cache.cc	/^inline void D_Cache::checkout_dramcache(){$/;"	f	class:ns3::D_Cache
+checkout_file	Cache.cc	/^inline void Slot_Object::checkout_file(const string &key, uint32_t last_id){$/;"	f	class:ns3::Slot_Object
+checkout_readcache	Cache.cc	/^inline void S_Cache::checkout_readcache(const Pkts& pkts){$/;"	f	class:ns3::S_Cache
+checkout_ssd	Cache.cc	/^inline void D_Cache::checkout_ssd(){$/;"	f	class:ns3::D_Cache
+checkout_writecache	Cache.cc	/^inline void S_Cache::checkout_writecache(){$/;"	f	class:ns3::S_Cache
+children	TrieNode.h	/^    map<Ptr<PtrString>, Ptr<TrieNode> > children;$/;"	m	class:ns3::TrieNode
+clearCachedNames	CCN_Name.h	/^    static void clearCachedNames(){cachedTokens.clear();}$/;"	f	class:ns3::CCN_Name
+clear_file_requests	Cache.cc	/^void CacheModule::clear_file_requests(const string &_filename, const string& _ID){$/;"	f	class:ns3::CacheModule
+cnt	CcnModule.cc	/^uint8_t cnt = 0;$/;"	m	namespace:ns3	file:
+content	CCN_Name.h	/^    string content;$/;"	m	class:ns3::PtrString
+count	md5.h	/^  uint4 count[2];   \/\/ 64bit counter for number of bits (lo, hi)$/;"	m	class:MD5
+create_workload	Initializer.cc	/^vector<string> Initializer::create_workload(map<string, uint32_t> files,$/;"	f	class:ns3::Initializer
+cur_index	Cache.h	/^    uint32_t cur_index = 0;$/;"	m	class:ns3::Slot_Object
+d	PTuple.h	/^    vector<Ptr<NetDevice> > d;$/;"	m	class:ns3::PTuple
+data	Receiver.h	/^    uint8_t* data;$/;"	m	class:ns3::Receiver
+data	Sender.h	/^    map<Ptr<CCN_Name>, Ptr<Packet> > data;$/;"	m	class:ns3::Sender
+data	ccn-packets.h	/^    uint8_t * data = NULL;$/;"	m	class:ns3::CCN_Data
+dataLength	ccn-packets.h	/^    uint32_t dataLength;$/;"	m	class:ns3::CCN_Data
+dataName	Receiver.h	/^    Ptr<CCN_Name> dataName;$/;"	m	class:ns3::Receiver
+dataNum	Initializer.h	/^    uint32_t dataNum;$/;"	m	class:ns3::Initializer
+dataOwner	Initializer.h	/^    int dataOwner;$/;"	m	class:ns3::Initializer
+data_table	Cache.h	/^    map <uint32_t, Slot_Object> data_table;$/;"	m	class:ns3::S_Cache
+data_table	Cache.h	/^    map<string , char* > data_table; $/;"	m	class:ns3::CacheModule
+decode	md5.cc	/^void MD5::decode(uint4 output[], const uint1 input[], size_type len)$/;"	f	class:MD5
+deliverData	local_app.cc	/^void LocalApp::deliverData(Ptr<CCN_Name> name, uint8_t* buffer, uint32_t bufflen){$/;"	f	class:ns3::LocalApp
+deliverInterest	local_app.cc	/^void LocalApp::deliverInterest(Ptr<CCN_Name> name){$/;"	f	class:ns3::LocalApp
+deserializeFromBuffer	CCN_Name.cc	/^pair<Ptr<CCN_Name>, uint32_t> CCN_Name::deserializeFromBuffer(uint8_t *buffer){$/;"	f	class:ns3::CCN_Name
+deserializeFromPacket	ccn-packets.cc	/^Ptr<CCN_Data> CCN_Data::deserializeFromPacket(const Ptr<Packet> packet) {$/;"	f	class:ns3::CCN_Data
+deserializeFromPacket	ccn-packets.cc	/^Ptr<CCN_Interest> CCN_Interest::deserializeFromPacket($/;"	f	class:ns3::CCN_Interest
+device	PIT_Key.h	/^    Ptr<NetDevice>  device;$/;"	m	class:ns3::PIT_Key
+devices	TrieNode.h	/^    vector<Ptr<NetDevice> > devices;$/;"	m	class:ns3::TrieNode
+digest	md5.h	/^  uint1 digest[16]; \/\/ the result$/;"	m	class:MD5
+digest	sha1.h	/^    uint32 digest[DIGEST_INTS];$/;"	m	class:SHA1
+doDeliverData	local_app.h	/^        void doDeliverData(Ptr<CCN_Name> name, uint8_t* buffer, uint32_t buffLen){onDataCallback(name, buffer, buffLen); }$/;"	f	class:ns3::LocalApp
+doDeliverInterest	local_app.h	/^        void doDeliverInterest(Ptr<CCN_Name> name){ onInterestCallback(name); }$/;"	f	class:ns3::LocalApp
+doNextRequestName	Receiver.cc	/^Ptr<CCN_Name> Receiver::doNextRequestName(){$/;"	f	class:ns3::Receiver
+doSendData	CcnModule.cc	/^void CcnModule::doSendData(Ptr<CCN_Name> name, uint8_t* buff, uint32_t bufflen) {$/;"	f	class:ns3::CcnModule
+doSendInterest	CcnModule.cc	/^void CcnModule::doSendInterest(Ptr<CCN_Name> name, Ptr<LocalApp> localApp) {$/;"	f	class:ns3::CcnModule
+doSendInterest	Receiver.cc	/^void Receiver::doSendInterest(Ptr<CCN_Name> name){$/;"	f	class:ns3::Receiver
+doesEveryModuleHaveANode	Initializer.cc	/^void Initializer::doesEveryModuleHaveANode() {$/;"	f	class:ns3::Initializer
+dohandleIncomingData	CcnModule.cc	/^void CcnModule::dohandleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd)$/;"	f	class:ns3::CcnModule
+dohandleIncomingInterest	CcnModule.cc	/^void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd) {$/;"	f	class:ns3::CcnModule
+dramcache_outoforder	Cache.h	/^    uint64_t dramcache_outoforder;$/;"	m	class:ns3::CacheModule
+dramcache_pcks	Cache.h	/^    uint64_t dramcache_pcks;$/;"	m	class:ns3::CacheModule
+dramcache_rmlru	Cache.h	/^    uint64_t dramcache_rmlru;$/;"	m	class:ns3::CacheModule
+enableCache	CcnModule.cc	/^char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fast_cap,$/;"	f	class:ns3::CcnModule
+enable_opt	Cache.h	/^    bool enable_opt;$/;"	m	class:ns3::S_Cache
+encode	md5.cc	/^void MD5::encode(uint1 output[], const uint4 input[], size_type len)$/;"	f	class:MD5
+erase	PIT.cc	/^void PIT::erase(Ptr<CCN_Name> key) {$/;"	f	class:ns3::PIT
+extract_packet_type	CcnModule.cc	/^uint8_t CcnModule::extract_packet_type(Ptr<const Packet> p) {$/;"	f	class:ns3::CcnModule
+false_positive_cnt	Cache.h	/^    uint64_t false_positive_cnt;$/;"	m	class:ns3::CacheModule
+false_positive_cnt_w	Cache.h	/^    uint64_t false_positive_cnt_w;$/;"	m	class:ns3::CacheModule
+fast_memory_hit	Cache.h	/^    uint64_t fast_memory_hit;$/;"	m	class:ns3::CacheModule
+file_map	Initializer.h	/^    map<string, uint32_t> file_map;$/;"	m	class:ns3::Initializer
+file_map_p	Cache.h	/^    map<string, uint32_t> *file_map_p;   $/;"	m	class:ns3::D_Cache
+file_map_p	Cache.h	/^    map<string, uint32_t> *file_map_p;$/;"	m	class:ns3::S_Cache
+file_num	Cache.h	/^    uint8_t file_num = FILE_NUM;$/;"	m	class:ns3::Slot_Object
+filename	Cache.h	/^    string filename;$/;"	m	class:ns3::LRU_Object
+files	Cache.h	/^    Files files;$/;"	m	class:ns3::Slot_Object
+final	sha1.cc	/^std::string SHA1::final()$/;"	f	class:SHA1
+finalize	md5.cc	/^MD5& MD5::finalize()$/;"	f	class:MD5
+finalized	md5.h	/^  bool finalized;$/;"	m	class:MD5
+find	Cache.cc	/^pair<bool, Pkts> Slot_Object::find(const string& key){$/;"	f	class:ns3::Slot_Object
+find	PTuple.cc	/^vector<Ptr<LocalApp> >::iterator PTuple::find(Ptr<LocalApp> app){$/;"	f	class:ns3::PTuple
+find	PTuple.cc	/^vector<Ptr<NetDevice> >::iterator PTuple::find(Ptr<NetDevice> device){$/;"	f	class:ns3::PTuple
+findData	Sender.cc	/^Ptr<Packet> Sender::findData(Ptr<CCN_Name> ccnn){$/;"	f	class:ns3::Sender
+findNode	Trie.cc	/^Ptr<TrieNode> Trie::findNode(Ptr<CCN_Name> name){$/;"	f	class:ns3::Trie
+firstUnvisitedChild	Initializer.cc	/^Ptr<CcnModule> Initializer::firstUnvisitedChild(Ptr<CcnModule> ccn) {$/;"	f	class:ns3::Initializer
+fmix	city.cc	/^static uint32 fmix(uint32 h)$/;"	f	file:
+from_file	sha1.cc	/^std::string SHA1::from_file(const std::string &filename)$/;"	f	class:SHA1
+getAskedFor	Receiver.cc	/^uint32_t Receiver::getAskedFor()$/;"	f	class:ns3::Receiver
+getBetweenness	CcnModule.h	/^    double getBetweenness(){$/;"	f	class:ns3::CcnModule
+getBetweenness	ccn-packets.h	/^    float getBetweenness(){ return betweenness; }$/;"	f	class:ns3::CCN_Data
+getBetweenness	ccn-packets.h	/^    float getBetweenness(){ return betweenness; }$/;"	f	class:ns3::CCN_Interest
+getChild	TrieNode.cc	/^Ptr<TrieNode> TrieNode::getChild(Ptr<PtrString> word){$/;"	f	class:ns3::TrieNode
+getChildren	TrieNode.h	/^    map<Ptr<PtrString>, Ptr<TrieNode> > getChildren(){ return children; }$/;"	f	class:ns3::TrieNode
+getContent	CCN_Name.h	/^    string getContent() const { return content; }$/;"	f	class:ns3::PtrString
+getContentLength	CCN_Name.h	/^    uint32_t getContentLength()const { return content.length();}$/;"	f	class:ns3::PtrString
+getData	ccn-packets.h	/^    uint8_t* getData() { return data; }$/;"	f	class:ns3::CCN_Data
+getDevice	PIT_Key.h	/^    Ptr<NetDevice> & getDevice() {return device;}$/;"	f	class:ns3::PIT_Key
+getDevices	PTuple.h	/^    vector<Ptr<NetDevice> >& getDevices() {return d;}\/\/devices that asked for data$/;"	f	class:ns3::PTuple
+getDevices	TrieNode.h	/^    vector<Ptr<NetDevice> > getDevices(){return devices;}$/;"	f	class:ns3::TrieNode
+getFIB	CcnModule.cc	/^Ptr<Trie> CcnModule::getFIB() {$/;"	f	class:ns3::CcnModule
+getID	CCN_Name.cc	/^string CCN_Name::getID() const{$/;"	f	class:ns3::CCN_Name
+getInterests	Sender.cc	/^uint32_t Sender::getInterests()$/;"	f	class:ns3::Sender
+getLength	ccn-packets.h	/^    uint32_t getLength() const { return dataLength; }$/;"	f	class:ns3::CCN_Data
+getLocalApp	PIT_Key.h	/^    Ptr<LocalApp> & getLocalApp() {return app;}$/;"	f	class:ns3::PIT_Key
+getLocalApp	Sender.cc	/^Ptr<LocalApp> Sender::getLocalApp()$/;"	f	class:ns3::Sender
+getLocalApps	PTuple.h	/^    vector<Ptr<LocalApp> >& getLocalApps() {return r;}\/\/apps that asked for data$/;"	f	class:ns3::PTuple
+getLocalApps	TrieNode.h	/^    vector<Ptr<LocalApp> > getLocalApps(){return localApps;}$/;"	f	class:ns3::TrieNode
+getModule	Receiver.cc	/^Ptr<CcnModule> Receiver::getModule()$/;"	f	class:ns3::Receiver
+getName	PIT_Key.h	/^    Ptr<CCN_Name> getName(){return name;};$/;"	f	class:ns3::PIT_Key
+getName	ccn-packets.h	/^    Ptr<CCN_Name> getName() const {return name; }$/;"	f	class:ns3::CCN_Data
+getName	ccn-packets.h	/^    Ptr<CCN_Name> getName()const {return name; }$/;"	f	class:ns3::CCN_Interest
+getNeighborModules	CcnModule.cc	/^map<Ptr<NetDevice>, Ptr<CcnModule> > CcnModule::getNeighborModules() {$/;"	f	class:ns3::CcnModule
+getNode	CcnModule.cc	/^Ptr<Node> CcnModule::getNode() {$/;"	f	class:ns3::CcnModule
+getNodeId	CcnModule.cc	/^uint32_t CcnModule::getNodeId()$/;"	f	class:ns3::CcnModule
+getPIT	CcnModule.cc	/^Ptr<PIT> CcnModule::getPIT() {$/;"	f	class:ns3::CcnModule
+getPrefix	CCN_Name.cc	/^string CCN_Name::getPrefix() const{$/;"	f	class:ns3::CCN_Name
+getPtr	Text.cc	/^Ptr<Text> Text::getPtr()$/;"	f	class:ns3::Text
+getReturned	Receiver.cc	/^uint32_t Receiver::getReturned()$/;"	f	class:ns3::Receiver
+getSize	PIT.cc	/^uint32_t PIT::getSize() {$/;"	f	class:ns3::PIT
+getTXData	CcnModule.cc	/^uint32_t CcnModule::getTXData()$/;"	f	class:ns3::CcnModule
+getToken	CCN_Name.h	/^    Ptr<PtrString> getToken (uint32_t i) const {return tokens[i];}$/;"	f	class:ns3::CCN_Name
+getTokenPtr	CCN_Name.cc	/^Ptr<PtrString> CCN_Name::getTokenPtr(string &str){$/;"	f	class:ns3::CCN_Name
+getTokens	CCN_Name.cc	/^vector<string> CCN_Name::getTokens() const{$/;"	f	class:ns3::CCN_Name
+get_avg_readtime	Cache.cc	/^int32_t S_Cache::get_avg_readtime(const string& key, const uint32_t ID){$/;"	f	class:ns3::S_Cache
+get_avg_writetime	Cache.cc	/^int32_t S_Cache::get_avg_writetime(const uint32_t ID, const uint32_t total_length){$/;"	f	class:ns3::S_Cache
+get_cached_packet	Cache.cc	/^pair<int64_t, int64_t> D_Cache::get_cached_packet(const string& _filename, const string& _ID){$/;"	f	class:ns3::D_Cache
+get_cached_packet	Cache.cc	/^pair<int64_t, int64_t> O_Cache::get_cached_packet(const string& _filename, const string& _ID){$/;"	f	class:ns3::O_Cache
+get_cached_packet	Cache.cc	/^pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const string& _ID){$/;"	f	class:ns3::P_Cache
+get_cached_packet	Cache.cc	/^pair<int64_t, int64_t> S_Cache::get_cached_packet($/;"	f	class:ns3::S_Cache
+get_cached_packet	Cache.h	/^    virtual pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& ID){return std::make_pair(0, 0);}$/;"	f	class:ns3::CacheModule
+get_cached_packets_dram	Cache.cc	/^int32_t D_Cache::get_cached_packets_dram(const string& chunk_name){$/;"	f	class:ns3::D_Cache
+get_cached_packets_ssd	Cache.cc	/^int32_t D_Cache::get_cached_packets_ssd(const string& chunk_name){$/;"	f	class:ns3::D_Cache
+get_chunk_id_hits	Cache.cc	/^string CacheModule::get_chunk_id_hits(){$/;"	f	class:ns3::CacheModule
+get_dram_packet	Cache.cc	/^int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){$/;"	f	class:ns3::S_Cache
+get_file_hits	Cache.cc	/^string CacheModule::get_file_hits(){$/;"	f	class:ns3::CacheModule
+get_file_requests	Cache.cc	/^uint32_t CacheModule::get_file_requests(const string &_filename, const string& _ID){$/;"	f	class:ns3::CacheModule
+get_packet_stats	Cache.cc	/^string O_Cache::get_packet_stats(){$/;"	f	class:ns3::O_Cache
+get_packet_stats	Cache.h	/^    string get_packet_stats(){return "";}$/;"	f	class:ns3::D_Cache
+get_packet_stats	Cache.h	/^    string get_packet_stats(){return "";}$/;"	f	class:ns3::P_Cache
+get_packet_stats	Cache.h	/^    virtual string get_packet_stats(){return 0;}$/;"	f	class:ns3::CacheModule
+get_readcached_packet	Cache.cc	/^int32_t S_Cache::get_readcached_packet(const string& key, const uint32_t ID){$/;"	f	class:ns3::S_Cache
+get_readcached_packet2	Cache.cc	/^int32_t S_Cache::get_readcached_packet2(const string& key, uint32_t ID){$/;"	f	class:ns3::S_Cache
+get_sendtime	CcnModule.cc	/^uint64_t CcnModule::get_sendtime(const Ptr<NetDevice> nd, uint64_t cache_delay){$/;"	f	class:ns3::CcnModule
+get_state	Cache.cc	/^string O_Cache::get_state(){$/;"	f	class:ns3::O_Cache
+get_state	Cache.cc	/^string P_Cache::get_state(){$/;"	f	class:ns3::P_Cache
+get_state	Cache.h	/^    virtual string get_state(){return 0;}$/;"	f	class:ns3::CacheModule
+get_stored_packets	Cache.cc	/^int32_t O_Cache::get_stored_packets(const string& _filename){$/;"	f	class:ns3::O_Cache
+get_stored_packets_r	Cache.cc	/^int32_t S_Cache::get_stored_packets_r(const string& _filename){$/;"	f	class:ns3::S_Cache
+get_stored_packets_w	Cache.cc	/^int32_t S_Cache::get_stored_packets_w(const string& _filename){$/;"	f	class:ns3::S_Cache
+get_writecached_packet	Cache.cc	/^int32_t S_Cache::get_writecached_packet(const string& key, const uint32_t ID){$/;"	f	class:ns3::S_Cache
+giveText	Text.cc	/^Ptr<CCN_Name> Text::giveText(string* text)$/;"	f	class:ns3::Text
+handleData	Receiver.cc	/^void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){$/;"	f	class:ns3::Receiver
+handleData	Sender.cc	/^void Sender::handleData(Ptr<CCN_Name>, uint8_t*, uint32_t){$/;"	f	class:ns3::Sender
+handleIncomingData	CcnModule.cc	/^void CcnModule::handleIncomingData(Ptr<const Packet> p, Ptr<NetDevice> nd){$/;"	f	class:ns3::CcnModule
+handleIncomingInterest	CcnModule.cc	/^void CcnModule::handleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd){$/;"	f	class:ns3::CcnModule
+handleInterest	Receiver.cc	/^void Receiver::handleInterest(Ptr<CCN_Name>){$/;"	f	class:ns3::Receiver
+handleInterest	Sender.cc	/^void Sender::handleInterest(Ptr<CCN_Name> ccnn) {$/;"	f	class:ns3::Sender
+handlePacket	CcnModule.cc	/^bool CcnModule::handlePacket(Ptr<NetDevice> nd, Ptr<const Packet> p, uint16_t a,$/;"	f	class:ns3::CcnModule
+hasData	TrieNode.cc	/^bool TrieNode::hasData(){$/;"	f	class:ns3::TrieNode
+hasDevices	TrieNode.h	/^    bool hasDevices(){return (devices.size()!=0&&(devices.size()>0)&&devices.at(0)!=0);}$/;"	f	class:ns3::TrieNode
+hasLocalApps	TrieNode.h	/^    bool hasLocalApps(){ return (localApps.size()!=0&&(localApps.size()>0)&&localApps.at(0)!=0);}$/;"	f	class:ns3::TrieNode
+head	Cache.h	/^    LRU_Object* head, *tail;$/;"	m	class:ns3::LRU_Table
+hexdigest	md5.cc	/^std::string MD5::hexdigest() const$/;"	f	class:MD5
+hits	Cache.h	/^    uint64_t hits;$/;"	m	class:ns3::CacheModule
+increase_file_requests	Cache.cc	/^void CacheModule::increase_file_requests(const string &_filename, const string& _ID){$/;"	f	class:ns3::CacheModule
+index_bf_ptr	Cache.h	/^    bf::a2_bloom_filter  *index_bf_ptr;$/;"	m	class:ns3::S_Cache
+index_table	Cache.h	/^    map<string , uint32_t> index_table;  $/;"	m	class:ns3::O_Cache
+init	md5.cc	/^void MD5::init()$/;"	f	class:MD5
+init_bf	Cache.cc	/^bf::a2_bloom_filter *S_Cache::init_bf(double fp){$/;"	f	class:ns3::S_Cache
+initializeFIBs	Initializer.cc	/^void Initializer::initializeFIBs() {$/;"	f	class:ns3::Initializer
+initialize_FIBs_for_publisher_app	Initializer.cc	/^void Initializer::initialize_FIBs_for_publisher_app( Ptr<Sender> _publisher_app){$/;"	f	class:ns3::Initializer
+insertData	Sender.cc	/^void Sender::insertData(Ptr< CCN_Name > name, Ptr<Packet> p)$/;"	f	class:ns3::Sender
+insert_packet	Cache.cc	/^pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char *payload){$/;"	f	class:ns3::Slot_Object
+insert_packets	Cache.cc	/^pair<bool, int> Slot_Object::insert_packets(const string& key, uint32_t last_id, Pkts pkts){$/;"	f	class:ns3::Slot_Object
+int2str	Receiver.cc	/^string Receiver::int2str(int n){$/;"	f	class:ns3::Receiver
+interests	Sender.h	/^    uint32_t interests;$/;"	m	class:ns3::Sender
+isLeaf	TrieNode.h	/^    bool isLeaf() { return children.size() == 0; }$/;"	f	class:ns3::TrieNode
+is_last	Cache.cc	/^pair<bool,uint32_t> D_Cache::is_last(const string &chunk_name, $/;"	f	class:ns3::D_Cache
+is_last	Cache.cc	/^pair<bool,uint32_t> S_Cache::is_last(const string &key, const uint32_t ID){$/;"	f	class:ns3::S_Cache
+is_reallycached	Cache.cc	/^bool S_Cache::is_reallycached(const string &key){$/;"	f	class:ns3::S_Cache
+k0	city.cc	/^static const uint64 k0 = 0xc3a5c85c97cb3127ULL;$/;"	v	file:
+k1	city.cc	/^static const uint64 k1 = 0xb492b66fbe98f273ULL;$/;"	v	file:
+k2	city.cc	/^static const uint64 k2 = 0x9ae16a3b2f90404fULL;$/;"	v	file:
+length	Receiver.h	/^    uint32_t length;$/;"	m	class:ns3::Receiver
+localApp	Receiver.h	/^    Ptr<LocalApp> localApp;$/;"	m	class:ns3::Receiver
+localApp	Sender.h	/^    Ptr<LocalApp> localApp;$/;"	m	class:ns3::Sender
+localApps	TrieNode.h	/^    vector<Ptr<LocalApp> > localApps;$/;"	m	class:ns3::TrieNode
+log_chunk_id_hits	Cache.h	/^    uint32_t *log_chunk_id_hits ;$/;"	m	class:ns3::CacheModule
+log_file_hit	Cache.cc	/^void S_Cache::log_file_hit(const string& _filename, const string& _ID){$/;"	f	class:ns3::S_Cache
+log_file_hits	Cache.h	/^    map<string, uint32_t>log_file_hits; \/\/ this gets erazed when its written$/;"	m	class:ns3::CacheModule
+log_file_requests	Cache.h	/^    map<string, uint32_t> log_file_requests;$/;"	m	class:ns3::CacheModule
+longestPrefixMatch	Trie.cc	/^Ptr<TrieNode> Trie::longestPrefixMatch(Ptr<CCN_Name> name) {$/;"	f	class:ns3::Trie
+maxLen	Receiver.h	/^    uint32_t maxLen;$/;"	m	class:ns3::Receiver
+maxRate	Receiver.h	/^    uint64_t maxRate;$/;"	m	class:ns3::Receiver
+md5	md5.cc	/^std::string md5(const std::string str)$/;"	f
+mem_table	Cache.h	/^    map<string , uint32_t> mem_table; $/;"	m	class:ns3::O_Cache
+mem_table	Cache.h	/^    map<string , uint32_t> mem_table;$/;"	m	class:ns3::S_Cache
+miss	Cache.h	/^    uint64_t miss;$/;"	m	class:ns3::CacheModule
+name	PIT_Key.h	/^    Ptr<CCN_Name> name;$/;"	m	class:ns3::PIT_Key
+name	ccn-packets.h	/^    Ptr<CCN_Name> name;$/;"	m	class:ns3::CCN_Data
+name	ccn-packets.h	/^    Ptr<CCN_Name> name;$/;"	m	class:ns3::CCN_Interest
+name2index	Cache.h	/^    Name2index name2index;$/;"	m	class:ns3::Slot_Object
+nameToBetweenness	CcnModule.h	/^    map <Ptr<CCN_Name>, float > nameToBetweenness;$/;"	m	class:ns3::CcnModule
+ndfinder	Initializer.cc	/^Ptr<NetDevice> Initializer::ndfinder(Ptr<Node> n1, Ptr<Node> n2) $/;"	f	class:ns3::Initializer
+neighborModules	CcnModule.h	/^    map<Ptr<NetDevice>, Ptr<CcnModule> > neighborModules;$/;"	m	class:ns3::CcnModule
+next	Cache.h	/^    LRU_Object * next;$/;"	m	class:ns3::LRU_Object
+nextRequestName	Receiver.cc	/^Ptr<CCN_Name> Receiver::nextRequestName(){$/;"	f	class:ns3::Receiver
+nodePtr	CcnModule.h	/^    Ptr<Node> nodePtr;$/;"	m	class:ns3::CcnModule
+ns3	CCN_Name.cc	/^namespace ns3 {$/;"	n	file:
+ns3	CCN_Name.h	/^namespace ns3 {$/;"	n
+ns3	Cache.cc	/^namespace ns3 {$/;"	n	file:
+ns3	Cache.h	/^namespace ns3 {$/;"	n
+ns3	CcnModule.cc	/^namespace ns3 {$/;"	n	file:
+ns3	CcnModule.h	/^namespace ns3 {$/;"	n
+ns3	Initializer.cc	/^namespace ns3 {$/;"	n	file:
+ns3	Initializer.h	/^namespace ns3 {$/;"	n
+ns3	PIT.cc	/^namespace ns3 {$/;"	n	file:
+ns3	PIT.h	/^namespace ns3 {$/;"	n
+ns3	PIT_Key.cc	/^namespace ns3 {$/;"	n	file:
+ns3	PIT_Key.h	/^namespace ns3 {$/;"	n
+ns3	PTuple.cc	/^namespace ns3 {$/;"	n	file:
+ns3	PTuple.h	/^namespace ns3 {$/;"	n
+ns3	Receiver.cc	/^namespace ns3 {$/;"	n	file:
+ns3	Receiver.h	/^namespace ns3 {$/;"	n
+ns3	ResultPrinter.h	/^namespace ns3 {$/;"	n
+ns3	Sender.cc	/^namespace ns3 {$/;"	n	file:
+ns3	Sender.h	/^namespace ns3{$/;"	n
+ns3	Text.cc	/^namespace ns3{$/;"	n	file:
+ns3	Text.h	/^namespace ns3{$/;"	n
+ns3	Trie.cc	/^namespace ns3 {$/;"	n	file:
+ns3	Trie.h	/^namespace ns3 {$/;"	n
+ns3	TrieNode.cc	/^namespace ns3 {$/;"	n	file:
+ns3	TrieNode.h	/^namespace ns3 {$/;"	n
+ns3	ccn-packets.cc	/^namespace ns3 {$/;"	n	file:
+ns3	ccn-packets.h	/^namespace ns3{$/;"	n
+ns3	ccncaching.cc	/^namespace ns3 {$/;"	n	file:
+ns3	ccncaching.h	/^namespace ns3 {$/;"	n
+ns3	local_app.cc	/^namespace ns3{$/;"	n	file:
+ns3	local_app.h	/^namespace ns3{$/;"	n
+ns3	utils.h	/^namespace ns3{$/;"	n
+nsNodeIdToModule	Initializer.h	/^    map<uint32_t, Ptr <CcnModule> > nsNodeIdToModule;$/;"	m	class:ns3::Initializer
+nsNodeToModule	ResultPrinter.h	/^    map<uint32_t, Ptr<CcnModule> > nsNodeToModule;$/;"	m	class:ns3::ResultPrinter
+objects	Cache.h	/^    map<string, LRU_Object*> objects; $/;"	m	class:ns3::LRU_Table
+offSet	Receiver.h	/^    uint32_t offSet;$/;"	m	class:ns3::Receiver
+onDataCallback	local_app.h	/^        Callback<void, Ptr<CCN_Name>, uint8_t*, uint32_t> onDataCallback;$/;"	m	class:ns3::LocalApp
+onInterestCallback	local_app.h	/^        Callback<void, Ptr<CCN_Name> > onInterestCallback;$/;"	m	class:ns3::LocalApp
+operator !=	CCN_Name.cc	/^bool operator!= (const Ptr<CCN_Name>& lhs, const Ptr<CCN_Name>& rhs){$/;"	f	namespace:ns3
+operator !=	CCN_Name.cc	/^bool operator!= (const PtrString &lhs, const PtrString &rhs){$/;"	f	namespace:ns3
+operator <	CCN_Name.cc	/^bool operator< (const Ptr<CCN_Name>& lhs, const Ptr<CCN_Name>& rhs){$/;"	f	namespace:ns3
+operator <	CCN_Name.cc	/^bool operator< (const Ptr<PtrString> lhs, const Ptr<PtrString> rhs){$/;"	f	namespace:ns3
+operator <	CcnModule.cc	/^bool operator<(const Ptr<NetDevice>& lhs, const Ptr<NetDevice>& rhs) {$/;"	f	namespace:ns3
+operator <	PIT_Key.cc	/^bool operator< (const Ptr<PIT_Key>& first, const Ptr<PIT_Key>& second)$/;"	f	namespace:ns3
+operator <	local_app.cc	/^bool operator< (const Ptr<LocalApp>& first, const Ptr<LocalApp>& second)$/;"	f	namespace:ns3
+operator <<	md5.cc	/^std::ostream& operator<<(std::ostream& out, MD5 md5)$/;"	f
+operator <=	CCN_Name.cc	/^bool operator<= (const Ptr<PtrString> lhs, const Ptr<PtrString> rhs){$/;"	f	namespace:ns3
+operator ==	CCN_Name.cc	/^bool operator== (const Ptr<CCN_Name>& lhs, const Ptr<CCN_Name>& rhs){$/;"	f	namespace:ns3
+operator ==	CCN_Name.cc	/^bool operator== (const PtrString &lhs, const PtrString &rhs){$/;"	f	namespace:ns3
+operator ==	ccn-packets.cc	/^bool operator==(const Ptr<CCN_Data>& lhs, const Ptr<CCN_Data>& rhs) {$/;"	f	namespace:ns3
+operator ==	ccn-packets.cc	/^bool operator==(const Ptr<CCN_Interest>& lhs, const Ptr<CCN_Interest>& rhs) {$/;"	f	namespace:ns3
+operator >	CCN_Name.cc	/^bool operator> (const Ptr<PtrString> lhs, const Ptr<PtrString> rhs){$/;"	f	namespace:ns3
+operator >=	CCN_Name.cc	/^bool operator>= (const Ptr<PtrString> lhs, const Ptr<PtrString> rhs){$/;"	f	namespace:ns3
+p_RX_Data	CcnModule.h	/^    uint32_t p_RX_Data;$/;"	m	class:ns3::CcnModule
+parseFileMap	Initializer.cc	/^map<string, uint32_t> Initializer::parseFileMap(){$/;"	f	class:ns3::Initializer
+parseWorkload	Initializer.cc	/^vector<pair <string, uint32_t> > Initializer::parseWorkload(uint32_t sseed){$/;"	f	class:ns3::Initializer
+parser	Initializer.h	/^    Ptr<Parser> parser;$/;"	m	class:ns3::Initializer
+pkt_num	Cache.h	/^    uint8_t pkt_num = PKT_NUM;$/;"	m	class:ns3::Slot_Object
+prev	Cache.h	/^    LRU_Object * prev;$/;"	m	class:ns3::LRU_Object
+prev_sendtimes	CcnModule.h	/^    map<Ptr<NetDevice>, int64_t> prev_sendtimes;$/;"	m	class:ns3::CcnModule
+print_data_table	Cache.cc	/^void print_data_table(map<uint32_t, Slot_Object> & dt){$/;"	f	namespace:ns3
+put	Trie.cc	/^bool Trie::put(Ptr<CCN_Name> name, Ptr<LocalApp> localApp){$/;"	f	class:ns3::Trie
+put	Trie.cc	/^bool Trie::put(Ptr<CCN_Name> name, Ptr<NetDevice> device) {$/;"	f	class:ns3::Trie
+r	PTuple.h	/^    vector<Ptr<LocalApp> > r;$/;"	m	class:ns3::PTuple
+reInit	CcnModule.cc	/^void CcnModule::reInit() {$/;"	f	class:ns3::CcnModule
+read	sha1.cc	/^void SHA1::read(std::istream &is, std::string &s, int max)$/;"	f	class:SHA1
+read_dram_cnt	Cache.h	/^    uint64_t read_dram_cnt;$/;"	m	class:ns3::CacheModule
+readcache_pcks	Cache.h	/^    uint64_t readcache_pcks;$/;"	m	class:ns3::S_Cache
+readcache_rmlru	Cache.h	/^    uint64_t readcache_rmlru;$/;"	m	class:ns3::CacheModule
+reads_for_evictions	Cache.h	/^    uint64_t reads_for_evictions;$/;"	m	class:ns3::CacheModule
+reads_for_fetchings	Cache.h	/^    uint64_t reads_for_fetchings;$/;"	m	class:ns3::CacheModule
+reads_for_insertions	Cache.h	/^    uint64_t reads_for_insertions;$/;"	m	class:ns3::CacheModule
+removeDevice	PTuple.cc	/^bool PTuple::removeDevice(Ptr<NetDevice> device){$/;"	f	class:ns3::PTuple
+removeLocalApp	PTuple.cc	/^bool PTuple::removeLocalApp(Ptr<LocalApp> app){$/;"	f	class:ns3::PTuple
+removeText	Text.cc	/^void Text::removeText(string* text)$/;"	f	class:ns3::Text
+remove_last_chunk_dram	Cache.cc	/^int32_t D_Cache::remove_last_chunk_dram(){$/;"	f	class:ns3::D_Cache
+remove_last_chunk_ssd	Cache.cc	/^int32_t D_Cache::remove_last_chunk_ssd(){$/;"	f	class:ns3::D_Cache
+remove_last_file	Cache.cc	/^int32_t O_Cache::remove_last_file(){$/;"	f	class:ns3::O_Cache
+remove_last_file_r	Cache.cc	/^int32_t S_Cache::remove_last_file_r(){$/;"	f	class:ns3::S_Cache
+remove_last_file_w	Cache.cc	/^int32_t S_Cache::remove_last_file_w(){$/;"	f	class:ns3::S_Cache
+remove_last_packet	Cache.cc	/^uint32_t O_Cache::remove_last_packet(const string& new_packet_filename){$/;"	f	class:ns3::O_Cache
+remove_last_packet	Cache.cc	/^uint32_t P_Cache::remove_last_packet(const string& _filename){$/;"	f	class:ns3::P_Cache
+remove_last_packet	Cache.h	/^    virtual uint32_t remove_last_packet(const string& _filename){return 0;}$/;"	f	class:ns3::CacheModule
+remove_object	Cache.cc	/^void LRU_Table::remove_object(const LRU_Object* obj){$/;"	f	class:ns3::LRU_Table
+replaceAll	utils.h	/^    void replaceAll(std::string& str, const std::string& from, const std::string& to) {$/;"	f	class:ns3::Utils
+requests	Cache.h	/^    uint64_t requests;$/;"	m	class:ns3::CacheModule
+reset	CcnModule.cc	/^void CcnModule::reset()$/;"	f	class:ns3::CcnModule
+reset	sha1.cc	/^void SHA1::reset()$/;"	f	class:SHA1
+responses	Cache.h	/^    uint64_t responses;   $/;"	m	class:ns3::CacheModule
+returned	Receiver.h	/^    uint32_t returned;$/;"	m	class:ns3::Receiver
+root	Trie.h	/^    Ptr<TrieNode> root;$/;"	m	class:ns3::Trie
+rotate_left	md5.cc	/^inline MD5::uint4 MD5::rotate_left(uint4 x, int n) {$/;"	f	class:MD5
+sendData	CcnModule.cc	/^void CcnModule::sendData(Ptr<CCN_Name> name, uint8_t *buff, uint32_t bufflen){$/;"	f	class:ns3::CcnModule
+sendFiles	Receiver.h	/^    vector<std::pair<string, std::pair<uint32_t, uint32_t>>> sendFiles;$/;"	m	class:ns3::Receiver
+sendInterest	CcnModule.cc	/^void CcnModule::sendInterest(Ptr<CCN_Name> name, Ptr<LocalApp> localApp){$/;"	f	class:ns3::CcnModule
+sendInterests	Receiver.cc	/^void Receiver::sendInterests(){$/;"	f	class:ns3::Receiver
+sendRate	Receiver.h	/^    uint64_t sendRate;$/;"	m	class:ns3::Receiver
+sendThroughDevice	CcnModule.cc	/^void CcnModule::sendThroughDevice(Ptr<const Packet> p, Ptr<NetDevice> nd) {$/;"	f	class:ns3::CcnModule
+serializeToBuffer	CCN_Name.cc	/^uint32_t CCN_Name::serializeToBuffer(uint8_t *buffer) const {$/;"	f	class:ns3::CCN_Name
+serializeToPacket	ccn-packets.cc	/^Ptr<Packet> CCN_Data::serializeToPacket() const {$/;"	f	class:ns3::CCN_Data
+serializeToPacket	ccn-packets.cc	/^Ptr<Packet> CCN_Interest::serializeToPacket() const {$/;"	f	class:ns3::CCN_Interest
+serializedSize	CCN_Name.cc	/^uint32_t CCN_Name::serializedSize() const {$/;"	f	class:ns3::CCN_Name
+setAndGetChildren	TrieNode.cc	/^Ptr<TrieNode> TrieNode::setAndGetChildren(Ptr<PtrString> word){$/;"	f	class:ns3::TrieNode
+setBetw	CcnModule.h	/^    void setBetw(const double& betw){$/;"	f	class:ns3::CcnModule
+setBetweenness	ccn-packets.h	/^    void setBetweenness(const float&  betw){ betweenness = betw; }$/;"	f	class:ns3::CCN_Interest
+setDataCallback	local_app.h	/^        void setDataCallback(Callback<void, Ptr<CCN_Name>, uint8_t*, uint32_t>& cb){ onDataCallback = cb;}$/;"	f	class:ns3::LocalApp
+setFIB	CcnModule.cc	/^void CcnModule::setFIB(Ptr<Trie> F) {$/;"	f	class:ns3::CcnModule
+setInterestCallback	local_app.h	/^        void setInterestCallback(Callback<void, Ptr<CCN_Name> >& cb){ onInterestCallback = cb; }$/;"	f	class:ns3::LocalApp
+setNeighbor	CcnModule.h	/^    void setNeighbor(Ptr<NetDevice> dev, Ptr<CcnModule> module){ neighborModules[dev] = module;}$/;"	f	class:ns3::CcnModule
+sha1	sha1.cc	/^std::string sha1(const std::string &string)$/;"	f
+size	CCN_Name.h	/^    uint32_t size() const {return tokens.size();}$/;"	f	class:ns3::CCN_Name
+size_type	md5.h	/^  typedef unsigned int size_type; \/\/ must be 32bit$/;"	t	class:MD5
+slot_num	Cache.h	/^    uint64_t slot_num;$/;"	m	class:ns3::S_Cache
+slow_memory_hit	Cache.h	/^    uint64_t slow_memory_hit;$/;"	m	class:ns3::CacheModule
+split	utils.h	/^    vector<string> & split(const string &s, char delim, vector<string> &elems) {$/;"	f	class:ns3::Utils
+split	utils.h	/^    vector<string> split(const string &s, char delim) {$/;"	f	class:ns3::Utils
+sram_stored_packets	Cache.h	/^    uint64_t sram_stored_packets;$/;"	m	class:ns3::CacheModule
+ssd_rmlru	Cache.h	/^    uint64_t ssd_rmlru;$/;"	m	class:ns3::CacheModule
+start	Receiver.cc	/^void Receiver::start() {$/;"	f	class:ns3::Receiver
+state	md5.h	/^  uint4 state[4];   \/\/ digest so far$/;"	m	class:MD5
+stats_table	Cache.h	/^    map<string , uint32_t> stats_table; $/;"	m	class:ns3::O_Cache
+stats_table	Cache.h	/^    map<string , uint32_t> stats_table;$/;"	m	class:ns3::S_Cache
+store_packets	Cache.cc	/^uint32_t D_Cache::store_packets(const string& chunk_name,$/;"	f	class:ns3::D_Cache
+store_packets	Cache.cc	/^uint32_t S_Cache::store_packets(const string& key, const uint32_t last_id, const Pkts & pkts){$/;"	f	class:ns3::S_Cache
+stored_files	Cache.h	/^    uint32_t stored_files;$/;"	m	class:ns3::CacheModule
+stored_files	Cache.h	/^    uint32_t stored_files;$/;"	m	class:ns3::LRU_Table
+stored_packets	Cache.h	/^    uint32_t stored_packets;$/;"	m	class:ns3::LRU_Object
+stored_packets	Cache.h	/^    uint64_t stored_packets;$/;"	m	class:ns3::CacheModule
+t	Receiver.h	/^    uint64_t t = 0;$/;"	m	class:ns3::Receiver
+table	PIT.h	/^    map<Ptr<CCN_Name>, Ptr<PTuple> > table;$/;"	m	class:ns3::PIT
+tail	Cache.h	/^    LRU_Object* head, *tail;$/;"	m	class:ns3::LRU_Table
+terminator	CcnModule.h	/^    uint32_t terminator;$/;"	m	class:ns3::CcnModule
+text	Text.cc	/^Ptr<Text> Text::text=0;$/;"	m	class:ns3::Text	file:
+text	Text.h	/^    static Ptr<Text> text;$/;"	m	class:ns3::Text
+textContainer	Text.h	/^    map<string, string*>* textContainer;$/;"	m	class:ns3::Text
+thePIT	CcnModule.h	/^    Ptr<PIT> thePIT;$/;"	m	class:ns3::CcnModule
+toString	CCN_Name.cc	/^string CCN_Name::toString() const{$/;"	f	class:ns3::CCN_Name
+tokens	CCN_Name.h	/^    vector<Ptr<PtrString> > tokens;$/;"	m	class:ns3::CCN_Name
+total_stored_packets	Cache.h	/^    uint64_t total_stored_packets;$/;"	m	class:ns3::CacheModule
+transform	md5.cc	/^void MD5::transform(const uint1 block[blocksize])$/;"	f	class:MD5
+transform	sha1.cc	/^void SHA1::transform(uint32 block[BLOCK_BYTES])$/;"	f	class:SHA1
+transforms	sha1.h	/^    uint64 transforms;$/;"	m	class:SHA1
+uint1	md5.h	/^  typedef unsigned char uint1; \/\/  8bit$/;"	t	class:MD5
+uint128	city.h	/^typedef std::pair<uint64, uint64> uint128;$/;"	t
+uint32	city.h	/^typedef uint32_t uint32;$/;"	t
+uint32	sha1.h	/^    typedef unsigned long int uint32;   \/* just needs to be at least 32bit *\/$/;"	t	class:SHA1
+uint32_in_expected_order	city.cc	100;"	d	file:
+uint32_in_expected_order	city.cc	97;"	d	file:
+uint4	md5.h	/^  typedef unsigned int uint4;  \/\/ 32bit$/;"	t	class:MD5
+uint64	city.h	/^typedef uint64_t uint64;$/;"	t
+uint64	sha1.h	/^    typedef unsigned long long uint64;  \/* just needs to be at least 64bit *\/$/;"	t	class:SHA1
+uint64_in_expected_order	city.cc	101;"	d	file:
+uint64_in_expected_order	city.cc	98;"	d	file:
+uint8	city.h	/^typedef uint8_t uint8;$/;"	t
+update	PIT.cc	/^void PIT::update(Ptr<CCN_Name> key, Ptr<PTuple> re) {$/;"	f	class:ns3::PIT
+update	md5.cc	/^void MD5::update(const char input[], size_type length)$/;"	f	class:MD5
+update	md5.cc	/^void MD5::update(const unsigned char input[], size_type length)$/;"	f	class:MD5
+update	sha1.cc	/^void SHA1::update(const std::string &s)$/;"	f	class:SHA1
+update	sha1.cc	/^void SHA1::update(std::istream &is)$/;"	f	class:SHA1
+update_object	Cache.cc	/^void LRU_Table::update_object(LRU_Object* obj, bool new_object){$/;"	f	class:ns3::LRU_Table
+visited	Initializer.h	/^    map<uint32_t, bool> visited;$/;"	m	class:ns3::Initializer
+word	TrieNode.h	/^    Ptr<PtrString> word;$/;"	m	class:ns3::TrieNode
+workload	Receiver.h	/^    vector<pair<string, uint32_t> > workload;$/;"	m	class:ns3::Receiver
+write_for_storings	Cache.h	/^    uint64_t write_for_storings;$/;"	m	class:ns3::CacheModule
+write_outoforder	Cache.h	/^    uint64_t write_outoforder;$/;"	m	class:ns3::CacheModule
+writecache_pcks	Cache.h	/^    uint64_t writecache_pcks;$/;"	m	class:ns3::S_Cache
+writecache_rmlru	Cache.h	/^    uint64_t writecache_rmlru;$/;"	m	class:ns3::CacheModule
+zero_pcks	Cache.h	/^    uint64_t zero_pcks;   $/;"	m	class:ns3::O_Cache
+zero_pcks	Cache.h	/^    uint64_t zero_pcks;$/;"	m	class:ns3::S_Cache
+~CCN_Data	ccn-packets.cc	/^CCN_Data::~CCN_Data() {$/;"	f	class:ns3::CCN_Data
+~CCN_Interest	ccn-packets.cc	/^CCN_Interest::~CCN_Interest() {$/;"	f	class:ns3::CCN_Interest
+~CCN_Name	CCN_Name.cc	/^CCN_Name::~CCN_Name() {$/;"	f	class:ns3::CCN_Name
+~CacheModule	Cache.h	/^    ~CacheModule(){$/;"	f	class:ns3::CacheModule
+~CcnModule	CcnModule.cc	/^CcnModule::~CcnModule() {$/;"	f	class:ns3::CcnModule
+~Initializer	Initializer.cc	/^Initializer::~Initializer() {$/;"	f	class:ns3::Initializer
+~LocalApp	local_app.h	/^        virtual ~LocalApp(){ }$/;"	f	class:ns3::LocalApp
+~PIT	PIT.cc	/^PIT::~PIT() {$/;"	f	class:ns3::PIT
+~PIT_Key	PIT_Key.cc	/^PIT_Key::~PIT_Key() {    $/;"	f	class:ns3::PIT_Key
+~PTuple	PTuple.cc	/^PTuple::~PTuple() {$/;"	f	class:ns3::PTuple
+~Receiver	Receiver.cc	/^Receiver::~Receiver() {$/;"	f	class:ns3::Receiver
+~ResultPrinter	ResultPrinter.cc	/^ResultPrinter::~ResultPrinter() {$/;"	f	class:ResultPrinter
+~S_Cache	Cache.h	/^    ~S_Cache(){$/;"	f	class:ns3::S_Cache
+~Sender	Sender.cc	/^Sender::~Sender() {$/;"	f	class:ns3::Sender
+~Text	Text.cc	/^Text::~Text()$/;"	f	class:ns3::Text
+~Trie	Trie.cc	/^Trie::~Trie() {$/;"	f	class:ns3::Trie
+~TrieNode	TrieNode.cc	/^TrieNode::~TrieNode() {$/;"	f	class:ns3::TrieNode

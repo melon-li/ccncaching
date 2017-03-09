@@ -29,7 +29,7 @@ Receiver::Receiver(Ptr<CcnModule> ccnmIn) {
     //The max number of requesting packets for a TTL time.
     //Note, the maxRate unit is bps, so 
     asked_size = (maxRate*TTL)/(8*REQ_SIZE);
-    NS_LOG_UNCOND("The asked_size(SEINDING_WIN_SIZE)="<<asked_size);
+    NS_LOG_UNCOND("The asked_size(SEINDING_WIN_SIZE)=" << asked_size);
     askedfor = 0;
     asked = set<Ptr<CCN_Name> >();
 
@@ -71,7 +71,6 @@ TypeId Receiver::GetTypeId(void) {
     static TypeId t = TypeId("RECEIVER");
     t.SetParent<Object>();
     //t.AddConstructor<CCNPacketSizeHeader>();
-
     return t;
 }
 
@@ -105,25 +104,16 @@ void Receiver::handleInterest(Ptr<CCN_Name>){
 }
 
 void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
-    /*if(Now().ToInteger(Time::MS) -t >=10){
-       //NS_LOG_UNCOND("asking = "<<asked.size());
-       //NS_LOG_UNCOND("asked_size = "<<asked_size);
-       NS_LOG_UNCOND("rec_data_rate = "<<
-                    (float(c)*1500*8/0.01/1000/1000/1000)<<" Gbps"); 
-       c = 0;
-       t = Now().ToInteger(Time::MS);
-    }
-    c++;
-    */
-    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
-                 " Data packet arrives at receiver at node "<<ccnm->getNodeId());
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()
+                 << " Data packet arrives at receiver at node "
+                 << ccnm->getNodeId());
     if (asked.find(name) == asked.end()){
         if(ENABLE_AGGREGATION == false) return; 
-        NS_ASSERT_MSG(false, "Got a Data for interest not asked " << name->toString());
+        NS_ASSERT_MSG(false, "Got a Data for interest not asked " 
+                             << name->toString());
     }else{
         returned++;
         asked.erase(name);
-        
         if(workload.empty()){
             if(asked.size()) return;
             NS_LOG_UNCOND(Simulator::Now ().GetPicoSeconds()<<" "
@@ -134,7 +124,9 @@ void Receiver::handleData(Ptr<CCN_Name> name, uint8_t*, uint32_t){
 }
 
 void Receiver::start() {
-        //NS_LOG_INFO("Receiver: "<<ccnm->getNodeId()<<" requested file: "<<workload.at(workload.size()-1).first);
+        NS_LOG_INFO("Receiver: " << ccnm->getNodeId()
+                    << " requested file: " 
+                    << workload.at(workload.size()-1).first);
         sendInterests();
 }
 
@@ -148,8 +140,6 @@ void Receiver::sendInterests(){
         
         if (ENABLE_CONGESTION_CONTROL) controlCongestion();
         tNext = REQ_SIZE*8*pow(10, 12)/sendRate;
-        NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
-                     " rec sends interest "<<theName->toString());
         Simulator::Schedule(PicoSeconds(tNext), &Receiver::doSendInterest, this, theName);
 }
 
@@ -157,13 +147,13 @@ void Receiver::controlCongestion(){
         ////simple congestion control algorithms
         if(asked.size() > asked_size*2){
             sendRate = sendRate/2;
-            //NS_LOG_UNCOND("asked_size > asked_size*2,descrease sendRate to "<<
-                          //float(sendRate)/1000/1000<<" Mb"); 
+            //NS_LOG_UNCOND("asked_size > asked_size*2,descrease sendRate to "
+                          //<< float(sendRate)/1000/1000<<" Mb"); 
         }else if(asked.size() < asked_size/2){
             sendRate = sendRate*2;
             if(sendRate >= maxRate) sendRate = maxRate;
-            //NS_LOG_UNCOND("asked_size < asked_size/2,increase sendRate to "<<
-                          //float(sendRate)/1000/1000<<" Mb"); 
+            //NS_LOG_UNCOND("asked_size < asked_size/2,increase sendRate to "
+                          //<< float(sendRate)/1000/1000<<" Mb"); 
         }
 }
 
@@ -195,12 +185,13 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
         while(sendFiles.size() < maxLen){
             if(workload.empty()) break;
             if (workload.size()%100==0){
-                NS_LOG_INFO(Now().ToInteger(Time::MS)<<
-                                   " Receiver: "<<ccnm->getNodeId()<<
-                             " remaining downloads: "<<workload.size());
+                NS_LOG_INFO(Now().ToInteger(Time::MS)
+                            << " Receiver: "<<ccnm->getNodeId()
+                            << " remaining downloads: "<<workload.size());
             }
-            //std::cout<<"Receiver: "<<ccnm->getNodeId()
-            //          <<" requested file: "<<workload.at(workload.size()-1).first<<std::endl;
+            NS_LOG_DEBUG("Receiver: "<<ccnm->getNodeId()
+                     <<" requested file: " 
+                     << workload.at(workload.size()-1).first);
             p.first = workload.at(workload.size()-1).first;
             p.second.first = workload.at(workload.size()-1).second;
             p.second.second = 1;

@@ -9,7 +9,7 @@
 #define EXPERIMENT_GLOBALS_H
 
 #define LRU_RATE  10 //Gbps
-//#define LRU_ACCESS_TIME 131875 //ps,the chunk consists of 2 packets
+#define LRU_ACCESS_TIME 131875 //ps,the chunk consists of 2 packets
 //#define LRU_ACCESS_TIME 120859 //ps,the chunk consists of 8 packets
 #define LRU_ENTRY_SIZE 40
 #define OPC_ENTRY_SIZE 42
@@ -27,6 +27,8 @@
 #define ZIPF_A 0.75
 
 //#define WIN_MAX 7000 //7000
+//#define LINK_DELAY "5ms"
+//#define ACCESS_LINK_DELAY "5ms"
 #define LINK_DELAY "5ms"
 #define ACCESS_LINK_DELAY "5ms"
 #define TTL 0.005*4 //second
@@ -41,7 +43,7 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define LINK_CAPACITY "150Gbps"  
 // LINK_CAPACITY/50, just for send rate, receiving rate is unlimited
 #define ACCESS_LINK_CAPACITY  "150Gbps"
-#define LINK_THROUGHTPUT "120Gbps" // 1Gbps
+#define LINK_THROUGHTPUT "100Gbps" // 1Gbps
 #define USER_EXPERIENCED_RATE "1Gbps"
 
 // The actual data packet is not saved, but its used for compatibility..
@@ -58,6 +60,8 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 //sram cache parameters
 #define WIDTH 8 //bytes
 #define PKT_SIZE 1500
+#define QUEUE_MAX_NPACKETS 10000
+#define THRESHOLD_NPACKETS 9000
 #define PKT_NUM 8
 #define FILE_NUM 4 //4
 #define DRAM_SIZE 100 //GB

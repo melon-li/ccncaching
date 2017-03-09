@@ -70,8 +70,8 @@ void Sender::AnnounceName(Ptr<CCN_Name> name) {
 void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
     interests++;
     //Time t = Seconds(this->waitingTime);
-    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
-                 " Sender gets "<<ccnn->toString());
+    NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()
+                 <<" Sender gets "<<ccnn->toString());
     Ptr<Packet> data = findData(ccnn);
     Simulator::Schedule(PicoSeconds(0), &Sender::SendData, this, ccnn, data);
 }

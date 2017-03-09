@@ -106,14 +106,14 @@ public:
     }
     
     //these used to be pure virtual but ns3 could not handle it
-    virtual int32_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
+    virtual int64_t add_packet(const string& _filename, const string& ID, const char* _payload, const bool is_first_packet){return 0;}
     virtual uint32_t remove_last_packet(const string& _filename){return 0;}
     virtual pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& ID){return std::make_pair(0, 0);}
-    virtual uint32_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}
+    virtual uint64_t cache_packet(const string& _filename, const string& ID, const char* _payload){return 0;}
     virtual string get_state(){return 0;}
     virtual string get_packet_stats(){return 0;}
     
-    uint32_t stored_files;
+    uint64_t stored_files;
     LRU_Table *LRU;
     uint64_t capacity; // the number of  packets
     uint64_t capacity_fast_table; // the number of entries in memory
@@ -176,12 +176,12 @@ public:
     // <filename, stats metric> metric may be a successfull hit counter, and will be used for pacekt removals
     map<string , uint32_t> stats_table; 
    
-    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    int64_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);  
     int32_t remove_last_file();//new by argi
     int32_t get_stored_packets(const string& _filename);//new by argi
     pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
-    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    uint64_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     string get_state();
     string get_packet_stats();
                 
@@ -194,8 +194,8 @@ public:
     P_Cache(uint64_t _capacity, uint64_t _capacity_fast_table):CacheModule(_capacity, _capacity_fast_table){}
         
     pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
-    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
-    int32_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
+    uint64_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    int64_t add_packet(const string& _filename, const string& _ID, const char* _payload, const bool is_first_packet);
     uint32_t remove_last_packet(const string& _filename);
     
     string get_state();
@@ -312,7 +312,7 @@ public:
     pair<bool,uint32_t>  is_last(const string &key, const uint32_t ID);
     int32_t get_avg_writetime(const uint32_t ID, const uint32_t total_length);
     int32_t get_avg_readtime(const string& key, const uint32_t ID);
-    int32_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
+    int64_t add_packet(const string& _filename, const uint32_t ID,const uint32_t block_id,  const char *_payload);
     int32_t get_dram_packet(const string& filename, const uint32_t ID);
     inline void checkout_readcache(const Pkts& pkts);
     int32_t get_writecached_packet(const string& key, const uint32_t ID);
@@ -325,7 +325,7 @@ public:
     int32_t get_stored_packets_r(const string& _filename);//new by argi
     int32_t get_stored_packets_w(const string& _filename);//new by argi
     pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
-    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    uint64_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
     void log_file_hit(const string& _filename, const string& _ID);
     inline void checkout_writecache();
     bool is_reallycached(const string &key);
@@ -364,8 +364,8 @@ public:
     Cachetable SSD_table;
         
     pair<int64_t, int64_t> get_cached_packet(const string& _filename, const string& _ID);
-    uint32_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
-    int32_t add_packet(const string& chunk_name,  const uint32_t ID, const uint32_t chunk_id, const char *_payload);
+    uint64_t cache_packet(const string& _filename, const string& _ID, const char* _payload);
+    int64_t add_packet(const string& chunk_name,  const uint32_t ID, const uint32_t chunk_id, const char *_payload);
     uint32_t store_packets(const string& chunk_name, const Pkts & pkts);
     pair<bool,uint32_t>  is_last(const string& chunk_name, const uint32_t ID);
     int32_t get_cached_packets_ssd(const string& chunk_name);

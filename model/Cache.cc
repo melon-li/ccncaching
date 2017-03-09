@@ -52,7 +52,7 @@ pair<int64_t, int64_t> O_Cache::get_cached_packet(const string& _filename, const
  * Decides wether packet should be stored or not.
  * @payload is currently not used in the simulation
  */
-uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+uint64_t O_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     responses++;
     uint32_t req = get_file_requests(_filename, _ID);
     req = req == 1?req-1:req;
@@ -83,7 +83,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
             stored_packets--;
             reads_for_evictions++;
         }
-        uint16_t tmp = add_packet(_filename, _ID, _payload, true);
+        int64_t tmp = add_packet(_filename, _ID, _payload, true);
         lookup_time += tmp;
         reads_for_insertions += tmp;
         stored_packets++;
@@ -101,7 +101,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
             stored_packets--;
             reads_for_evictions++;
         }
-        uint16_t tmp = add_packet(_filename, _ID, _payload, false);
+        int64_t tmp = add_packet(_filename, _ID, _payload, false);
         lookup_time += tmp;
         stored_packets++;
         reads_for_insertions+= tmp;
@@ -118,7 +118,7 @@ uint32_t O_Cache::cache_packet(const string& _filename, const string& _ID, const
  * This operation is currently avoided in the simulation
  * Return accesses in DRAM 
  */
-int32_t O_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
+int64_t O_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
     
     uint32_t ID = atoi(_ID.c_str());
     /* if its packet 0 then have to add it to caching tables */
@@ -315,11 +315,11 @@ pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const
     requests++;
     increase_file_requests(_filename, _ID);
     int64_t lookup_time = 0; 
-    string key = _filename+"-";
+    string key = _filename + "-";
     key.append(_ID);
     map<string, char*>::iterator it = data_table.find(key);
 
-    if (it!=data_table.end()){    
+    if (it != data_table.end()){    
         LRU->update_object(LRU->objects[key]);
         map<string, uint32_t>::iterator it = log_file_hits.find(key);
         if (it!=log_file_hits.end())
@@ -341,11 +341,10 @@ pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const
     }
     miss++;
     return std::make_pair(-1, 0);
-
-    }
+}
     
 // returns the lookup delay in *DRAM* (picosecond) 
-uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+uint64_t P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     responses++;
     uint32_t req = get_file_requests(_filename, _ID);
     req = req == 1?req-1:req;
@@ -354,8 +353,8 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
 
     string key = _filename+"-";
     key.append(_ID);
-    uint32_t access_time = 0;
-    uint32_t lookup_time = 0;
+    int64_t access_time = 0;
+    uint64_t lookup_time = 0;
     map<string, char*>::iterator it = data_table.find(key);
 
     
@@ -374,6 +373,7 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     reads_for_insertions++;
     //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
     lookup_time = PKT_SIZE*1000*8/LRU_RATE; //ps
+    //lookup_time = LRU_ACCESS_TIME;
     return lookup_time;
 }
     
@@ -381,7 +381,7 @@ uint32_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
  *  is_first_packet is not used in packet level caching
  * @payload is not used in the simulation
  * */    
-int32_t P_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
+int64_t P_Cache::add_packet(const string& _filename, const string& _ID, const  char* _payload, const bool is_first_packet){
     string key = _filename+"-";
     key.append(_ID);
     //stats_table.set (_filename, 0);
@@ -802,12 +802,14 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
     }
     if(lookup_time >=0){
         fast_memory_hit++;
+        //return std::make_pair(0, LRU_ACCESS_TIME);
         return std::make_pair(0, 0);
     }
 
     lookup_time = get_writecached_packet(key, ID);
     if(lookup_time >=0){
         fast_memory_hit++;
+        //return std::make_pair(0, LRU_ACCESS_TIME);
         return std::make_pair(0, 0);
     }
 
@@ -828,7 +830,8 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
         return std::make_pair(-1, lookup_time);
     }
 
-    return std::make_pair(0, lookup_time+lt);
+    //return std::make_pair(0, LRU_ACCESS_TIME);
+    return std::make_pair(0, lookup_time + lt);
 }
 
 int32_t S_Cache::remove_last_file_w(){
@@ -925,7 +928,7 @@ inline void S_Cache::checkout_writecache(){
 
 // Cache packets and transfer them to dram,
 // when the number is more than PKT_NUM or is last one in file.
-int32_t S_Cache::add_packet(const string& key, 
+int64_t S_Cache::add_packet(const string& key, 
                             const uint32_t ID, 
                             const uint32_t chunk_id, 
                             const char *_payload){
@@ -996,14 +999,14 @@ bool S_Cache::is_reallycached(const string &key){
 }
 
 //cache a packet
-uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
-    uint32_t write_time = 0;
+uint64_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+    uint64_t write_time = 0;
     uint32_t ID = uint32_t(atoi(_ID.c_str()) - CACHING_START_INDEX);
     uint32_t chunk_id = ID/PKT_NUM;
 
     responses++;
     uint32_t req = get_file_requests(_filename, _ID);
-    req = req == 1?req-1:req;
+    req = req == 1 ? req-1: req;
     hits += req;
     clear_file_requests(_filename, _ID);
 
@@ -1023,6 +1026,7 @@ uint32_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     //if not exist in dram, store it
     write_time += add_packet(key, ID, chunk_id, _payload);
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
+    //return LRU_ACCESS_TIME;
     return write_time;    
 }
 
@@ -1113,10 +1117,10 @@ pair<int64_t, int64_t> D_Cache::get_cached_packet(const string& _filename, const
 }
 
 // Returns the lookup delay in SSD-DRAM caching system (picosecond)
-uint32_t D_Cache::cache_packet(const string& _filename, 
+uint64_t D_Cache::cache_packet(const string& _filename, 
                                const string& _ID, 
                                const char* _payload){
-    uint64_t wt = 0;
+    int64_t wt = 0;
 
     //For statistic of request and hits
     responses++;
@@ -1152,9 +1156,9 @@ uint32_t D_Cache::cache_packet(const string& _filename,
  *    chunk_id: chunk-id.
  *    _payload: char*.
  *Return:
- *    int32_t: the time taken by DRAM-SSD caching system.
+ *    int64_t: the time taken by DRAM-SSD caching system.
  */
-int32_t D_Cache::add_packet(const string& chunk_name, 
+int64_t D_Cache::add_packet(const string& chunk_name, 
                             const uint32_t ID,
                             const uint32_t chunk_id,
                             const char* _payload){

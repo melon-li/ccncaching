@@ -149,8 +149,8 @@ void Parser::parse(string& filepath, uint32_t group_size) {
 
             PointToPointHelper pph;
             pph.SetQueue(string("ns3::DropTailQueue"),
-                         string("MaxPackets"), ns3::UintegerValue(10000), 
-                         string("MaxBytes"), ns3::UintegerValue(10000*PKT_SIZE));
+                         string("MaxPackets"), ns3::UintegerValue(QUEUE_MAX_NPACKETS), 
+                         string("MaxBytes"), ns3::UintegerValue(QUEUE_MAX_NPACKETS*PKT_SIZE));
             pph.SetDeviceAttribute("DataRate", StringValue(LINK_CAPACITY));
             pph.SetChannelAttribute("Delay", StringValue(LINK_DELAY));
             NetDeviceContainer ndc = pph.Install(n);

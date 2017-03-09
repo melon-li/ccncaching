@@ -7,6 +7,7 @@
 #include <string>
 #include <unistd.h>
 #include <queue>
+#include <map>
 #include "ns3/core-module.h"
 #include "ns3/data-rate.h"
 #include "ns3/network-module.h"
@@ -16,6 +17,8 @@
 #include "ns3/ccn-packets.h"
 #include "ns3/Cache.h"
 #include "ns3/experiment_globals.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/ptr.h"
 
 using std::string;
 
@@ -37,6 +40,11 @@ enum CSState
         BUSY     /**< The transmitter is busy transmitting a packet */
 };
 
+// The Content Storage poll the recQueue and sendQueue alternately.
+enum PollState{
+    WRITE,
+    READ
+};
 
 class CcnModule: public Object {
 public:
@@ -84,6 +92,8 @@ public:
     void getCachedSend(Ptr<const Packet> p, Ptr<NetDevice> nd);
     bool getCachedTransmitStart();
     void getCachedTransmitComplete();
+    void senderTransmitData(Ptr<NetDevice> nd);
+    void senderTransmitComplete(Ptr<NetDevice> nd);
 
     friend bool operator< (const Ptr<NetDevice>&, const Ptr<NetDevice>&);
     char enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fast_cap, 
@@ -115,12 +125,16 @@ private:
      
     uint32_t buf_cnt;
     //map<Ptr<NetDevice>, int64_t> prev_sendtimes;
-    CSState m_txCSState;
-    CSState m_rxCSState;
+    bool congestionFlag;
+    CSState m_CSState;
+    PollState m_PollState;
+    uint64_t minCompletedTime;
     //uint64_t sendQueue;
     //uint64_t recQueue;
     std::queue<std::pair<Ptr<const Packet>, Ptr<NetDevice> > > recQueue;
     std::queue<std::pair<Ptr<const Packet>, Ptr<NetDevice> > > sendQueue;
+    std::map<Ptr<NetDevice>, std::queue<Ptr<const Packet> > > sendDataQueues;
+    std::map<Ptr<NetDevice>, CSState> m_senderStates;
     /*
      *paragram: cache delay, PicoSeconds number
      *return: PicoSeconds number after current time

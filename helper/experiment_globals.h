@@ -54,8 +54,8 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define CACHE_MODE "packet" // "packet" or "object"
 #define PACKET_CACHE_MODE 1  //LRU
 #define OBJECT_CACHE_MODE 2  //OPC
-#define SRAM_CACHE_MODE 3  //SRAM cache for dram
-#define DRAM_CACHE_MODE 4  //DRAM cache for SSD
+#define SRAM_CACHE_MODE 3    //SRAM cache for dram
+#define DRAM_CACHE_MODE 4    //DRAM cache for SSD
 
 //sram cache parameters
 #define WIDTH 8 //bytes
@@ -63,8 +63,11 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define QUEUE_MAX_NPACKETS 10000
 #define THRESHOLD_NPACKETS 9000
 #define PKT_NUM 8
-#define FILE_NUM 4 //4
+#define FILE_NUM 8 //4
 #define DRAM_SIZE 100 //GB
+// We make the load factor of the DRAM storage (treated as hash table)
+// keep in 30%-50%, to reduce the hash collision.
+#define DRAM_REDUNDANCE 2
 
 //#define CACHE_PLACEMENT 0 // 0 for edges, 1 for betweenness and 2 for all nodes
 
@@ -89,9 +92,9 @@ http://www.samsung.com/cn/memory-storage/ssd-960-pro/MZ-V6P2T0Z.
 the sequential read performance of 3,500MB/s and sequential write speeds of 2,100MB/s. 
 Let 3,500MB/s read_throughput, 2,100MB/s be write_throughput.
 We Assume the read_ratio: write_ratio = 1:2.73,
-then we can derive SSD_DATA_RATE = (3500*1 + 2100*2.73)/(3.73*2)= 1237.67MB/s = 9.7 Gbps
+then we can derive SSD_DATA_RATE = (3500*1 + 2100*2.73)/3.73= 1237.67MB/s = 9.7 Gbps
 */
-#define SSD_DATA_RATE 9.7 //Gbps
+#define SSD_DATA_RATE 19.8 //Gbps
 
 #include "ns3/core-module.h"
 

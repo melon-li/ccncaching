@@ -231,6 +231,8 @@ void BootstrappingHelper::startExperiment(){
             uint64_t w_storings = 0;
             uint64_t write_outoforder = 0;
             uint64_t false_positive_cnt_w = 0;
+            uint64_t false_positive_cnt_test = 0; // for-test
+            uint64_t false_positive_cnt_w_test = 0; // for-test
             uint64_t total_stored_packets = 0;
             uint64_t sram_stored_packets = 0;
             uint64_t dramcache_pcks=0;
@@ -259,6 +261,8 @@ void BootstrappingHelper::startExperiment(){
                 stored_packets += nsNodeIdToModule[nd->GetId()]->cache->stored_packets;
                 write_outoforder += nsNodeIdToModule[nd->GetId()]->cache->write_outoforder;
                 false_positive_cnt_w += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt_w;
+                false_positive_cnt_w_test += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt_w_test;
+                false_positive_cnt_test += nsNodeIdToModule[nd->GetId()]->cache->false_positive_cnt_test;
                 total_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->total_stored_packets;
                 sram_stored_packets += nsNodeIdToModule[nd->GetId()]->cache->sram_stored_packets;
                 dramcache_pcks += nsNodeIdToModule[nd->GetId()]->cache->dramcache_pcks;
@@ -281,11 +285,16 @@ void BootstrappingHelper::startExperiment(){
                           ", dramcache_outoforder:"<<dramcache_outoforder<<
                           ", dramcache_rmlru:"<<dramcache_rmlru<<
                           ", ssd_rmlru:"<<ssd_rmlru);          
-            NS_LOG_UNCOND("false_positive_cnt: "<<false_positive_cnt<<" read_dram_cnt: "<<read_dram_cnt<<
-                   " readcache_rmlru: "<<readcache_rmlru<<" writecache_rmlru: "<<writecache_rmlru);
-            NS_LOG_UNCOND("false_positive_cnt_w: "<<false_positive_cnt_w<<" write_outoforder_cnt: "<<
-                          write_outoforder<<" total_stored_packets: "<<total_stored_packets<<
-                          " sram_stored_packets: "<<sram_stored_packets);
+            NS_LOG_UNCOND("false_positive_cnt: "<<false_positive_cnt
+                          <<" false_positive_cnt_test: " << false_positive_cnt_test
+                         <<" read_dram_cnt: "<<read_dram_cnt
+                        <<" readcache_rmlru: "<<readcache_rmlru
+                        <<" writecache_rmlru: "<<writecache_rmlru);
+            NS_LOG_UNCOND(" false_positive_cnt_w: "<<false_positive_cnt_w
+                          <<" false_positive_cnt_w_test: " << false_positive_cnt_w_test
+                          <<" write_outoforder_cnt: "<< write_outoforder
+                          <<" total_stored_packets: "<<total_stored_packets
+                          <<" sram_stored_packets: "<<sram_stored_packets);
         }
         
         NS_LOG_UNCOND("HITS="<<CcnModule::HITS);

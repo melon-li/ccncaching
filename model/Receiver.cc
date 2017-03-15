@@ -218,6 +218,7 @@ Ptr<CCN_Name> Receiver::doNextRequestName(){
             }
         }while(ENABLE_AGGREGATION && asked.find(theName) != asked.end());
 
+        //NS_LOG_UNCOND("get "<<theName->toString());
         return theName;
 }
 

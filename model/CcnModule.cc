@@ -79,9 +79,6 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
         size_t cells = ka*(capacity/PKT_NUM/FILE_NUM)/std::log(2); //bits
         uint64_t writing_cache_size;
-        NS_LOG_UNCOND("In enableCache function,fp="<<_fp<<
-                      " ka = "<<ka<<" cells = "<<cells<<
-                      " size = "<<float(cells)/1024/1024<<" Mb");
 
         //Get cache_size which is equit to (reading_cache_size + writing _cache_size) 
         uint64_t cache_size = _cache_fast_cap - (cells/8);
@@ -91,8 +88,11 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         }else{
             writing_cache_size = uint64_t(cache_size/2);
         }
-        NS_LOG_UNCOND("The writing_cache_size = "<<float(writing_cache_size)/1024/1024<<" MB\n");
-        cache = new S_Cache(capacity, writing_cache_size/PKT_SIZE, _file_map_p, _fp, enable_opt);
+        writing_cache_size = writing_cache_size/PKT_SIZE;
+        NS_LOG_UNCOND("capacity = " << capacity << " packets, "
+                     << "the writing_cache_size = "
+                     << float(writing_cache_size) << " packets");
+        cache = new S_Cache(capacity, writing_cache_size, _file_map_p, _fp, enable_opt);
     }else if (mode == DRAM_CACHE_MODE){
       //_cache_fast_cap is the size of SRAM which is used as index for chunk cached in DRAM.
       cache = new D_Cache(capacity, _cache_fast_cap/LRU_ENTRY_SIZE, _file_map_p);
@@ -179,6 +179,7 @@ bool CcnModule::handlePacket(Ptr<NetDevice> nd,
                              Ptr<const Packet> p,
                              uint16_t a,
                              const Address& ad) {
+    //NS_LOG_UNCOND("Router "<<getNode()->GetId()<<" proceed input packets");
     uint8_t type = extract_packet_type(p);
     if (type == CCN_Packets::INTEREST) {
         RX_INTERESTS++;
@@ -360,7 +361,8 @@ void CcnModule::dohandleIncomingInterest(Ptr<const Packet> p, Ptr<NetDevice> nd)
     Ptr<PointToPointNetDevice> pnd = DynamicCast<PointToPointNetDevice>(outport);
     Ptr<Queue> q = pnd->GetQueue();
     if (q->GetNPackets() > THRESHOLD_NPACKETS){
-        NS_LOG_UNCOND("In Que size = " << q->GetNPackets());
+        NS_LOG_DEBUG("Interest Queue Size in Content Storage = " 
+                     << q->GetNPackets());
         congestionFlag = true;
         return;
     }
@@ -700,7 +702,7 @@ void CcnModule::senderTransmitData(Ptr<NetDevice> nd) {
     Ptr<PointToPointNetDevice> pnd = DynamicCast< PointToPointNetDevice>(nd);
     Ptr<Queue> q2 = pnd->GetQueue();
     if (q2->GetNPackets() > THRESHOLD_NPACKETS){
-        NS_LOG_UNCOND("Da Que size = " << q2->GetNPackets());
+        NS_LOG_DEBUG("Data Queue size in Sender = " << q2->GetNPackets());
         Simulator::Schedule(PicoSeconds(minCompletedTime), 
                             &CcnModule::senderTransmitComplete, this, nd);
         return;

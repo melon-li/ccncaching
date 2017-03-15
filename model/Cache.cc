@@ -14,13 +14,12 @@ namespace ns3 {
 pair<int64_t, int64_t> O_Cache::get_cached_packet(const string& _filename, const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
-    //click_chatter("Searching chunk.. %d", ID);
     int64_t lookup_time = 0;
     uint32_t ID = atoi(_ID.c_str());
     map<string, uint32_t>::iterator it = index_table.find(_filename);
-    // chunk is cached
+    // Chunk is cached
     if (it!=index_table.end() && ID<=it->second){    
-        LRU->update_object(LRU->objects[_filename]);//fere to arxeio san most recent
+        LRU->update_object(LRU->objects[_filename]);
         string key = _filename+"-";
         key.append(_ID);
         map<string, uint32_t>::iterator lit = log_file_hits.find(key);
@@ -308,10 +307,11 @@ string P_Cache::get_state(){
     }
 
 /**
- * Looks for cached packet in Packet-organised cache
- * returns the amount of time spend in DRAM
+ * Looks for cached packet in Packet-organised cache.
+ * returns the amount of time spend in DRAM.
  */
-pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const string& _ID){
+pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, 
+                                                  const string& _ID){
     requests++;
     increase_file_requests(_filename, _ID);
     int64_t lookup_time = 0; 
@@ -334,16 +334,17 @@ pair<int64_t, int64_t> P_Cache::get_cached_packet(const string& _filename, const
         log_chunk_id_hits[std::min(MAX_LOG_CHUNK_ID-1,atoi(_ID.c_str()))]++;
         NS_LOG_DEBUG("Found key: "<<key<<" cached");
         reads_for_fetchings++;
-        //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
-        lookup_time = PKT_SIZE*8*1000/LRU_RATE; //ps
-        //lookup_time = LRU_ACCESS_TIME;
+        //lookup_time = DRAM_ACCESS_TIME + 
+        //              (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME;
+        //lookup_time = LRU_ACCESS_TIME; // for-test
+        lookup_time = PKT_SIZE*8*1000/LRU_RATE; //unit is ps
         return std::make_pair(0, lookup_time);
     }
     miss++;
     return std::make_pair(-1, 0);
 }
     
-// returns the lookup delay in *DRAM* (picosecond) 
+// It returns the lookup delay in *DRAM* (picosecond). 
 uint64_t P_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
     responses++;
     uint32_t req = get_file_requests(_filename, _ID);
@@ -362,18 +363,23 @@ uint64_t P_Cache::cache_packet(const string& _filename, const string& _ID, const
     if (it != data_table.end()) return 0;
     /* remove the last chunk from the least recently used file*/
     if (stored_packets >= capacity){
-        remove_last_packet(key); // do not add DRAM delay, overwritte wth one access
+        // Not add DRAM delay, overwritte wth one access.
+        remove_last_packet(key); 
         stored_packets--;
         reads_for_evictions++;
     }
     access_time += add_packet(_filename, _ID, _payload, true);
     it = data_table.find(key);
     stored_packets++;
-    //NS_LOG_DEBUG("Added packet "<<_filename<<"/"<<_ID<<" stored_pcks:"<<stored_packets<<"/"<<capacity);
+    //NS_LOG_DEBUG("Added packet "<<_filename<<"/"<<_ID
+    //             <<" stored_pcks:"<<stored_packets
+    //             <<"/"<<capacity);
     reads_for_insertions++;
-    //lookup_time = DRAM_ACCESS_TIME + (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + (access_time-1)*DRAM_ACCESS_TIME;
-    lookup_time = PKT_SIZE*1000*8/LRU_RATE; //ps
+    //lookup_time = DRAM_ACCESS_TIME + 
+    //              (PKT_SIZE/WIDTH -1)*DRAM_OLD_ACCESS_TIME + 
+    //              (access_time-1)*DRAM_ACCESS_TIME;
     //lookup_time = LRU_ACCESS_TIME;
+    lookup_time = PKT_SIZE*1000*8/LRU_RATE; // Unit is ps.
     return lookup_time;
 }
     
@@ -493,36 +499,40 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
     uint32_t pos = 0;
     string _filename;
     int cnt = 0;
-
     it = name2index.find(key);
-    //1.The file named key was  cached partly!, cache its packet without checkout order
+    //1.The file named key was  cached partly!, 
+    //cache its packet without checkout order.
     if(it != name2index.end()){
         pos = it->second;
         Pkts::iterator vt = files[pos].begin();
         NS_ASSERT_MSG((_ID - vt->first) < PKT_NUM,
-           "Slot_Object::insert_packet, Internal error, out-of-order"<<_ID<<" "<<vt->first);
+           "Slot_Object::insert_packet, Internal error, out-of-order"
+            << _ID << " " << vt->first);
         NS_ASSERT_MSG(files[pos].size() <= PKT_NUM,
-           "Slot_Object::insert_packet, Internal error, files can not be more than PKT_NUM");
+           "Slot_Object::insert_packet, Internal error,"
+            << "files can not be more than PKT_NUM");
         files[pos].insert(Pkts::value_type(_ID, payload));
         cnt++;
         return std::make_pair(true, cnt);
      }
 
-     //2.The file named key was not cached!, and this slot is full
+     //2.The file named key was not cached!, and this slot is full.
     if(files.size() >= file_num){
-        /* Delete the oldest file, or in options, we can use LRU algorithm to delete file
-           Note: it's worthy to discuss if we should delete the corresponding elements in bloom filter, 
+        /* Delete the oldest file, or in options, 
+         * we can use LRU algorithm to delete file
+           Note: it's worthy to discuss if we should 
+           delete the corresponding elements in bloom filter, 
         */
         //NS_LOG_WARN("This slot is full(test)");
-        NS_ASSERT_MSG(files[cur_index].size()!=0,
+        NS_ASSERT_MSG(files[cur_index].size() != 0,
                      "File is empty");
-
         cnt -= files[cur_index].size();
         files[cur_index].clear();
         files[cur_index].insert(Pkts::value_type(_ID, payload)); 
         cnt++;
         //Find old corresponding element in name2index, and erase it
-        for(Name2index::iterator it_t=name2index.begin(); it_t!=name2index.end(); it_t++){
+        for (Name2index::iterator it_t=name2index.begin(); 
+             it_t!=name2index.end(); it_t++){
             if(it_t->second == cur_index) {
                 name2index.erase(it_t);
                 break;
@@ -537,9 +547,9 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
         return std::make_pair(true, cnt);
     }
 
-    //3.The file named key was not  cached!, and this slot is not full
+    // 3.The file named key was not  cached!, and this slot is not full
     Pkts p;
-    // get the pos after insert one element into files
+    // Get the pos after insert one element into files
     pos = files.size();
     p.insert(Pkts::value_type(_ID, payload));
     files.push_back(p);
@@ -548,17 +558,17 @@ pair<bool, int> Slot_Object::insert_packet(const string& key, uint32_t _ID, char
     return std::make_pair(true, cnt);
 }
 
-pair<bool, int> Slot_Object::insert_packets(const string& key, uint32_t last_id, Pkts pkts){
+pair<bool, int> Slot_Object::insert_packets(const string& key, 
+                                            uint32_t last_id,
+                                            Pkts pkts){
     int cnt = 0;
-
     checkout_file(key, last_id); 
     //insert packets to dram
-    for(Pkts::iterator it =pkts.begin(); it != pkts.end(); it++){
+    for (Pkts::iterator it = pkts.begin(); it != pkts.end(); it++){
         pair<bool, int> pr = insert_packet(key, it->first, it->second);
         NS_ASSERT_MSG(pr.first, "Internal error,insert_packet is failed");
         cnt += pr.second;
     }
- 
     return std::make_pair(true, cnt);
 }
 
@@ -568,8 +578,9 @@ inline void Slot_Object::checkout_file(const string &key, uint32_t last_id){
     NS_ASSERT_MSG(pos,"Key format is error!");
     ID = atoi(key.substr(pos+1).c_str());
     len = last_id - ID + 1;
-    NS_ASSERT_MSG(len <= PKT_NUM,
-         "Internal error,"<<last_id<<"-"<<ID<<",len can not be more than  PKT_NUM");
+    NS_ASSERT_MSG(len <= PKT_NUM, "Internal error,"
+                 << last_id << "-" << ID 
+                 << ",len can not be more than  PKT_NUM");
 }
 
 pair<bool, Pkts> Slot_Object::find(const string& key){
@@ -722,7 +733,7 @@ inline void S_Cache::checkout_readcache(const Pkts& pkts){
 
 int32_t S_Cache::get_avg_readtime(const string& key, const uint32_t ID){
     int32_t lookup_time = 0;
-    uint32_t addr = 0;
+    uint64_t addr = 0;
     addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num;
     map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
@@ -738,8 +749,8 @@ int32_t S_Cache::get_avg_readtime(const string& key, const uint32_t ID){
 }
 
 int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
-    int32_t lookup_time = 0;
-    uint32_t addr = 0;
+    int64_t lookup_time = 0;
+    uint64_t addr = 0;
     int32_t pcks_num = 0;
     addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num;
@@ -751,7 +762,8 @@ int32_t S_Cache::get_dram_packet(const string& key, const uint32_t ID){
      
     checkout_readcache(pr.second);
 
-    pair<Cachetable::iterator, bool> result = cache_table_r.insert(Cachetable::value_type(key, pr.second));
+    pair<Cachetable::iterator, bool> result = 
+             cache_table_r.insert(Cachetable::value_type(key, pr.second));
     // failed to insert, key may exist in cache_table_r
     if (result.second == false){
         if(cache_table_r.find(key) != cache_table_r.end()){
@@ -793,7 +805,6 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
     string key(_filename);
     key += "-";
     key.append(std::to_string(((ID/PKT_NUM)*PKT_NUM)));
-   
     //int32_t lt = get_avg_readtime(key, ID); 
     if(enable_opt){
         lookup_time = get_readcached_packet2(key, ID);
@@ -819,19 +830,22 @@ pair<int64_t, int64_t> S_Cache::get_cached_packet(
         miss++;
         return std::make_pair(-1, 0);
     }
+    // for-test
+    if (data_test.find(key) == data_test.end()){
+        false_positive_cnt_test++;
+    }
+    
     read_dram_cnt++;
     lookup_time += DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME + 
                       DRAM_OLD_ACCESS_TIME*FILE_NUM*LRU_ENTRY_SIZE/WIDTH;
-    int64_t lt = get_dram_packet(key, ID); 
-    if(lt == -1){
+    int64_t lt = get_dram_packet(key, ID);  
+    if(lt == -1){ 
         false_positive_cnt++;
-        //NS_LOG_WARN("Bloom Filter:False positive");
         miss++;
         return std::make_pair(-1, lookup_time);
     }
 
-    //return std::make_pair(0, LRU_ACCESS_TIME);
-    return std::make_pair(0, lookup_time + lt);
+    return std::make_pair(0, lookup_time + lt); 
 }
 
 int32_t S_Cache::remove_last_file_w(){
@@ -888,22 +902,24 @@ int32_t S_Cache::get_avg_writetime(const uint32_t ID, const uint32_t total_lengt
 }
 
 uint32_t S_Cache::store_packets(const string& key, 
-    const uint32_t last_id, const Pkts & pkts){
-    uint32_t write_time = 0;
-    uint32_t addr = 0;
+                                const uint32_t last_id, 
+                                const Pkts & pkts){
+    uint64_t write_time = 0;
+    uint64_t addr = 0;
     addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num; 
     map <uint32_t, Slot_Object>::iterator dtit = data_table.find(addr);
     pair<bool, int> pr;
-    if(dtit != data_table.end()){
+    if(dtit != data_table.end()) {
         pr = dtit->second.insert_packets(key, last_id, pkts);
-    }else{
+    }else {
         Slot_Object so;
         pr = so.insert_packets(key, last_id, pkts);
         data_table.insert(map<uint32_t, Slot_Object>::value_type(addr, so));
     }
     NS_ASSERT_MSG(pr.first, "Error.Fail to insert_packets");
     index_bf_ptr->add(key.c_str());
+    data_test.insert(key);  //for-test
 
     stored_packets += pr.second;
     total_stored_packets += pkts.size();
@@ -934,16 +950,13 @@ int64_t S_Cache::add_packet(const string& key,
                             const char *_payload){
     pair<bool,uint32_t> islast = is_last(key, ID);
     char* data = NULL;
-    //uint32_t wt = get_avg_writetime(ID, islast.second);
 
-    //data = new char[PAYLOAD_SIZE];
-    //memcpy(data, _payload->data(), PAYLOAD_SIZE);
-
-    //if writecache is full, delete LRU file
+    //If writecache is full, delete the LRU file.
     checkout_writecache();
     Cachetable::iterator it = cache_table_w.find(key);
     if(it != cache_table_w.end()){
-        //if the packet has exited or is out-of-order, ignore it and return 0
+        // If the packet has exited or is out-of-order,
+        // ignore it and return 0.
         if((ID-chunk_id*PKT_NUM) != it->second.size()){
             write_outoforder++;
             return 0;
@@ -952,7 +965,7 @@ int64_t S_Cache::add_packet(const string& key,
         it->second.insert(Pkts::value_type(ID, data));
         writecache_pcks++;
         sram_stored_packets++;
-        //up to PKT_NUM or islast is true
+        //Up to PKT_NUM or islast is true
         if(it->second.size() >= PKT_NUM || islast.first){
             uint32_t wt = store_packets(key, ID, it->second);
             LRU_W->remove_object(LRU_W->objects[key]);
@@ -974,7 +987,6 @@ int64_t S_Cache::add_packet(const string& key,
         if(islast.first){
              sram_stored_packets++;
              return store_packets(key, ID, pkts);
-             //return wt;
          }else{
             cache_table_w.insert(Cachetable::value_type(key, pkts));
             writecache_pcks++;
@@ -984,11 +996,10 @@ int64_t S_Cache::add_packet(const string& key,
          } 
     }  
     return 0;
-    //return wt;
 }
 
 bool S_Cache::is_reallycached(const string &key){
-    uint32_t addr = CityHash64(key.c_str(), key.size());
+    uint64_t addr = CityHash64(key.c_str(), key.size());
     addr = addr%slot_num;
     map <uint32_t, Slot_Object>::iterator it = data_table.find(addr);
     if(it != data_table.end()){
@@ -999,7 +1010,9 @@ bool S_Cache::is_reallycached(const string &key){
 }
 
 //cache a packet
-uint64_t S_Cache::cache_packet(const string& _filename, const string& _ID, const char* _payload){
+uint64_t S_Cache::cache_packet(const string& _filename,
+                               const string& _ID,
+                               const char* _payload){
     uint64_t write_time = 0;
     uint32_t ID = uint32_t(atoi(_ID.c_str()) - CACHING_START_INDEX);
     uint32_t chunk_id = ID/PKT_NUM;
@@ -1014,19 +1027,23 @@ uint64_t S_Cache::cache_packet(const string& _filename, const string& _ID, const
     key = key + "-";
     key.append(std::to_string(chunk_id*PKT_NUM)); 
     // if packet has existed in dram, ignore and
-    // return time taked to look up tables
+    // return time taked to look up tables.
     size_t iscache = index_bf_ptr->lookup(key.c_str()); 
     if(iscache){
+        // for-test
+        if (data_test.find(key) == data_test.end()) {
+            false_positive_cnt_w_test++;
+        }
+
         write_time += DRAM_ACCESS_TIME - DRAM_OLD_ACCESS_TIME +
                       (FILE_NUM*LRU_ENTRY_SIZE/WIDTH)*DRAM_OLD_ACCESS_TIME;
         if(is_reallycached(key)) return write_time;
         false_positive_cnt_w++;
     }
 
-    //if not exist in dram, store it
-    write_time += add_packet(key, ID, chunk_id, _payload);
+    //If not exist in dram, store it.
+    write_time += add_packet(key, ID, chunk_id, _payload); 
     NS_LOG_INFO("S_Cache stored "<<_filename<<"/"<<_ID);
-    //return LRU_ACCESS_TIME;
     return write_time;    
 }
 
@@ -1039,8 +1056,12 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
     cells = ka*(capacity/PKT_NUM)/std::log(2);
 
-    NS_LOG_UNCOND("Init A^2  BF,ka = "<<ka<<" cells = "<<cells<<
-                 " size = "<<cells/1024/1024<<" Mb");
+    NS_LOG_UNCOND("Init A^2  BF,ka = " << ka 
+                   << " fp = " << fp
+                   << " cells = " << cells 
+                   << " size = " << cells/1024/1024 << " Mb "
+                   << " capacity = " << capacity
+                   << " capacity/PKT_NUM/2 = " << (capacity/PKT_NUM/2));
 
     return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM/2, 1, 199};
 }

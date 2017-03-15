@@ -79,6 +79,7 @@ void Sender::handleInterest(Ptr<CCN_Name> ccnn) {
 void Sender::SendData(Ptr<CCN_Name> name, Ptr<Packet> data) {
     NS_LOG_DEBUG(Simulator::Now ().GetPicoSeconds()<<
                  " Sender sends "<<name->toString());
+    //NS_LOG_UNCOND("Put "<<name->toString());
     uint8_t *newBuff = (uint8_t*)malloc(data->GetSize());
     data->CopyData(newBuff, data->GetSize());
     this->ccnm->sendData(name, newBuff, data->GetSize());

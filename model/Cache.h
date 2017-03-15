@@ -16,6 +16,7 @@
 #include <bf.h>
 #include <deque>
 #include <time.h>
+#include <set>
 
 #include "ns3/city.h"
 #include "ns3/citycrc.h"
@@ -86,6 +87,8 @@ public:
         write_for_storings = 0;
         write_outoforder = 0;
         false_positive_cnt_w = 0;
+        false_positive_cnt_w_test = 0; // for-test
+        false_positive_cnt_test = 0; // for-test
         total_stored_packets = 0;
         sram_stored_packets = 0;
    
@@ -136,6 +139,8 @@ public:
     uint64_t write_outoforder;
     uint64_t write_for_storings;
     uint64_t false_positive_cnt_w;
+    uint64_t false_positive_cnt_w_test; // for-test
+    uint64_t false_positive_cnt_test; // for-test
     uint64_t total_stored_packets;
     uint64_t sram_stored_packets;
 
@@ -271,7 +276,7 @@ public:
         if(_capacity == 0){
             slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
         }else{
-            slot_num = _capacity/PKT_NUM/FILE_NUM;
+            slot_num = _capacity*DRAM_REDUNDANCE/PKT_NUM/FILE_NUM;
         }
        
         if(_fp){
@@ -288,12 +293,10 @@ public:
     bool enable_opt;
     bf::a2_bloom_filter  *index_bf_ptr;
     bf::a2_bloom_filter  *init_bf(double fp);
-
     map<string, uint32_t> *file_map_p;
-
     // DRAM table
     map <uint32_t, Slot_Object> data_table;
-
+    std::set<string> data_test;
     //SRAM table for reading
     //filename-begin_id, packets
     Cachetable cache_table_r;

@@ -46,7 +46,8 @@ int main(int argc ,char *argv[])
         cmd.AddValue("sc", "Total SRAM capacity(uint64_t Bytes)", fast_cap);
 
  
-        cmd.AddValue("ds", "Total DRAM size(double GB),prior than dc.", cache_size);
+        cmd.AddValue("ds", 
+        "Total DRAM size(double GB. if the cpo = 3, the actual DRAM size is twice over this value ),prior than dc.", cache_size);
         cmd.AddValue("ss", "Total SRAM size(double MB), prior than sc.", fast_size);
 
         cmd.AddValue("fp", "The desired false-positive rate", fp);
@@ -77,9 +78,10 @@ int main(int argc ,char *argv[])
 
         }
 
-	Ptr<BootstrappingHelper> bh = CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed,std::make_pair(
-                                                                       std::make_pair(caching, enable_opt), fp), 
-                                                                       cache_cap, fast_cap);
+	Ptr<BootstrappingHelper> bh = 
+        CreateObject<BootstrappingHelper>(tp, "/tmp/", gs, seed, 
+            std::make_pair(std::make_pair(caching, enable_opt), fp),
+            cache_cap, fast_cap);
 	bh->parseTopology(gs);//ftiaxnei ccnModules kai nodes
 	bh->startExperiment();
 

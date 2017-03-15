@@ -80,7 +80,7 @@ map<string, uint32_t> Initializer::parseFileMap(){
     std::ifstream myfile (WORKLOAD_FILE);
     string file,line;
     uint32_t packets=0;
-    uint64_t cum_packets=0;
+    uint64_t sum_packets=0;
     NS_ASSERT_MSG(myfile.is_open(), "Unable to open file_map file:"<<WORKLOAD_FILE); 
 
     
@@ -89,12 +89,12 @@ map<string, uint32_t> Initializer::parseFileMap(){
         if (map.find(file)==map.end()){
             packets = atoi(line.substr(line.find(" ")+1).c_str());
             map[file] = packets;
-            cum_packets+=packets;
+            sum_packets+=packets;
         }
     }
     myfile.close();
         
-    NS_LOG_INFO("Num_of_files: "<<map.size()<<" data: "<<cum_packets );
+    NS_LOG_INFO("Num_of_files: "<<map.size()<<" data: " << sum_packets);
     file_map = map;
     return map;
 }

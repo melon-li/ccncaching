@@ -1114,7 +1114,8 @@ pair<int64_t, int64_t> D_Cache::get_cached_packet(const string& _filename, const
         DRAM_table.insert(std::make_pair(it->first, it->second));
         LRU_Object * _obj  = new LRU_Object(chunk_name);
         L1_LRU->add_object(_obj);        
-        lt += (it->second.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE; 
+        //lt += (it->second.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE; 
+        lt += (it->second.size()*PKT_SIZE*8*1000)/SSD_READ_RATE; 
         slow_memory_hit += it->second.size();
         reads_for_fetchings++;
     }
@@ -1251,7 +1252,8 @@ uint32_t D_Cache::store_packets(const string& chunk_name,
         SSD_table.insert(Cachetable::value_type(chunk_name, pkts));
         stored_packets += pkts.size();
         total_stored_packets += pkts.size();
-        wt += (pkts.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE;
+        //wt += (pkts.size()*PKT_SIZE*8*1000)/SSD_DATA_RATE;
+        wt += (pkts.size()*PKT_SIZE*8*1000)/SSD_WRITE_RATE;
     }
     write_for_storings++;
     return wt;

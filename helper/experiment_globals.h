@@ -92,9 +92,11 @@ http://www.samsung.com/cn/memory-storage/ssd-960-pro/MZ-V6P2T0Z.
 the sequential read performance of 3,500MB/s and sequential write speeds of 2,100MB/s. 
 Let 3,500MB/s read_throughput, 2,100MB/s be write_throughput.
 We Assume the read_ratio: write_ratio = 1:2.73,
-then we can derive SSD_DATA_RATE = (3500*1 + 2100*2.73)/3.73= 1237.67MB/s = 9.7 Gbps
+then we can derive SSD_AVG_RATE = (3500*1 + 2100*2.73)/3.73= 1237.67MB/s = 9.7 Gbps
 */
-#define SSD_DATA_RATE 19.8 //Gbps
+#define SSD_AVG_RATE 19.8 //Gbps
+#define SSD_READ_RATE 28 //Gbps
+#define SSD_WRITE_RATE 16.8 //Gbps
 
 #include "ns3/core-module.h"
 

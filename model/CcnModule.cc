@@ -77,7 +77,7 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
         //the size of L2 index is determined by DRAM size.
         //We can calculate this size as follows:
         size_t ka = std::floor(-std::log(1 - std::sqrt(1 - _fp)) / std::log(2));
-        size_t cells = ka*(capacity/PKT_NUM/FILE_NUM)/std::log(2); //bits
+        size_t cells = 2*ka*(capacity/PKT_NUM)/std::log(2); //bits
         uint64_t writing_cache_size;
 
         //Get cache_size which is equit to (reading_cache_size + writing _cache_size) 
@@ -89,7 +89,9 @@ char CcnModule::enableCache(char _mode, uint64_t _cache_cap, uint64_t _cache_fas
             writing_cache_size = uint64_t(cache_size/2);
         }
         writing_cache_size = writing_cache_size/PKT_SIZE;
-        NS_LOG_UNCOND("capacity = " << capacity << " packets, "
+        NS_LOG_UNCOND("The capacity for A^2 = " << capacity*PKT_SIZE/1024/1024/1024
+                     << " GB, "
+                     << capacity << " packets, "
                      << "the writing_cache_size = "
                      << float(writing_cache_size) << " packets");
         cache = new S_Cache(capacity, writing_cache_size, _file_map_p, _fp, enable_opt);
@@ -292,6 +294,7 @@ bool CcnModule::getCachedTransmitStart(){
     if (re.first >= 0) {
         HITS++;
         lt += uint64_t(re.second);
+        //lt = 0;
         uint8_t *tmp = NULL;
         Ptr<CCN_Data> data = CreateObject<CCN_Data>(interest->getName(),
                                                     tmp, 0, 
@@ -451,6 +454,7 @@ bool CcnModule::cacheTransmitStart(){
     string pref = data->getName()->getPrefix();
     string _id = data->getName()->getID();
     int64_t lt = cache->cache_packet(pref, _id, NULL) + SRAM_ACCESS_TIME;
+    //lt = 0;
     Simulator::Schedule(PicoSeconds(lt), 
                         &CcnModule::cacheTransmitComplete, this);
     Simulator::Schedule(PicoSeconds(lt), 

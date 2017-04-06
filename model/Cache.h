@@ -277,6 +277,11 @@ public:
             slot_num = DRAM_SIZE*(1024*1024*1024/PKT_NUM/PKT_SIZE/FILE_NUM);
         }else{
             slot_num = _capacity*DRAM_REDUNDANCE/PKT_NUM/FILE_NUM;
+            NS_LOG_UNCOND("We set the actual DRAM Size = (" 
+                 <<DRAM_REDUNDANCE<<"capacity for A^2), namely "
+                 << _capacity*DRAM_REDUNDANCE*PKT_SIZE/1000/1000/1000
+                 << "GB, to keep 30%-50% loading factor in DRAM Hash Table,\n\t"
+                 << "considering the A^2 Bloom Filter's character.");
         }
        
         if(_fp){

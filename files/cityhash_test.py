@@ -9,7 +9,7 @@ Created on 2016.6.18
 
 import cityhash
 
-FILE_NUM = 8
+FILE_NUM = 4
 PKT_NUM = 8
 PKT_SIZE = 1500
 DRAM_SIZE = 15*1024*1024*1024 #byte
@@ -60,5 +60,5 @@ while(len(files_set)):
 #    i = i + 1
 #    if(i==10):
 #        break
-print "total=%d, collision_cnt=%d, collision_rate=%.4f" %(total, collision_cnt, (float(collision_cnt)/total))
+print "total=%d, collision_cnt=%d, collision_rate=%.4f (Percent)" %(total, collision_cnt, (100*float(collision_cnt)/total))
 print "total size=%.2f GB" % (pkt_size*1500/1024.0/1024/1024)

@@ -1054,16 +1054,15 @@ bf::a2_bloom_filter *S_Cache::init_bf(double fp){
     size_t cells; //bits, the number of cells to use 
 
     ka = std::floor(-std::log(1 - std::sqrt(1 - fp)) / std::log(2));
-    cells = ka*(capacity/PKT_NUM)/std::log(2);
+    cells = 2*ka*(capacity/PKT_NUM)/std::log(2);
 
     NS_LOG_UNCOND("Init A^2  BF,ka = " << ka 
                    << " fp = " << fp
                    << " cells = " << cells 
-                   << " size = " << cells/1024/1024 << " Mb "
-                   << " capacity = " << capacity
-                   << " capacity/PKT_NUM/2 = " << (capacity/PKT_NUM/2));
+                   << " size = " << cells/1000/1000 << " Mb "
+                   << " one bucket capacity = " << (capacity/PKT_NUM));
 
-    return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM/2, 1, 199};
+    return new bf::a2_bloom_filter{ka, cells, capacity/PKT_NUM, 1, 199};
 }
 
 /**

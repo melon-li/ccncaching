@@ -63,11 +63,11 @@ The PointToPointNetDevice models a transmitter section that puts bits on a corre
 #define QUEUE_MAX_NPACKETS 10000
 #define THRESHOLD_NPACKETS 9000
 #define PKT_NUM 8
-#define FILE_NUM 8 //4
+#define FILE_NUM 4 //4
 #define DRAM_SIZE 100 //GB
-// We make the load factor of the DRAM storage (treated as hash table)
+// We make the loading factor of the DRAM storage (treated as hash table)
 // keep in 30%-50%, to reduce the hash collision.
-#define DRAM_REDUNDANCE 2
+#define DRAM_REDUNDANCE 3
 
 //#define CACHE_PLACEMENT 0 // 0 for edges, 1 for betweenness and 2 for all nodes
 
